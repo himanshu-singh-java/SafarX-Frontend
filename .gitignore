@@ -1,4 +1,4 @@
-# Dependencies (MOST IMPORTANT - NEVER COMMIT NODE_MODULES!)
+#Dependencies
 node_modules/
 /.pnp
 .pnp.js
