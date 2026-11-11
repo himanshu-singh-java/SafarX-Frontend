@@ -1,70 +1,102 @@
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { setAuthToken, parseJwt } from '../utils/auth';
+import { setAuthToken, parseJwt, setStorageItem } from '../utils/auth';
+import apiClient from '../utils/apiClient';
 
 /**
  * OAuth2RedirectHandler Component
  * 
  * Handles redirect from backend OAuth2 login (e.g., Google OAuth2).
- * Extracts JWT token from URL query params: ?token=...
- * If token exists:
- *   - Saves to localStorage ('jwtToken')
- *   - Parses user profile & role
- *   - Redirects to /dashboard
- * If token is missing:
- *   - Redirects to /login
+ * Extracts JWT token from URL query params or hash fragment.
+ * Fetches authoritative role and profile details from GET /api/auth/me.
+ * If isNew=true, redirects to /complete-profile; otherwise redirects to /dashboard.
  */
 export default function OAuth2RedirectHandler() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Try extracting from query params: ?token=...
-    let token = searchParams.get('token');
-    let name = searchParams.get('name');
-    let isNew = searchParams.get('isNew') === 'true';
+    let isCancelled = false;
 
-    // 2. Try extracting from URL hash fragment: #token=... (Spring Boot OAuth2SuccessHandler format)
-    if (!token && window.location.hash) {
-      const hashStr = window.location.hash.startsWith('#')
-        ? window.location.hash.substring(1)
-        : window.location.hash;
-      const hashParams = new URLSearchParams(hashStr);
-      token = hashParams.get('token');
-      name = hashParams.get('name');
-      if (hashParams.has('isNew')) {
-        isNew = hashParams.get('isNew') === 'true';
+    const handleOAuth = async () => {
+      // 1. Try extracting from query params: ?token=...
+      let token = searchParams.get('token');
+      let name = searchParams.get('name');
+      let isNew = searchParams.get('isNew') === 'true';
+
+      // 2. Try extracting from URL hash fragment: #token=... (Spring Boot OAuth2SuccessHandler format)
+      if (!token && window.location.hash) {
+        const hashStr = window.location.hash.startsWith('#')
+          ? window.location.hash.substring(1)
+          : window.location.hash;
+        const hashParams = new URLSearchParams(hashStr);
+        token = hashParams.get('token');
+        name = hashParams.get('name');
+        if (hashParams.has('isNew')) {
+          isNew = hashParams.get('isNew') === 'true';
+        }
       }
-    }
 
-    if (token) {
+      if (!token) {
+        navigate('/login', { replace: true });
+        return;
+      }
+
       const cleanToken = token.trim();
-
-      // Decode claims (email & role)
       const decoded = parseJwt(cleanToken);
       const email = decoded?.sub || '';
-      const role =
-        decoded?.role ||
-        (email.toLowerCase().includes('admin') ? 'ROLE_ADMIN' : 'ROLE_RIDER');
+      let role = decoded?.role || 'ROLE_RIDER';
 
-      // Save token, email, and role to localStorage
+      // Save token to session
       setAuthToken(cleanToken, email, role);
 
       if (name) {
         try {
-          localStorage.setItem('userName', decodeURIComponent(name));
+          setStorageItem('userName', decodeURIComponent(name));
         } catch {
-          localStorage.setItem('userName', name);
+          setStorageItem('userName', name);
         }
       }
 
-      // Mark session and route directly to dashboard (or onboarding if new)
-      localStorage.setItem('profileCompleted', 'true');
-      navigate('/dashboard', { replace: true });
-    } else {
-      // Token missing: redirect user to /login
-      navigate('/login', { replace: true });
-    }
+      // Fetch authoritative role, name, and IDs directly from /api/auth/me
+      try {
+        const meRes = await apiClient.get('/api/auth/me', {
+          headers: { Authorization: `Bearer ${cleanToken}` },
+        });
+        if (meRes.data) {
+          if (meRes.data.role) {
+            role = meRes.data.role;
+            setStorageItem('userRole', role);
+          }
+          if (meRes.data.name) {
+            setStorageItem('userName', meRes.data.name);
+          }
+          if (meRes.data.riderId) {
+            setStorageItem('riderId', String(meRes.data.riderId));
+          }
+          if (meRes.data.driverId) {
+            setStorageItem('driverId', String(meRes.data.driverId));
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch /api/auth/me during OAuth redirect:', err);
+      }
+
+      if (isCancelled) return;
+
+      // If newly registered OAuth user, send to complete profile; otherwise to dashboard
+      if (isNew) {
+        navigate('/complete-profile', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+    };
+
+    handleOAuth();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [searchParams, navigate]);
 
   return (
@@ -88,8 +120,8 @@ export default function OAuth2RedirectHandler() {
           <h2 className="text-base font-bold tracking-tight text-white">
             Authenticating with Google
           </h2>
-          <p className="text-xs text-neutral-400 leading-relaxed">
-            Securing your session token and setting up your SafarX profile...
+          <p className="text-xs text-neutral-400">
+            Securely syncing your credentials with SafarX...
           </p>
         </div>
 
@@ -97,4 +129,3 @@ export default function OAuth2RedirectHandler() {
     </div>
   );
 }
-

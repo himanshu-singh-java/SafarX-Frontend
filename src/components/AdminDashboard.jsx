@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAuthHeaders, handleAuthResponse } from '../utils/auth';
-import { getDriverDetails } from '../utils/driverDirectory';
+import apiClient from '../utils/apiClient';
 
 export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
   const [activeTab, setActiveTab] = useState('rides'); // 'rides' | 'vehicles'
@@ -89,104 +88,56 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     setIsLoading(true);
     setUserId('');
     try {
-      const response = await fetch(`http://localhost:8080/api/rides/all`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setRides(Array.isArray(data) ? data : [data]);
-        setIsBackendOnline(true);
-        if (!silent) setStatusMessage({ text: 'All rides loaded from database.', isError: false });
-      } else {
-        if (!silent) setStatusMessage({ text: 'No rides found in database.', isError: true });
-        setRides([]);
-      }
+      const response = await apiClient.get('/api/rides/all');
+      const data = response.data;
+      setRides(Array.isArray(data) ? data : [data]);
+      setIsBackendOnline(true);
+      if (!silent) setStatusMessage({ text: 'All rides loaded from database.', isError: false });
     } catch (error) {
       setIsBackendOnline(false);
-      if (!silent) setStatusMessage({ text: 'Backend unreachable. Verify Spring Boot on port 8080.', isError: true });
+      if (!silent) setStatusMessage({ text: 'Backend unreachable. Verify Spring Boot.', isError: true });
     }
     setIsLoading(false);
   };
 
-  const fetchUserRides = async (silent = false) => {
-    if (!userId) {
+  const fetchUserRides = (silent = false) => {
+    if (!userId.trim()) {
       setStatusMessage({ text: 'Please enter a valid Rider ID.', isError: true });
       return;
     }
-    setIsLoading(true);
-    try {
-      const response = await fetch(`http://localhost:8080/api/rides/history/${userId}`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setRides(Array.isArray(data) ? data : [data]);
-        setIsBackendOnline(true);
-        if (!silent) setStatusMessage({ text: `Rides loaded for Rider #${userId}.`, isError: false });
-      } else {
-        if (!silent) setStatusMessage({ text: `No rides found for Rider #${userId}.`, isError: true });
-        setRides([]);
-      }
-    } catch (error) {
-      setIsBackendOnline(false);
-      if (!silent) setStatusMessage({ text: 'Backend offline. Verify Spring Boot.', isError: true });
+    const matching = rides.filter((r) => String(r.rider?.riderID || r.riderId || '') === userId.trim());
+    if (matching.length > 0) {
+      if (!silent) setStatusMessage({ text: `Showing ${matching.length} rides for Rider #${userId.trim()}.`, isError: false });
+    } else {
+      if (!silent) setStatusMessage({ text: `No rides found for Rider #${userId.trim()} in loaded database.`, isError: true });
     }
-    setIsLoading(false);
   };
 
-  const handleCompleteRide = async (rideId) => {
+  const handleCompleteRide = async (rideId, vehicleId = null) => {
+    const targetVehId = vehicleId || rides.find((r) => (r.id || r.rideId) === rideId)?.vehicle?.vehicleId;
+    if (!targetVehId) {
+      setStatusMessage({ text: 'Vehicle ID not found for this ride. Cannot complete via vehicle endpoint.', isError: true });
+      return;
+    }
     try {
-      const response = await fetch(`http://localhost:8080/api/rides/complete/${rideId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        setStatusMessage({ text: `Ride #${rideId} marked as Completed. Vehicle is now Available.`, isError: false });
-        userId ? fetchUserRides(true) : fetchAllGlobalRides(true);
-      } else {
-        const errorText = await response.text();
-        setStatusMessage({ text: errorText || 'Failed to complete ride.', isError: true });
-      }
+      await apiClient.put(`/api/vehicles/complete-ride/${targetVehId}`);
+      setStatusMessage({ text: `Ride #${rideId} marked as Completed via Vehicle #${targetVehId}. Vehicle is now Available.`, isError: false });
+      fetchAllGlobalRides(true);
+      if (selectedVehicleType) fetchVehicles(selectedVehicleType);
     } catch (error) {
-      setStatusMessage({ text: 'Network failure while completing ride.', isError: true });
+      const msg = error.response?.data?.message || 'Failed to complete ride.';
+      setStatusMessage({ text: msg, isError: true });
     }
   };
 
   const handleDeleteRide = async (rideId) => {
     if (!window.confirm(`Are you sure you want to permanently delete Ride #${rideId}?`)) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/rides/delete/${rideId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        setStatusMessage({ text: `Ride #${rideId} deleted successfully.`, isError: false });
-        setRides((prev) => prev.filter((r) => (r.id || r.rideId) !== rideId));
-      } else {
-        setStatusMessage({ text: 'Unable to delete ride record.', isError: true });
-      }
+      await apiClient.delete(`/api/rides/delete/${rideId}`);
+      setStatusMessage({ text: `Ride #${rideId} deleted successfully.`, isError: false });
+      setRides((prev) => prev.filter((r) => (r.id || r.rideId) !== rideId));
     } catch (error) {
-      setStatusMessage({ text: 'Transaction failed due to network disruption.', isError: true });
+      setStatusMessage({ text: 'Unable to delete ride record.', isError: true });
     }
   };
 
@@ -196,22 +147,11 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     setSelectedVehicleType(type);
     setVehicles([]);
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/status/${type}`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setVehicles(Array.isArray(data) ? data : []);
-        setIsBackendOnline(true);
-        setStatusMessage({ text: `${type} fleet status loaded.`, isError: false });
-      } else {
-        setStatusMessage({ text: `Failed to load ${type} fleet status.`, isError: true });
-      }
+      const response = await apiClient.get(`/api/vehicles/status/${type}`);
+      const data = response.data;
+      setVehicles(Array.isArray(data) ? data : []);
+      setIsBackendOnline(true);
+      setStatusMessage({ text: `${type} fleet status loaded.`, isError: false });
     } catch (error) {
       setIsBackendOnline(false);
       setStatusMessage({ text: 'Backend fleet service unreachable.', isError: true });
@@ -221,24 +161,13 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
 
   const handleCompleteFromFleet = async (vehicleId, vehicleType) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/vehicles/complete-ride/${vehicleId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        setStatusMessage({ text: `Vehicle #${vehicleId} has completed its ride and is now Available.`, isError: false });
-        fetchVehicles(vehicleType);
-      } else {
-        const errorText = await response.text();
-        setStatusMessage({ text: errorText || `Unable to complete ride for Vehicle #${vehicleId}.`, isError: true });
-      }
+      await apiClient.put(`/api/vehicles/complete-ride/${vehicleId}`);
+      setStatusMessage({ text: `Vehicle #${vehicleId} has completed its ride and is now Available.`, isError: false });
+      fetchVehicles(vehicleType);
+      fetchAllGlobalRides(true);
     } catch (error) {
-      setStatusMessage({ text: 'Network disruption.', isError: true });
+      const errorText = error.response?.data?.message || `Unable to complete ride for Vehicle #${vehicleId}.`;
+      setStatusMessage({ text: errorText, isError: true });
     }
   };
 
@@ -276,10 +205,11 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
       const q = searchQuery.toLowerCase();
       const idMatch = String(ride.id || ride.rideId || '').includes(q);
       const riderMatch = String(ride.rider?.riderID || ride.riderId || '').includes(q);
-      const driver = getDriverDetails(ride, rides);
+      const driverName = ride.driverName || ride.vehicle?.driver?.driverName || '';
+      const driverPlate = ride.plateNumber || ride.vehicle?.plateNumber || '';
       const driverMatch =
-        String(driver.name || '').toLowerCase().includes(q) ||
-        String(driver.plateNumber || '').toLowerCase().includes(q);
+        driverName.toLowerCase().includes(q) ||
+        driverPlate.toLowerCase().includes(q);
 
       return matchesStatus && (idMatch || riderMatch || driverMatch);
     });
@@ -582,10 +512,10 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               {ride.vehicle ? (
                                 <div className="space-y-0.5">
                                   <div className="font-semibold text-white">
-                                    {getDriverDetails(ride).name}
+                                    {ride.driverName || ride.vehicle?.driver?.driverName || 'Driver Partner'}
                                   </div>
                                   <div className="text-[11px] text-[#8b949e]">
-                                    Unit #{ride.vehicle.vehicleId} • {ride.vehicle.bikeModel || ride.vehicle.autoModel || ride.vehicle.carModel || 'Standard'} ({getDriverDetails(ride).plateNumber})
+                                    Unit #{ride.vehicle.vehicleId} • {ride.vehicle.bikeModel || ride.vehicle.autoModel || ride.vehicle.carModel || 'Standard'} ({ride.plateNumber || ride.vehicle.plateNumber || ''})
                                   </div>
                                 </div>
                               ) : (
@@ -633,7 +563,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               </button>
                               {isCompletable && (
                                 <button
-                                  onClick={() => handleCompleteRide(rideId)}
+                                  onClick={() => handleCompleteRide(rideId, ride.vehicle?.vehicleId)}
                                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
                                   title="Mark this ride as completed"
                                 >
@@ -910,20 +840,19 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                       </div>
                       {selectedAuditRide.vehicle ? (
                         (() => {
-                          const auditDriver = getDriverDetails(selectedAuditRide, rides);
+                          const auditDriverName = selectedAuditRide.driverName || selectedAuditRide.vehicle?.driver?.driverName || 'Driver Partner';
+                          const auditPlate = selectedAuditRide.plateNumber || selectedAuditRide.vehicle?.plateNumber || '';
+                          const auditModel = selectedAuditRide.vehicleType ? `SafarX ${selectedAuditRide.vehicleType}` : (selectedAuditRide.vehicle?.carModel || selectedAuditRide.vehicle?.bikeModel || selectedAuditRide.vehicle?.autoModel || 'Standard');
                           return (
                             <div>
                               <div className="text-base font-bold text-white flex items-center gap-1.5">
-                                {auditDriver.name}
+                                {auditDriverName}
                                 <span className="text-amber-400 text-xs">
-                                  ★ {auditDriver.rating ? auditDriver.rating.toFixed(1) : '5.0'}
-                                </span>
-                                <span className="text-[#8b949e] text-[11px] font-normal">
-                                  • {auditDriver.tripsCompleted} {auditDriver.tripsCompleted === 1 ? 'ride' : 'rides'}
+                                  ★ 5.0
                                 </span>
                               </div>
                               <div className="text-xs text-[#8b949e] mt-0.5">
-                                {auditDriver.model} • <strong className="font-mono text-white">{auditDriver.plateNumber}</strong>
+                                {auditModel} • <strong className="font-mono text-white">{auditPlate}</strong>
                               </div>
                               <div className="text-[11px] text-[#8b949e] font-mono mt-1">
                                 Status: <span className="text-emerald-400 font-bold">{selectedAuditRide.vehicle.vehicleStatus || 'READY'}</span>
@@ -1064,7 +993,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                   (selectedAuditRide.rideStatus || selectedAuditRide.status || '').toUpperCase() === 'ACCEPTED') && (
                   <button
                     onClick={async () => {
-                      await handleCompleteRide(selectedAuditRide.id || selectedAuditRide.rideId);
+                      await handleCompleteRide(selectedAuditRide.id || selectedAuditRide.rideId, selectedAuditRide.vehicle?.vehicleId);
                       setSelectedAuditRide(null);
                     }}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"

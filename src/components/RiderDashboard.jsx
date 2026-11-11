@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getAuthToken, getAuthHeaders, handleAuthResponse, getStorageItem, setStorageItem } from '../utils/auth';
+import apiClient from '../utils/apiClient';
 import wsService from '../utils/websocket';
 import LiveRouteMap from './LiveRouteMap';
 import FullPageCarMotionScene from './CarMotionScene';
@@ -168,12 +169,34 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  // Rider Identification (Auto-detect from session/local storage or default to active rider #2)
+  // Rider Identification: strictly loaded from /api/auth/me (no hardcoded default)
   const [riderId, setRiderId] = useState(() => {
-    const saved = getStorageItem('riderId') || localStorage.getItem('riderId');
-    if (saved) return Number(saved);
-    return 2;
+    const saved = getStorageItem('riderId');
+    return saved ? Number(saved) : null;
   });
+
+  // Sync verified riderId from /api/auth/me
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMe = async () => {
+      try {
+        const res = await apiClient.get('/api/auth/me');
+        if (res.data?.riderId && isMounted) {
+          const id = Number(res.data.riderId);
+          setRiderId(id);
+          setStorageItem('riderId', String(id));
+        }
+      } catch (err) {
+        console.warn('[RiderDashboard] Could not fetch rider profile from /api/auth/me', err);
+      }
+    };
+    if (token || getAuthToken()) {
+      fetchMe();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [token]);
 
   // Trigger My Trips drawer from navbar
   useEffect(() => {
@@ -351,43 +374,45 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
     const pollInterval = setInterval(async () => {
       try {
-        const targetId = riderId || localStorage.getItem('riderId') || 1;
-        const res = await fetch(`http://localhost:8080/api/rides/history/${targetId}`, {
-          headers: getAuthHeaders(),
-        });
-        if (res.ok) {
-          const myRides = await res.json().catch(() => []);
-          const current = myRides.find((r) => r.rideId === activeRide.rideId);
-          if (current) {
-            const currentStatus = current.rideStatus;
-            if (currentStatus === 'COMPLETED' && activeRide.status !== 'COMPLETED') {
-              setActiveRide((prev) => ({
-                ...prev,
-                status: 'COMPLETED',
-                fare: current.fare ?? prev?.fare,
-                vehicle: current.vehicle || prev?.vehicle,
-              }));
-              setStatusMessage({
-                text: `🏁 Ride #${current.rideId} completed! Please complete settlement below.`,
-                isError: false,
-              });
-              setLiveDriverGps(null);
-              fetchHistory(true);
-            } else if (currentStatus === 'IN_PROGRESS' && activeRide.status !== 'IN_PROGRESS') {
-              setActiveRide((prev) => ({
-                ...prev,
-                status: 'IN_PROGRESS',
-                fare: current.fare ?? prev?.fare,
-                vehicle: current.vehicle || prev?.vehicle,
-              }));
-            } else if (currentStatus === 'ACCEPTED' && activeRide.status === 'REQUESTED') {
-              setActiveRide((prev) => ({
-                ...prev,
-                status: 'ACCEPTED',
-                fare: current.fare ?? prev?.fare,
-                vehicle: current.vehicle || prev?.vehicle,
-              }));
-            }
+        if (!riderId) return;
+        const res = await apiClient.get(`/api/rides/history/${riderId}`);
+        const myRides = Array.isArray(res.data) ? res.data : [];
+        const current = myRides.find((r) => r.rideId === activeRide.rideId);
+        if (current) {
+          const currentStatus = current.rideStatus || current.status;
+          if (currentStatus === 'COMPLETED' && activeRide.status !== 'COMPLETED') {
+            setActiveRide((prev) => ({
+              ...prev,
+              status: 'COMPLETED',
+              fare: current.fare ?? prev?.fare,
+              vehicle: current.vehicle || prev?.vehicle,
+              driverName: current.driverName || prev?.driverName,
+              plateNumber: current.plateNumber || prev?.plateNumber,
+            }));
+            setStatusMessage({
+              text: `🏁 Ride #${current.rideId} completed! Please complete settlement below.`,
+              isError: false,
+            });
+            setLiveDriverGps(null);
+            fetchHistory(true);
+          } else if (currentStatus === 'IN_PROGRESS' && activeRide.status !== 'IN_PROGRESS') {
+            setActiveRide((prev) => ({
+              ...prev,
+              status: 'IN_PROGRESS',
+              fare: current.fare ?? prev?.fare,
+              vehicle: current.vehicle || prev?.vehicle,
+              driverName: current.driverName || prev?.driverName,
+              plateNumber: current.plateNumber || prev?.plateNumber,
+            }));
+          } else if (currentStatus === 'ACCEPTED' && activeRide.status === 'REQUESTED') {
+            setActiveRide((prev) => ({
+              ...prev,
+              status: 'ACCEPTED',
+              fare: current.fare ?? prev?.fare,
+              vehicle: current.vehicle || prev?.vehicle,
+              driverName: current.driverName || prev?.driverName,
+              plateNumber: current.plateNumber || prev?.plateNumber,
+            }));
           }
         }
       } catch (e) {
@@ -698,12 +723,16 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
     const selectedTier = VEHICLE_TIERS.find((v) => v.type === selectedVehicle) || VEHICLE_TIERS[0];
 
-    let finalDropLat = parseFloat(dropCoords.lat);
-    let finalDropLng = parseFloat(dropCoords.lng);
+    const finalDropLat = parseFloat(dropCoords.lat);
+    const finalDropLng = parseFloat(dropCoords.lng);
     const initialDist = calculateDistanceKm(pickupCoords.lat, pickupCoords.lng, finalDropLat, finalDropLng);
     if (initialDist < 0.5) {
-      finalDropLat = parseFloat((pickupCoords.lat - 0.035).toFixed(4));
-      finalDropLng = parseFloat((pickupCoords.lng + 0.042).toFixed(4));
+      setStatusMessage({
+        text: 'Drop location must be at least 0.5 km away from pickup location. Please choose a different drop point.',
+        isError: true,
+      });
+      setIsLoading(false);
+      return;
     }
 
     const requestPayload = {
@@ -716,90 +745,41 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     };
 
     try {
-      const response = await fetch('http://localhost:8080/api/rides/book', {
-        method: 'POST',
-        headers: getAuthHeaders({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify(requestPayload),
-      });
+      const response = await apiClient.post('/api/rides/book', requestPayload);
+      const data = response.data || {};
 
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      let data = {};
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json().catch(() => ({}));
-      } else {
-        const text = await response.text();
-        data = { message: text };
-      }
-
-      if (response.ok) {
-        setActiveRide(data);
-        setCurrentScreen('product-selection');
-        setStatusMessage({
-          text:
-            data.status === 'REQUESTED'
-              ? `Ride #${data.rideId} requested! Searching for nearby drivers...`
-              : `Success! SafarX Ride #${data.rideId} confirmed. Driver dispatched.`,
-          isError: false,
-          hasActiveRideConflict: false,
-        });
-        fetchHistory(true);
-      } else {
-        const errMsg =
-          data.message ||
-          data.error ||
-          `No drivers available nearby for ${selectedTier.name} (${selectedTier.backendType}). Please verify your driver is Online and registered as ${selectedTier.backendType} in the database.`;
-        
-        const isConflict = response.status === 409 || errMsg.toLowerCase().includes('already have an active ride');
-        setStatusMessage({
-          text: isConflict
-            ? `${errMsg} (Tip: Ongoing ride ko complete ya cancel karein tabhi nayi ride book hogi!)`
-            : errMsg,
-          isError: true,
-          hasActiveRideConflict: isConflict,
-        });
-        if (isConflict) {
-          fetchHistory(true);
-        }
-      }
-    } catch (err) {
+      setActiveRide(data);
+      setCurrentScreen('product-selection');
       setStatusMessage({
-        text: 'Unable to connect to backend server. Ensure Spring Boot is running on port 8080.',
-        isError: true,
+        text:
+          data.status === 'REQUESTED'
+            ? `Ride #${data.rideId} requested! Searching for nearby drivers...`
+            : `Success! SafarX Ride #${data.rideId} confirmed. Driver dispatched.`,
+        isError: false,
+        hasActiveRideConflict: false,
       });
+      fetchHistory(true);
+    } catch (err) {
+      const data = err.response?.data || {};
+      const status = err.response?.status;
+      const errMsg =
+        data.message ||
+        data.error ||
+        `No drivers available nearby for ${selectedTier.name} (${selectedTier.backendType}). Please verify your driver is Online and registered as ${selectedTier.backendType} in the database.`;
+
+      const isConflict = status === 409 || errMsg.toLowerCase().includes('already have an active ride');
+      setStatusMessage({
+        text: isConflict
+          ? `${errMsg} (Tip: Ongoing ride ko complete ya cancel karein tabhi nayi ride book hogi!)`
+          : errMsg,
+        isError: true,
+        hasActiveRideConflict: isConflict,
+      });
+      if (isConflict) {
+        fetchHistory(true);
+      }
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Quick Driver Accept simulator (allows testing accept from Rider UI)
-  const handleQuickDriverAccept = async (targetRideId, driverId = 1) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/accept/${targetRideId}?driverId=${driverId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setActiveRide(data);
-        setStatusMessage({
-          text: `Driver #${driverId} accepted Ride #${targetRideId}! Driver is on the way.`,
-          isError: false,
-        });
-      } else {
-        const err = await response.json().catch(() => ({}));
-        setStatusMessage({ text: err.message || 'Driver accept failed', isError: true });
-      }
-    } catch (e) {
-      setStatusMessage({ text: 'Error accepting ride', isError: true });
     }
   };
 
@@ -813,78 +793,20 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     const cancelledId = validId;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/cancel/${cancelledId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
-      );
+      await apiClient.put(`/api/rides/cancel/${cancelledId}`);
 
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        setStatusMessage({
-          text: `Ride #${cancelledId} cancelled successfully. Ready to book your ride!`,
-          isError: false,
-          hasActiveRideConflict: false,
-        });
-        setActiveRide(null);
-        setLiveDriverGps(null);
-        fetchHistory(true);
-      } else {
-        let errJson = {};
-        try {
-          errJson = await response.json();
-        } catch {
-          const text = await response.text().catch(() => '');
-          errJson = { message: text };
-        }
-        setStatusMessage({ text: errJson.message || 'Unable to cancel ride.', isError: true });
-      }
+      setStatusMessage({
+        text: `Ride #${cancelledId} cancelled successfully. Ready to book your ride!`,
+        isError: false,
+        hasActiveRideConflict: false,
+      });
+      setActiveRide(null);
+      setLiveDriverGps(null);
+      fetchHistory(true);
     } catch (err) {
       console.warn('Ride cancel error:', err);
-      setStatusMessage({ text: 'Unable to cancel ride at this moment.', isError: true });
-    }
-  };
-
-  // ================= API: COMPLETE RIDE =================
-  const handleCompleteActiveRide = async () => {
-    if (!activeRide) return;
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/complete/${activeRide.rideId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
-      );
-
-      if (handleAuthResponse(response)) {
-        return;
-      }
-
-      if (response.ok) {
-        setStatusMessage({
-          text: `SafarX Ride #${activeRide.rideId} concluded! Receipt saved to ledger.`,
-          isError: false,
-        });
-        setActiveRide(null);
-        fetchHistory(true);
-      } else {
-        let errJson = {};
-        try {
-          errJson = await response.json();
-        } catch {
-          const text = await response.text().catch(() => '');
-          errJson = { message: text };
-        }
-        setStatusMessage({ text: errJson.message || 'Failed to complete ride.', isError: true });
-      }
-    } catch (err) {
-      setStatusMessage({ text: 'Network disruption.', isError: true });
+      const msg = err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : '') || 'Cannot cancel ride after it has started';
+      setStatusMessage({ text: msg, isError: true });
     }
   };
 
@@ -897,9 +819,9 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     await initiateRazorpayPayment({
       amount: activeRide.fare || 100,
       rideId: activeRide.rideId,
-      userEmail: userEmail || localStorage.getItem('userEmail'),
-      userName: localStorage.getItem('userName') || 'Himanshu Singh',
-      userPhone: localStorage.getItem('userPhone') || '7321948274',
+      userEmail: userEmail || getStorageItem('userEmail') || '',
+      userName: getStorageItem('userName') || '',
+      userPhone: getStorageItem('userPhone') || '',
       onSuccess: (result) => {
         setIsPayingRazorpay(false);
         setRazorpaySuccessData(result);
@@ -930,60 +852,36 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
   const fetchHistory = async (silent = false) => {
     if (!silent) setLoadingHistory(true);
     try {
-      let targetId = riderId || 2;
-      let response = await fetch(`http://localhost:8080/api/rides/history/${targetId}`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (handleAuthResponse(response)) {
+      let targetId = riderId;
+      if (!targetId) {
+        const meRes = await apiClient.get('/api/auth/me');
+        if (meRes.data?.riderId) {
+          targetId = Number(meRes.data.riderId);
+          setRiderId(targetId);
+          setStorageItem('riderId', String(targetId));
+        }
+      }
+      if (!targetId) {
+        if (!silent) setLoadingHistory(false);
         return;
       }
 
-      let data = [];
-      if (response.ok) {
-        data = await response.json().catch(() => []);
-      }
+      const response = await apiClient.get(`/api/rides/history/${targetId}`);
+      let data = Array.isArray(response.data) ? response.data : [];
 
-      // If no trips returned, auto-discover the active rider's real ID by probing candidate IDs via /api/rides/history/{id}
-      if (!Array.isArray(data) || data.length === 0) {
-        try {
-          const candidateIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-          for (const cid of candidateIds) {
-            if (cid === targetId) continue;
-            const probeRes = await fetch(`http://localhost:8080/api/rides/history/${cid}`, {
-              headers: getAuthHeaders(),
-            });
-            if (probeRes.ok) {
-              const probeData = await probeRes.json().catch(() => []);
-              targetId = cid;
-              setRiderId(cid);
-              localStorage.setItem('riderId', String(cid));
-              data = probeData;
-              break;
-            }
-          }
-        } catch (e) {
-          console.warn('Auto-discovery fallback issue:', e);
-        }
-      }
+      // Sort newest trip first
+      data.sort((a, b) => (b.rideId || b.id || 0) - (a.rideId || a.id || 0));
+      setRideHistory(data);
 
-      if (Array.isArray(data)) {
-        // Sort newest trip first
-        data.sort((a, b) => (b.rideId || b.id || 0) - (a.rideId || a.id || 0));
-        setRideHistory(data);
-
-        // Auto-restore any currently active ride so rider can see/manage/cancel it
-        const currentActive = data.find(
-          (r) => r.rideStatus === 'REQUESTED' || r.rideStatus === 'ACCEPTED' || r.rideStatus === 'IN_PROGRESS'
-        );
-        if (currentActive && (!activeRide || activeRide.rideId !== currentActive.rideId)) {
-          setActiveRide({
-            ...currentActive,
-            status: currentActive.rideStatus,
-          });
-        }
-      } else {
-        setRideHistory([]);
+      // Auto-restore any currently active ride so rider can see/manage/cancel it
+      const currentActive = data.find(
+        (r) => r.rideStatus === 'REQUESTED' || r.rideStatus === 'ACCEPTED' || r.rideStatus === 'IN_PROGRESS'
+      );
+      if (currentActive && (!activeRide || activeRide.rideId !== currentActive.rideId)) {
+        setActiveRide({
+          ...currentActive,
+          status: currentActive.rideStatus,
+        });
       }
     } catch (err) {
       if (!silent) setStatusMessage({ text: 'Could not load trip history.', isError: true });
@@ -1967,7 +1865,10 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                       </div>
                     ) : (
                       (() => {
-                        const driverInfo = getDriverDetails(activeRide, rideHistory);
+                        const driverInfo = getDriverDetails(activeRide);
+                        const driverName = activeRide?.driverName || driverInfo.name;
+                        const driverPlate = activeRide?.plateNumber || driverInfo.plateNumber;
+                        const driverModel = driverInfo.model || (activeRide?.vehicleType ? `SafarX ${activeRide.vehicleType}` : 'Comfort Cab');
 
                         return (
                           <div className="space-y-4">
@@ -1975,21 +1876,21 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                             <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full bg-black text-white font-black text-lg flex items-center justify-center shadow">
-                                  {(driverInfo.name || 'D').charAt(0).toUpperCase()}
+                                  {driverName.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-sm font-extrabold text-black">{driverInfo.name}</h4>
+                                  <h4 className="text-sm font-extrabold text-black">{driverName}</h4>
                                   <div className="flex items-center gap-1.5 text-xs text-neutral-600 font-semibold">
-                                    <span className="text-black font-bold">★ {driverInfo.rating.toFixed(1)}</span>
+                                    <span className="text-black font-bold">★ 5.0</span>
                                     <span>•</span>
-                                    <span>{driverInfo.model}</span>
+                                    <span>{driverModel}</span>
                                   </div>
                                 </div>
                               </div>
 
                               <div className="text-right">
                                 <div className="inline-block bg-white text-black font-mono font-bold text-xs px-3 py-1 rounded-lg border border-neutral-300 shadow-sm tracking-wider">
-                                  {driverInfo.plateNumber}
+                                  {driverPlate}
                                 </div>
                               </div>
                             </div>
@@ -2022,7 +1923,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                                 type="button"
                                 onClick={() => {
                                   navigator.clipboard?.writeText(
-                                    `I am on SafarX Ride #${activeRide.rideId} with driver ${driverInfo.name} (${driverInfo.model}, Plate: ${driverInfo.plateNumber}).`
+                                    `I am on SafarX Ride #${activeRide.rideId} with driver ${driverName} (${driverModel}, Plate: ${driverPlate}).`
                                   );
                                   setStatusMessage({
                                     text: 'Trip & driver details copied to clipboard!',
@@ -2048,7 +1949,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                       </div>
                     )}
 
-                    {activeRide.status === 'ACCEPTED' && (
+                    {(activeRide.status === 'ACCEPTED' || activeRide.rideStatus === 'ACCEPTED') && (
                       <button
                         type="button"
                         onClick={handleCancelRide}
@@ -2059,19 +1960,10 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                       </button>
                     )}
 
-                    {activeRide.status === 'IN_PROGRESS' && (
-                      <div className="space-y-2">
-                        <div className="w-full py-3.5 bg-black text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                          <span>Trip In Progress • Safe Journey</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleCancelRide()}
-                          className="w-full py-2.5 bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-700 font-bold rounded-2xl text-xs uppercase tracking-wider transition-all border border-neutral-200 hover:border-red-300 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
-                        >
-                          ✕ Cancel / End Active Trip
-                        </button>
+                    {(activeRide.status === 'IN_PROGRESS' || activeRide.rideStatus === 'IN_PROGRESS') && (
+                      <div className="w-full py-3.5 bg-black text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                        <span>Trip In Progress • Safe Journey</span>
                       </div>
                     )}
                   </div>
@@ -2152,11 +2044,11 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                           {ride.vehicle?.carModel ? '🚗' : ride.vehicle?.autoModel ? '🛺' : '🏍️'}
                         </span>
                         <span className="font-semibold text-neutral-800">
-                          {getDriverDetails(ride).name}
+                          {getDriverDetails(ride, rideHistory).name}
                         </span>
                         <span className="text-neutral-300">•</span>
                         <span className="text-neutral-500 font-mono text-[11px]">
-                          {getDriverDetails(ride).plateNumber}
+                          {getDriverDetails(ride, rideHistory).plateNumber}
                         </span>
                         <span className="text-neutral-300">•</span>
                         <span className="text-neutral-500 font-mono text-[11px]">
@@ -2226,7 +2118,10 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
               
               {/* Vehicle & Driver Profile */}
               {(() => {
-                const receiptDriver = getDriverDetails(selectedRideReceipt, rideHistory);
+                const rDriver = getDriverDetails(selectedRideReceipt, rideHistory);
+                const rDriverName = selectedRideReceipt?.driverName || rDriver.name;
+                const rPlate = selectedRideReceipt?.plateNumber || rDriver.plateNumber;
+                const rModel = rDriver.model || (selectedRideReceipt?.vehicleType ? `SafarX ${selectedRideReceipt.vehicleType}` : 'Comfort Cab');
                 return (
                   <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -2240,18 +2135,18 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-extrabold text-black text-sm">
-                            {receiptDriver.name}
+                            {rDriverName}
                           </h4>
                           <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
                             ✓ Verified Partner
                           </span>
                         </div>
                         <div className="text-xs text-neutral-500 font-medium">
-                          {receiptDriver.model} • <strong className="font-mono text-black">{receiptDriver.plateNumber}</strong>
+                          {rModel} • <strong className="font-mono text-black">{rPlate}</strong>
                         </div>
                         <div className="text-xs text-amber-500 font-bold flex items-center gap-1 mt-0.5">
-                          <span>★ {receiptDriver.rating.toFixed(1)}</span>
-                          <span className="text-neutral-400 text-[10px] font-normal">• Top Rated Driver ({receiptDriver.tripsCompleted} {receiptDriver.tripsCompleted === 1 ? 'ride' : 'rides'} completed)</span>
+                          <span>★ 5.0</span>
+                          <span className="text-neutral-400 text-[10px] font-normal">• Top Rated Driver ({rDriver.tripsCompleted || 5} {rDriver.tripsCompleted === 1 ? 'ride' : 'rides'} completed)</span>
                         </div>
                       </div>
                     </div>
@@ -2360,12 +2255,12 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
                 <div className="flex justify-between text-xs text-neutral-600">
                   <span>Driver Partner</span>
-                  <span className="font-semibold text-black">{getDriverDetails(selectedRideReceipt).name}</span>
+                  <span className="font-semibold text-black">{selectedRideReceipt?.driverName || getDriverDetails(selectedRideReceipt).name}</span>
                 </div>
 
                 <div className="flex justify-between text-xs text-neutral-600">
                   <span>Vehicle Registration</span>
-                  <span className="font-mono font-semibold text-black">{getDriverDetails(selectedRideReceipt).plateNumber}</span>
+                  <span className="font-mono font-semibold text-black">{selectedRideReceipt?.plateNumber || getDriverDetails(selectedRideReceipt).plateNumber}</span>
                 </div>
 
                 <div className="flex justify-between text-xs text-neutral-600">

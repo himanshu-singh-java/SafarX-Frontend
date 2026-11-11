@@ -1,4 +1,6 @@
-import { getAuthToken, getAuthHeaders, handleAuthResponse } from './auth';
+import apiClient from './apiClient';
+import { RAZORPAY_KEY_ID } from '../config';
+import { getAuthToken } from './auth';
 
 /**
  * SafarX Razorpay Payment Gateway Client
@@ -7,8 +9,7 @@ import { getAuthToken, getAuthHeaders, handleAuthResponse } from './auth';
  * - POST /api/payment/verify (Protected with JWT)
  */
 
-export const RAZORPAY_KEY_ID =
-  import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Tqcd3XSrs9GLmI';
+export { RAZORPAY_KEY_ID };
 
 /**
  * Ensures the Razorpay checkout.js script is loaded on the page
@@ -62,53 +63,39 @@ export async function initiateRazorpayPayment({
     return;
   }
 
+  if (!RAZORPAY_KEY_ID) {
+    if (onError) {
+      onError(new Error('Payment gateway key missing. Please set VITE_RAZORPAY_KEY_ID in your environment.'));
+    }
+    return;
+  }
+
   const scriptLoaded = await loadRazorpayScript();
   if (!scriptLoaded || !window.Razorpay) {
     if (onError) {
       onError(
         new Error(
-          'Unable to load Razorpay payment SDK. Please verify your internet connection.'
+          'Unable to load payment SDK. Please verify your internet connection and try again.'
         )
       );
     }
     return;
   }
 
-  // 1. Create Razorpay Order in Backend with JWT Auth
+  // 1. Create Razorpay Order in Backend with JWT Auth via apiClient
   let orderData = null;
   try {
-    const response = await fetch('http://localhost:8080/api/payment/create-order', {
-      method: 'POST',
-      headers: getAuthHeaders({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify({
-        rideId: Number(rideId),
-      }),
+    const res = await apiClient.post('/api/payment/create-order', {
+      rideId: Number(rideId),
     });
 
-    if (handleAuthResponse(response)) {
-      if (onError) onError(new Error('Session expired. Please log in again.'));
-      return;
-    }
-
-    if (!response.ok) {
-      let errJson = {};
-      try {
-        errJson = await response.json();
-      } catch {
-        const text = await response.text().catch(() => '');
-        errJson = { message: text };
-      }
-      throw new Error(errJson.message || `Failed to create payment order (${response.status})`);
-    }
-
-    const raw = await response.json();
+    const raw = res.data;
     orderData = typeof raw === 'string' ? JSON.parse(raw) : raw;
   } catch (err) {
     console.error('Order creation error:', err);
     if (onError) {
-      onError(new Error(err.message || 'Error connecting to payment gateway.'));
+      const msg = err.response?.data?.message || err.message || 'Error connecting to payment gateway.';
+      onError(new Error(msg));
     }
     return;
   }
@@ -130,9 +117,9 @@ export async function initiateRazorpayPayment({
     image: '/vehicle_car.jpg',
     order_id: orderData.id,
     prefill: {
-      name: userName || localStorage.getItem('userName') || 'SafarX Rider',
-      email: userEmail || localStorage.getItem('userEmail') || 'rider@safarx.in',
-      contact: userPhone || localStorage.getItem('userPhone') || '7321948274',
+      name: userName || localStorage.getItem('userName') || '',
+      email: userEmail || localStorage.getItem('userEmail') || '',
+      contact: userPhone || localStorage.getItem('userPhone') || '',
     },
     notes: {
       ride_id: String(rideId),
@@ -147,55 +134,28 @@ export async function initiateRazorpayPayment({
       },
     },
     handler: async function (response) {
-      // 3. Cryptographic Signature Verification in Backend
+      // 3. Cryptographic Signature Verification in Backend via apiClient
       try {
-        const verifyRes = await fetch('http://localhost:8080/api/payment/verify', {
-          method: 'POST',
-          headers: getAuthHeaders({
-            'Content-Type': 'application/json',
-          }),
-          body: JSON.stringify({
-            rideId: Number(rideId),
-            razorPayOrderId: response.razorpay_order_id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignatureId: response.razorpay_signature,
-          }),
+        const verifyRes = await apiClient.post('/api/payment/verify', {
+          rideId: Number(rideId),
+          razorPayOrderId: response.razorpay_order_id,
+          razorpayPaymentId: response.razorpay_payment_id,
+          razorpaySignatureId: response.razorpay_signature,
         });
 
-        if (handleAuthResponse(verifyRes)) {
-          if (onError) onError(new Error('Session expired during verification.'));
-          return;
+        const result = verifyRes.data || { status: 'success' };
+        if (onSuccess) {
+          onSuccess({
+            ...result,
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+          });
         }
-
-        if (verifyRes.ok) {
-          const result = await verifyRes.json().catch(() => ({ status: 'success' }));
-          if (onSuccess) {
-            onSuccess({
-              ...result,
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              amount: parseFloat(Number(amount).toFixed(2)),
-            });
-          }
-        } else {
-          let errJson = {};
-          try {
-            errJson = await verifyRes.json();
-          } catch {
-            const errText = await verifyRes.text().catch(() => '');
-            errJson = { message: errText };
-          }
-          throw new Error(errJson.message || 'Signature verification failed on backend.');
-        }
-      } catch (verifyErr) {
-        console.error('Payment verification error:', verifyErr);
+      } catch (err) {
+        console.error('Payment signature verification failed:', err);
         if (onError) {
-          onError(
-            new Error(
-              verifyErr.message ||
-                'Payment signature verification failed. Please contact support.'
-            )
-          );
+          const msg = err.response?.data?.message || 'Payment verification failed. Please contact support.';
+          onError(new Error(msg));
         }
       }
     },
@@ -204,21 +164,21 @@ export async function initiateRazorpayPayment({
   try {
     const rzp = new window.Razorpay(options);
     rzp.on('payment.failed', function (resp) {
-      console.warn('Payment failed response:', resp);
+      console.warn('Payment failed callback:', resp.error);
       if (onError) {
-        onError(new Error(resp.error?.description || 'Payment was declined or cancelled.'));
+        onError(
+          new Error(
+            resp.error?.description ||
+              'Payment was declined or cancelled by bank. Please try another method.'
+          )
+        );
       }
     });
     rzp.open();
-  } catch (openErr) {
-    console.error('Failed to open Razorpay modal:', openErr);
-    if (onError) onError(openErr);
+  } catch (initErr) {
+    console.error('Razorpay popup open error:', initErr);
+    if (onError) {
+      onError(new Error('Failed to open payment modal.'));
+    }
   }
 }
-
-export default {
-  RAZORPAY_KEY_ID,
-  loadRazorpayScript,
-  initiateRazorpayPayment,
-};
-

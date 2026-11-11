@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { setAuthToken } from '../utils/auth';
+import { setAuthToken, setStorageItem, parseJwt } from '../utils/auth';
+import apiClient from '../utils/apiClient';
+import { API_BASE_URL } from '../config';
 
 export default function AuthPage({ onLoginSuccess, sessionExpired }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -30,45 +32,47 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-        }),
+      const response = await apiClient.post('/api/auth/login', {
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      if (response.ok) {
-        // Backend returns token as plain text or JSON string
-        const rawToken = await response.text();
-        // Remove any wrapping quotes if serialized as JSON string
-        const token = rawToken.replace(/^["']|["']$/g, '').trim();
+      const rawToken = typeof response.data === 'string' ? response.data : response.data?.token || '';
+      const token = rawToken.replace(/^["']|["']$/g, '').trim();
 
-        if (token && token !== 'Fail') {
-          setAuthToken(token, email.trim());
-          setSuccessMessage('Authentication successful! Loading dashboard...');
-          setTimeout(() => {
-            if (onLoginSuccess) {
-              onLoginSuccess(token, email.trim());
-            }
-          }, 400);
-        } else {
-          setErrorMessage('Invalid credentials. Please verify your email and password.');
+      if (token && token !== 'Fail') {
+        let resolvedRole = 'ROLE_RIDER';
+        try {
+          const meRes = await apiClient.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (meRes.data?.role) resolvedRole = meRes.data.role;
+          if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
+          if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+          if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+        } catch {
+          const decoded = parseJwt(token);
+          if (decoded?.role) resolvedRole = decoded.role;
         }
-      } else if (response.status === 401) {
-        const errorText = await response.text();
-        setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+
+        setAuthToken(token, email.trim(), resolvedRole);
+        setSuccessMessage('Authentication successful! Loading dashboard...');
+        setTimeout(() => {
+          if (onLoginSuccess) {
+            onLoginSuccess(token, email.trim(), resolvedRole);
+          }
+        }, 400);
       } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText || `Authentication failed with status ${response.status}.`);
+        setErrorMessage('Invalid credentials. Please verify your email and password.');
       }
     } catch (err) {
-      setErrorMessage(
-        'Unable to connect to backend server at http://localhost:8080. Please ensure your Spring Boot application is running.'
-      );
+      const status = err.response?.status;
+      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      if (status === 401) {
+        setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+      } else {
+        setErrorMessage(errorText || 'Unable to connect to service. Please check your connection.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -98,54 +102,51 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-          role: role,
-        }),
+      await apiClient.post('/api/auth/register', {
+        email: email.trim(),
+        password: password.trim(),
+        role: role,
       });
 
-      if (response.ok) {
-        setSuccessMessage('Account registered successfully! Signing you in automatically...');
-        
-        // Auto-login upon successful registration
-        setTimeout(async () => {
-          try {
-            const loginRes = await fetch('http://localhost:8080/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: email.trim(), password: password.trim() }),
-            });
+      setSuccessMessage('Account registered successfully! Signing you in automatically...');
+      
+      // Auto-login upon successful registration
+      setTimeout(async () => {
+        try {
+          const loginRes = await apiClient.post('/api/auth/login', {
+            email: email.trim(),
+            password: password.trim(),
+          });
 
-            if (loginRes.ok) {
-              const rawToken = await loginRes.text();
-              const token = rawToken.replace(/^["']|["']$/g, '').trim();
-              setAuthToken(token, email.trim());
-              if (onLoginSuccess) {
-                onLoginSuccess(token, email.trim());
-              }
-            } else {
-              setMode('login');
-              setSuccessMessage('Account created! Please sign in with your password.');
-            }
+          const rawToken = typeof loginRes.data === 'string' ? loginRes.data : loginRes.data?.token || '';
+          const token = rawToken.replace(/^["']|["']$/g, '').trim();
+
+          let resolvedRole = 'ROLE_RIDER';
+          try {
+            const meRes = await apiClient.get('/api/auth/me', {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (meRes.data?.role) resolvedRole = meRes.data.role;
+            if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
+            if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+            if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
           } catch {
-            setMode('login');
-            setSuccessMessage('Account created! Please sign in with your credentials.');
+            const decoded = parseJwt(token);
+            if (decoded?.role) resolvedRole = decoded.role;
           }
-        }, 800);
-      } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText || `Registration failed (${response.status}). Email may already be in use.`);
-      }
+
+          setAuthToken(token, email.trim(), resolvedRole);
+          if (onLoginSuccess) {
+            onLoginSuccess(token, email.trim(), resolvedRole);
+          }
+        } catch {
+          setMode('login');
+          setSuccessMessage('Account created! Please sign in with your credentials.');
+        }
+      }, 600);
     } catch (err) {
-      setErrorMessage(
-        'Unable to connect to backend server at http://localhost:8080. Please ensure your Spring Boot application is running.'
-      );
+      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      setErrorMessage(errorText || 'Registration failed. Email may already be in use.');
     } finally {
       setIsLoading(false);
     }
@@ -388,7 +389,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
         <div className="text-center text-[11px] text-[#736353] flex items-center justify-center gap-3">
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Backend: <code className="text-[#a89685]">localhost:8080</code>
+            Backend: <code className="text-[#a89685]">{API_BASE_URL.replace(/^https?:\/\//, '')}</code>
           </span>
           <span>•</span>
           <span>JWT Filter Enabled</span>

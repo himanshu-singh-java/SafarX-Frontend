@@ -263,7 +263,8 @@ export default function LiveRouteMap({
 
     // Dynamically resolve driver's vehicle icon image matching their actual vehicle
     const effectiveType = (
-      (activeRide ? driverInfo?.vehicleType : null) ||
+      driverInfo?.vehicleType ||
+      activeRide?.vehicleType ||
       vehicleType ||
       'CAR'
     ).toUpperCase();

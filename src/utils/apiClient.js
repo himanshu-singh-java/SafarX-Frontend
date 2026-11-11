@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import { getAuthToken, clearAuthToken, AUTH_UNAUTHORIZED_EVENT } from './auth';
 
 /**
@@ -6,7 +7,7 @@ import { getAuthToken, clearAuthToken, AUTH_UNAUTHORIZED_EVENT } from './auth';
  * Handles automatic JWT Bearer token injection and global 401 error / token cleanup.
  */
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

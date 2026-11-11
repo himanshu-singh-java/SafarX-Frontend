@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { setAuthToken, setStorageItem, getStorageItem } from '../utils/auth';
-import { registerDriverProfile } from '../utils/driverDirectory';
+import apiClient from '../utils/apiClient';
 
 /**
  * DriverOnboardingModal Component
@@ -154,88 +154,50 @@ export default function DriverOnboardingModal({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/driver/onboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await apiClient.post('/api/driver/onboard', payload);
+      const data = response.data || {};
 
-      let data = {};
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        data = { message: text };
+      setErrorMessage('');
+      setSuccessMessage('🎉 Partner Account & Vehicle Registered! Welcome to SafarX Fleet.');
+
+      try {
+        // Update local session with complete driver & vehicle profile
+        const normalizedEmail = (data.email || email).trim().toLowerCase();
+        const resolvedDriverId = data.driverId ? String(data.driverId) : '';
+        const resolvedModel =
+          vehicleType === 'CAR'
+            ? (carModel.trim() || 'Maruti Suzuki Dzire')
+            : vehicleType === 'BIKE'
+            ? (bikeType === 'SCOOTER' ? (bikeModel.trim() || 'Honda Activa (Scooter)') : (bikeModel.trim() || 'Hero Splendor Plus'))
+            : (autoModel.trim() || 'Bajaj RE Compact');
+        const resolvedPlate = plateNumber.trim().toUpperCase();
+
+        setAuthToken(data.token, normalizedEmail, 'ROLE_DRIVER');
+        if (resolvedDriverId) setStorageItem('driverId', resolvedDriverId);
+        setStorageItem('userEmail', normalizedEmail);
+        setStorageItem('userName', fullName.trim());
+        setStorageItem('userPhone', phone.trim());
+        setStorageItem('driverVehicleType', vehicleType);
+        setStorageItem('driverVehicleModel', resolvedModel);
+        setStorageItem('driverPlateNumber', resolvedPlate);
+      } catch (storageErr) {
+        console.warn('[DriverOnboarding] Local profile storage warning:', storageErr);
       }
 
-      if (response.ok && (response.status === 201 || response.status === 200)) {
-        setErrorMessage('');
-        setSuccessMessage('🎉 Partner Account & Vehicle Registered! Welcome to SafarX Fleet.');
-
-        try {
-          // Update local session with complete driver & vehicle profile
-          const normalizedEmail = (data.email || email).trim().toLowerCase();
-          const resolvedDriverId = data.driverId ? String(data.driverId) : '3';
-          const resolvedModel =
-            vehicleType === 'CAR'
-              ? (carModel.trim() || 'Maruti Suzuki Dzire')
-              : vehicleType === 'BIKE'
-              ? (bikeType === 'SCOOTER' ? (bikeModel.trim() || 'Honda Activa (Scooter)') : (bikeModel.trim() || 'Hero Splendor Plus'))
-              : (autoModel.trim() || 'Bajaj RE Compact');
-          const resolvedPlate = plateNumber.trim().toUpperCase() || (vehicleType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888');
-
-          setAuthToken(data.token, normalizedEmail, 'ROLE_DRIVER');
-          setStorageItem('driverId', resolvedDriverId);
-          setStorageItem('userEmail', normalizedEmail);
-          setStorageItem('userName', fullName.trim());
-          setStorageItem('userPhone', phone.trim());
-          setStorageItem('driverVehicleType', vehicleType);
-          setStorageItem('driverVehicleModel', resolvedModel);
-          setStorageItem('driverPlateNumber', resolvedPlate);
-
-          // Register new driver profile into directory under multiple keys (id, email, plate)
-          const profileObj = {
-            driverId: Number(resolvedDriverId),
-            id: Number(resolvedDriverId),
-            name: fullName.trim(),
-            email: normalizedEmail,
-            phone: phone.trim(),
-            rating: 5.0,
-            vehicleType,
-            model: resolvedModel,
-            plateNumber: resolvedPlate,
-            city: 'Hyderabad',
-            lat: coords.lat,
-            lng: coords.lng,
-            isVerified: true,
-          };
-          registerDriverProfile(profileObj);
-
-          const raw = localStorage.getItem('safarx_drivers_registry');
-          const reg = raw ? JSON.parse(raw) : {};
-          reg[resolvedDriverId] = profileObj;
-          reg[normalizedEmail] = profileObj;
-          reg[resolvedPlate] = profileObj;
-          localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
-          localStorage.setItem(`safarx_driver_${normalizedEmail}`, JSON.stringify(profileObj));
-          localStorage.setItem(`safarx_driver_${resolvedDriverId}`, JSON.stringify(profileObj));
-        } catch (storageErr) {
-          console.warn('[DriverOnboarding] Local profile storage warning:', storageErr);
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess(data.token, data.email || email.trim(), data.driverId);
         }
-
-        setTimeout(() => {
-          if (onSuccess) {
-            onSuccess(data.token, data.email || email.trim(), data.driverId);
-          }
-          if (onClose) {
-            onClose();
-          }
-        }, 700);
-      } else if (
-        response.status === 409 ||
+        if (onClose) {
+          onClose();
+        }
+      }, 700);
+    } catch (err) {
+      console.warn('Driver onboarding network issue:', err);
+      const status = err.response?.status;
+      const data = err.response?.data || {};
+      if (
+        status === 409 ||
         (data.message && data.message.toLowerCase().includes('already exists'))
       ) {
         setIsEmailRegistered(true);
@@ -244,14 +206,7 @@ export default function DriverOnboardingModal({
         );
       } else {
         setErrorMessage(
-          data.message || data.error || `Registration failed with code ${response.status}.`
-        );
-      }
-    } catch (err) {
-      console.warn('Driver onboarding network issue:', err);
-      if (!successMessage) {
-        setErrorMessage(
-          'Unable to connect to backend server at http://localhost:8080. Please verify Spring Boot is running.'
+          data.message || data.error || 'Unable to connect to service. Please check your connection and try again.'
         );
       }
     } finally {

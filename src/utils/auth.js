@@ -24,39 +24,23 @@ const TAB_SCOPED_KEYS = new Set([
 
 /**
  * Authoritative user name resolver based on verified credentials & database mapping.
- * Eliminates cross-tab naming race conditions permanently.
+ * Eliminates cross-tab naming race conditions permanently without hardcoded identities.
  */
 export const resolveUserName = (rawName, email) => {
-  const cleanEmail = (email || '').toLowerCase().trim();
   const cleanName = (rawName || '').trim();
-
-  if (cleanEmail === 'harsh@gmail.com' || cleanEmail.includes('harsh') || cleanEmail.includes('ghoda')) {
-    return cleanName && cleanName !== 'null' && cleanName !== 'undefined' ? cleanName : 'Ghoda kumar';
-  }
-  if (cleanEmail === 'kalu@gmail.com' || cleanEmail.includes('kalu')) {
-    return cleanName && cleanName !== 'null' && cleanName !== 'undefined' ? cleanName : 'Kalu Singh';
-  }
-  if (cleanEmail === 'kmrvishalsingh122@gmail.com' || cleanEmail.includes('vishal')) {
-    return 'Vishal Singh';
-  }
-  if (cleanEmail === 'singhhimanshu85952@gmail.com' || cleanEmail.includes('himanshu')) {
-    return 'Himanshu Singh';
-  }
-  if (cleanEmail === 'car.driver1@ride.com') return 'Rajesh Khanna';
-  if (cleanEmail === 'bike.driver1@ride.com') return 'Vikram Singh';
-  if (cleanEmail === 'auto.driver1@ride.com') return 'Ramesh Kumar';
-
   if (cleanName && cleanName !== 'null' && cleanName !== 'undefined') {
     return cleanName;
   }
+  const cleanEmail = (email || '').toLowerCase().trim();
   if (cleanEmail) {
     const prefix = cleanEmail.split('@')[0].replace(/[._-]/g, ' ');
     return prefix
       .split(' ')
+      .filter(Boolean)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
   }
-  return 'SafarX Partner';
+  return 'SafarX User';
 };
 
 export const getStorageItem = (key) => {
@@ -129,13 +113,6 @@ export const getUserRole = () => {
   if (token) {
     const decoded = parseJwt(token);
     if (decoded?.role) return decoded.role;
-    if (decoded?.sub && decoded.sub.toLowerCase().includes('admin')) {
-      return 'ROLE_ADMIN';
-    }
-  }
-  const email = getStorageItem('userEmail');
-  if (email && email.toLowerCase().includes('admin')) {
-    return 'ROLE_ADMIN';
   }
   return 'ROLE_RIDER';
 };
@@ -154,9 +131,6 @@ export const setAuthToken = (token, email = '', role = '') => {
   }
   if (email) {
     setStorageItem('userEmail', email.trim());
-    if (!role && email.toLowerCase().includes('admin')) {
-      role = 'ROLE_ADMIN';
-    }
   }
   if (role) {
     setStorageItem('userRole', role.trim());

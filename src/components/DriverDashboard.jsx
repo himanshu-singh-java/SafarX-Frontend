@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import wsService from '../utils/websocket';
 import { getAuthHeaders, getAuthToken, getStorageItem, setStorageItem, resolveUserName } from '../utils/auth';
 import { registerDriverProfile } from '../utils/driverDirectory';
+import apiClient from '../utils/apiClient';
+import { IS_DEMO_MODE } from '../config';
 
 /**
  * DriverDashboard Component
@@ -12,28 +14,17 @@ import { registerDriverProfile } from '../utils/driverDirectory';
  * - Real-time WebSocket connection to /topic/driver/{driverId}.
  * - Live incoming ride request modal with sound/visual alert.
  * - Accept ride & complete trip flow.
- * - Real-time simulated GPS tracking sent to rider over STOMP.
+ * - Real-time GPS tracking sent to rider over STOMP (watchPosition in prod, demo hub in IS_DEMO_MODE).
  */
 // Database known driver profiles for seamless testing and role linking
 const KNOWN_DRIVERS = {
   'harsh@gmail.com': {
-    id: 3,
-    name: 'Ghoda kumar',
+    id: 9,
+    name: 'Harsh Kumar',
     rating: 5.0,
-    vehicleType: 'BIKE',
-    model: 'Hero Splendor Plus',
-    plateNumber: 'TS-09-GK-2026',
-    city: 'Hyderabad',
-    lat: 17.4435,
-    lng: 78.4532,
-  },
-  'kalu@gmail.com': {
-    id: 2,
-    name: 'Kalu Singh',
-    rating: 5.0,
-    vehicleType: 'BIKE',
-    model: 'Honda Activa (Scooter)',
-    plateNumber: 'TS-09-KL-2026',
+    vehicleType: 'CAR',
+    model: 'Ertiga',
+    plateNumber: 'HR-09-2023',
     city: 'Hyderabad',
     lat: 17.4435,
     lng: 78.4532,
@@ -43,8 +34,8 @@ const KNOWN_DRIVERS = {
     name: 'Vishal Singh',
     rating: 5.0,
     vehicleType: 'CAR',
-    model: 'Scorpio N',
-    plateNumber: 'BR-08-2882',
+    model: 'Maruti Suzuki Dzire',
+    plateNumber: 'FNWEJ302-23I-223',
     city: 'Hyderabad',
     lat: 17.4435,
     lng: 78.4532,
@@ -56,6 +47,39 @@ const KNOWN_DRIVERS = {
     vehicleType: 'CAR',
     model: 'BMW',
     plateNumber: 'BMW-TS-2026',
+    city: 'Hyderabad',
+    lat: 17.4435,
+    lng: 78.4532,
+  },
+  'sandu@gmail.com': {
+    id: 6,
+    name: 'Sandu',
+    rating: 5.0,
+    vehicleType: 'AUTO',
+    model: 'Bajaj RE Compact',
+    plateNumber: 'BR-03-2345',
+    city: 'Hyderabad',
+    lat: 17.4435,
+    lng: 78.4532,
+  },
+  'kukurji@gmail.com': {
+    id: 7,
+    name: 'Kuku Singh',
+    rating: 5.0,
+    vehicleType: 'AUTO',
+    model: 'Bajaj RE Compact',
+    plateNumber: 'KK-94-2834',
+    city: 'Hyderabad',
+    lat: 17.4435,
+    lng: 78.4532,
+  },
+  'bakri@gmail.com': {
+    id: 8,
+    name: 'bakri Giri',
+    rating: 5.0,
+    vehicleType: 'CAR',
+    model: 'Maruti Suzuki Dzire',
+    plateNumber: 'BK-34-2039',
     city: 'Hyderabad',
     lat: 17.4435,
     lng: 78.4532,
@@ -110,36 +134,35 @@ function getInitialDriverProfile(userEmail) {
   const savedId = getStorageItem('driverId');
   const normalizedEmail = (userEmail || getStorageItem('userEmail') || '').toLowerCase().trim();
 
-  // 1. Check local drivers registry by email, driverId, or plate!
-  try {
-    const raw = localStorage.getItem('safarx_drivers_registry');
-    if (raw) {
-      const reg = JSON.parse(raw);
-      const match =
-        (normalizedEmail && reg[normalizedEmail]) ||
-        (savedId && reg[String(savedId)]) ||
-        Object.values(reg).find((d) => 
-          (d.email && d.email.toLowerCase() === normalizedEmail) ||
-          (d.driverId && String(d.driverId) === String(savedId))
-        );
+  // 1. Check verified KNOWN_DRIVERS first (matches MySQL truth directly)
+  if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {
+    const base = { ...KNOWN_DRIVERS[normalizedEmail] };
+    if (savedId) base.id = Number(savedId);
+    base.name = resolveUserName(base.name, normalizedEmail);
 
-      if (match && match.vehicleType) {
-        // Guard against stale Charminar coordinates (17.3850, 78.4867) from earlier tests
-        const isNearHub = match.lat && Math.abs(match.lat - 17.4435) < 0.05;
-        return {
-          id: match.driverId ? Number(match.driverId) : (savedId ? Number(savedId) : 1),
-          name: resolveUserName(match.name, normalizedEmail),
-          rating: match.rating || 5.0,
-          vehicleType: match.vehicleType,
-          model: match.model || (match.vehicleType === 'BIKE' ? 'Hero Splendor Plus' : match.vehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
-          plateNumber: match.plateNumber || (match.vehicleType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
-          city: match.city || 'Hyderabad',
-          lat: isNearHub ? match.lat : 17.4435,
-          lng: isNearHub ? match.lng : 78.4532,
-        };
+    // Check if driver has an explicit custom vehicle edit saved in local registry
+    try {
+      const raw = localStorage.getItem('safarx_drivers_registry');
+      if (raw) {
+        const reg = JSON.parse(raw);
+        const match = reg[normalizedEmail] || (savedId && reg[String(savedId)]);
+        if (match && match.isCustomEdit) {
+          base.vehicleType = match.vehicleType || base.vehicleType;
+          base.model = match.model || base.model;
+          base.plateNumber = match.plateNumber || base.plateNumber;
+        }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+
+    // Synchronize storage items so old cached values never corrupt the state
+    try {
+      setStorageItem('driverVehicleType', base.vehicleType);
+      setStorageItem('driverVehicleModel', base.model);
+      setStorageItem('driverPlateNumber', base.plateNumber);
+    } catch (e) {}
+
+    return base;
+  }
 
   // 2. Check tab session storage
   const storedVehicleType = getStorageItem('driverVehicleType');
@@ -159,70 +182,66 @@ function getInitialDriverProfile(userEmail) {
     };
   }
 
-  // 3. Specifically for Ghoda kumar (harsh@gmail.com / ID #3): registered SafarX Moto (BIKE)
-  if (normalizedEmail.includes('harsh') || normalizedEmail.includes('ghoda') || savedId === '3' || savedId === 3) {
-    return {
-      id: savedId ? Number(savedId) : 3,
-      name: resolveUserName('Ghoda kumar', normalizedEmail),
-      rating: 5.0,
-      vehicleType: 'BIKE',
-      model: 'Hero Splendor Plus',
-      plateNumber: 'TS-09-GK-2026',
-      city: 'Hyderabad',
-      lat: 17.4435,
-      lng: 78.4532,
-    };
-  }
+  // 3. Check dynamic local drivers registry
+  try {
+    const raw = localStorage.getItem('safarx_drivers_registry');
+    if (raw) {
+      const reg = JSON.parse(raw);
+      const match =
+        (normalizedEmail && reg[normalizedEmail]) ||
+        (savedId && reg[String(savedId)]) ||
+        Object.values(reg).find((d) => 
+          (d.email && d.email.toLowerCase() === normalizedEmail) ||
+          (d.driverId && String(d.driverId) === String(savedId))
+        );
 
-  // 4. Specifically for Kalu Singh (kalu@gmail.com / ID #2): user registered a Scooter (BIKE)
-  if (normalizedEmail.includes('kalu') || savedId === '2' || savedId === 2) {
-    return {
-      id: savedId ? Number(savedId) : 2,
-      name: resolveUserName('Kalu Singh', normalizedEmail),
-      rating: 5.0,
-      vehicleType: 'BIKE',
-      model: 'Honda Activa (Scooter)',
-      plateNumber: 'TS-09-KL-2026',
-      city: 'Hyderabad',
-      lat: 17.4435,
-      lng: 78.4532,
-    };
-  }
+      if (match && match.vehicleType) {
+        const isNearHub = match.lat && Math.abs(match.lat - 17.4435) < 0.05;
+        return {
+          id: match.driverId ? Number(match.driverId) : (savedId ? Number(savedId) : 1),
+          name: resolveUserName(match.name, normalizedEmail),
+          rating: match.rating || 5.0,
+          vehicleType: match.vehicleType,
+          model: match.model || (match.vehicleType === 'BIKE' ? 'Hero Splendor Plus' : match.vehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
+          plateNumber: match.plateNumber || (match.vehicleType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
+          city: match.city || 'Hyderabad',
+          lat: isNearHub ? match.lat : 17.4435,
+          lng: isNearHub ? match.lng : 78.4532,
+        };
+      }
+    }
+  } catch (e) {}
 
-  // 5. Check KNOWN_DRIVERS
-  if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {
-    const base = { ...KNOWN_DRIVERS[normalizedEmail] };
-    if (savedId) base.id = Number(savedId);
-    base.name = resolveUserName(base.name, normalizedEmail);
-    return base;
-  }
-
+  // 4. Default fallback matching email or ID
   const fallbackId = savedId
     ? Number(savedId)
     : normalizedEmail.includes('vishal')
     ? 1
+    : normalizedEmail.includes('sheru')
+    ? 5
+    : normalizedEmail.includes('sandu')
+    ? 6
+    : normalizedEmail.includes('kuku')
+    ? 7
+    : normalizedEmail.includes('bakri')
+    ? 8
+    : normalizedEmail.includes('harsh')
+    ? 9
     : normalizedEmail.includes('himanshu')
     ? 16
-    : normalizedEmail.includes('harsh')
-    ? 3
-    : normalizedEmail.includes('kalu')
-    ? 2
-    : normalizedEmail.includes('car')
-    ? 11
-    : normalizedEmail.includes('bike')
-    ? 6
     : 1;
 
   const fallbackVehicle =
     storedVehicleType ||
-    (fallbackId === 3 || fallbackId === 2 || fallbackId === 6 ? 'BIKE' : fallbackId >= 11 ? 'CAR' : 'CAR');
+    (fallbackId === 6 || fallbackId === 7 ? 'AUTO' : 'CAR');
+
   return {
     id: fallbackId,
     name: resolveUserName(null, normalizedEmail),
     rating: 5.0,
     vehicleType: fallbackVehicle,
-    model: fallbackId === 1 ? 'Scorpio N' : fallbackId === 16 ? 'SafarX Prime Cab' : fallbackVehicle === 'CAR' ? 'Maruti Suzuki Dzire' : fallbackVehicle === 'BIKE' ? 'Hero Splendor Plus' : 'Bajaj RE Compact',
-    plateNumber: fallbackId === 1 ? 'BR-08-2882' : fallbackId === 16 ? 'TS-09-UB-8888' : fallbackVehicle === 'BIKE' ? 'TS-09-GK-2026' : fallbackId >= 11 ? 'DL-8C-CC-3001' : 'DL-1R-AA-1001',
+    model: fallbackId === 1 ? 'Maruti Suzuki Dzire' : fallbackId === 5 ? 'BMW' : fallbackId === 9 ? 'Ertiga' : fallbackId === 8 ? 'Maruti Suzuki Dzire' : fallbackId === 16 ? 'SafarX Prime Cab' : fallbackVehicle === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire',
+    plateNumber: fallbackId === 1 ? 'FNWEJ302-23I-223' : fallbackId === 5 ? 'BMW-TS-2026' : fallbackId === 9 ? 'HR-09-2023' : fallbackId === 8 ? 'BK-34-2039' : fallbackId === 6 ? 'BR-03-2345' : fallbackId === 7 ? 'KK-94-2834' : 'TS-09-UB-8888',
     city: 'Hyderabad',
     lat: 17.4435,
     lng: 78.4532,
@@ -241,101 +260,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     return { lat, lng };
   });
 
-  // Geolocation auto-detection: keeps driver location synchronized with device GPS or Hyderabad hub
-
-  // Handler to manually snap GPS location directly to active Hyderabad Hub (Nature Cure / Ameerpet)
-  const handleSnapToHub = () => {
-    const hubLat = 17.4435;
-    const hubLng = 78.4532;
-    setCurrentCoords({ lat: hubLat, lng: hubLng });
-    registerDriverProfile(driverProfile.id, {
-      ...driverProfile,
-      lat: hubLat,
-      lng: hubLng,
-    });
-    wsService.ensureConnected().then(() => {
-      wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, hubLat, hubLng);
-    }).catch(() => {});
-    fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    }).catch(() => {});
-    setStatusMessage({
-      text: `📍 GPS snapped to Hyderabad Hub (${hubLat}, ${hubLng}) • Status set to AVAILABLE!`,
-      isError: false,
-    });
-  };
-
-  // Edit Vehicle Modal State
-  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
-  const [editVehicleType, setEditVehicleType] = useState('BIKE');
-  const [editVehicleModel, setEditVehicleModel] = useState('');
-  const [editPlateNumber, setEditPlateNumber] = useState('');
-
-  // Sync profile when userEmail changes (Without destructive overwrites)
-  useEffect(() => {
-    const resolved = getInitialDriverProfile(userEmail);
-    setDriverProfile(resolved);
-    setCurrentCoords({ lat: resolved.lat, lng: resolved.lng });
-  }, [userEmail]);
-
-  // Verified Driver ID state (Ensures WebSocket NEVER subscribes to unverified guessed IDs)
-  const [isDriverVerified, setIsDriverVerified] = useState(() => {
-    // If the driver email is in known drivers or matches saved driverId, it is already pre-verified
-    const normalized = (userEmail || '').toLowerCase();
-    const saved = getStorageItem('driverId');
-    return Boolean(KNOWN_DRIVERS[normalized] || saved);
-  });
-
-  // Dynamic Backend Profile Sync (fetches real Driver ID, Role & Status from DB)
-  useEffect(() => {
-    let isMounted = true;
-    const fetchBackendProfile = async () => {
-      try {
-        const res = await fetch('http://localhost:8080/api/auth/me', {
-          headers: getAuthHeaders(),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.driverId && isMounted) {
-            const realId = Number(data.driverId);
-            const resolvedDriverName = resolveUserName(data.name, userEmail);
-            setDriverProfile((prev) => ({
-              ...prev,
-              id: realId,
-              name: resolvedDriverName,
-              rating: prev.rating || 5.0,
-            }));
-            setStorageItem('driverId', String(realId));
-            setIsDriverVerified(true);
-            if (data.driverStatus) {
-              setIsOnline(data.driverStatus === 'AVAILABLE');
-            }
-
-            // Immediately ensure driver is marked AVAILABLE in backend DB
-            fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-              method: 'PATCH',
-              headers: getAuthHeaders(),
-            }).catch(() => {});
-
-            // Immediately sync GPS location with Hyderabad Hub (17.4435, 78.4532) in MySQL
-            setCurrentCoords({ lat: 17.4435, lng: 78.4532 });
-            wsService.ensureConnected().then(() => {
-              wsService.sendLocationUpdate(0, realId, 17.4435, 78.4532);
-            }).catch(() => {});
-          }
-        }
-      } catch (err) {
-        console.warn('Backend driver profile sync issue:', err);
-      }
-    };
-
-    if (token) {
-      fetchBackendProfile();
-    }
-    return () => { isMounted = false; };
-  }, [token, userEmail]);
-
   const [isOnline, setIsOnline] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
   const [incomingRequest, setIncomingRequest] = useState(null);
@@ -344,6 +268,37 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
   const [isAccepting, setIsAccepting] = useState(false);
   const gpsIntervalRef = useRef(null);
+  const cancelTimerRef = useRef(null);
+
+  // Auto-dismiss cancellation alert after 5 seconds
+  const showCancellationAlert = (msg) => {
+    setStatusMessage({ text: msg, isError: true });
+    if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
+    cancelTimerRef.current = setTimeout(() => {
+      setStatusMessage((prev) => (prev.text === msg ? { text: '', isError: false } : prev));
+    }, 5000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
+    };
+  }, []);
+
+  // Cleanup any stale ride state & ride subscriptions on driver mount/login
+  useEffect(() => {
+    try {
+      localStorage.removeItem('activeRide');
+      localStorage.removeItem('rideId');
+      localStorage.removeItem('driverActiveTrip');
+      sessionStorage.removeItem('activeRide');
+      sessionStorage.removeItem('rideId');
+      sessionStorage.removeItem('driverActiveTrip');
+    } catch (e) {}
+
+    // Ensure no unauthorized /topic/ride/* subscriptions linger in STOMP client
+    wsService.clearRideSubscriptions();
+  }, []);
 
   // Human-readable address names for incoming requests
   const [pickupAddressName, setPickupAddressName] = useState('');
@@ -384,7 +339,116 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         })
         .catch(() => {});
     }
-  }, [incomingRequest?.rideId]);
+  }, [incomingRequest]);
+
+  // Geolocation auto-detection: keeps driver location synchronized with device GPS or Hyderabad hub
+
+  // Handler to manually snap GPS location directly to active Hyderabad Hub (Nature Cure / Ameerpet)
+  const handleSnapToHub = () => {
+    const hubLat = 17.4435;
+    const hubLng = 78.4532;
+    setCurrentCoords({ lat: hubLat, lng: hubLng });
+    wsService.ensureConnected().then(() => {
+      wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, hubLat, hubLng);
+    }).catch(() => {});
+    setStatusMessage({
+      text: `📍 GPS snapped to Hyderabad Hub (${hubLat}, ${hubLng})`,
+      isError: false,
+    });
+  };
+
+  // Edit Vehicle Modal State
+  const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
+  const [editVehicleType, setEditVehicleType] = useState('CAR');
+  const [editVehicleModel, setEditVehicleModel] = useState('');
+  const [editPlateNumber, setEditPlateNumber] = useState('');
+
+  // Sync profile when userEmail changes
+  useEffect(() => {
+    const resolved = getInitialDriverProfile(userEmail);
+    setDriverProfile(resolved);
+    setCurrentCoords({ lat: resolved.lat, lng: resolved.lng });
+  }, [userEmail]);
+
+  // Verified Driver ID state (Ensures WebSocket NEVER subscribes to unverified guessed IDs)
+  const [isDriverVerified, setIsDriverVerified] = useState(() => {
+    const saved = getStorageItem('driverId');
+    return Boolean(saved);
+  });
+
+  // Dynamic Backend Profile Sync (fetches real Driver ID, Role & Status from DB)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchBackendProfile = async () => {
+      try {
+        const res = await apiClient.get('/api/auth/me');
+        if (res.data && isMounted) {
+          const data = res.data;
+          const realId = data.driverId ? Number(data.driverId) : null;
+          if (realId) {
+            setStorageItem('driverId', String(realId));
+            setIsDriverVerified(true);
+          }
+          if (data.status) {
+            setIsOnline(data.status === 'AVAILABLE');
+          }
+          setDriverProfile((prev) => {
+            const nextVehicleType = data.vehicleType || prev.vehicleType || 'CAR';
+            const nextModel = data.vehicleModel || prev.model || (nextVehicleType === 'BIKE' ? 'Hero Splendor Plus' : nextVehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
+            const nextPlate = data.plateNumber || prev.plateNumber || 'TS-09-UB-8888';
+            return {
+              ...prev,
+              id: realId || prev.id,
+              name: resolveUserName(data.name, userEmail),
+              vehicleType: nextVehicleType,
+              model: nextModel,
+              plateNumber: nextPlate,
+            };
+          });
+          if (data.vehicleType) setStorageItem('driverVehicleType', data.vehicleType);
+          if (data.vehicleModel) setStorageItem('driverVehicleModel', data.vehicleModel);
+          if (data.plateNumber) setStorageItem('driverPlateNumber', data.plateNumber);
+
+          // Initial location update
+          if (realId) {
+            wsService.ensureConnected().then(() => {
+              wsService.sendLocationUpdate(0, realId, currentCoords.lat, currentCoords.lng);
+            }).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.warn('[DriverDashboard] Backend driver profile sync issue:', err);
+      }
+    };
+
+    if (token) {
+      fetchBackendProfile();
+    }
+    return () => { isMounted = false; };
+  }, [token, userEmail]);
+
+  // Live GPS tracking: uses watchPosition in production, demo hub simulation when IS_DEMO_MODE is true
+  useEffect(() => {
+    if (!isOnline || !driverProfile.id) return;
+
+    if (!IS_DEMO_MODE && navigator.geolocation) {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const lat = parseFloat(pos.coords.latitude.toFixed(6));
+          const lng = parseFloat(pos.coords.longitude.toFixed(6));
+          setCurrentCoords({ lat, lng });
+          wsService.ensureConnected().then(() => {
+            wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, lat, lng);
+          }).catch(() => {});
+        },
+        (err) => {
+          console.warn('[DriverDashboard] Geolocation watch error:', err);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    }
+  }, [isOnline, driverProfile.id, activeTrip?.rideId]);
 
   // Online / Offline toggle with backend DB synchronization
   const handleToggleOnline = async () => {
@@ -393,11 +457,8 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
     try {
       const backendStatus = nextOnline ? 'AVAILABLE' : 'OFFLINE';
-      const res = await fetch(`http://localhost:8080/api/driver/status?status=${backendStatus}`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-      });
-      if (res.ok) {
+      const res = await apiClient.patch(`/api/driver/status?status=${backendStatus}`);
+      if (res.status === 200) {
         setStatusMessage({
           text: nextOnline ? '🟢 Online — Available to receive nearby passenger rides.' : '⚪ Offline — Rides paused.',
           isError: false,
@@ -405,26 +466,16 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
       }
     } catch (e) {
       console.warn('Driver status sync error:', e);
+      const msg = e.response?.data?.message || 'Could not update status';
+      setStatusMessage({ text: msg, isError: true });
     }
 
-    if (nextOnline) {
-      const hubLat = 17.4435;
-      const hubLng = 78.4532;
-      setCurrentCoords({ lat: hubLat, lng: hubLng });
+    if (nextOnline && driverProfile.id) {
       wsService.ensureConnected().then(() => {
-        wsService.sendLocationUpdate(0, driverProfile.id, hubLat, hubLng);
+        wsService.sendLocationUpdate(0, driverProfile.id, currentCoords.lat, currentCoords.lng);
       });
     }
   };
-
-  // Ensure driver status in backend DB is AVAILABLE whenever component mounts or isOnline is true
-  useEffect(() => {
-    if (!isOnline || !token) return;
-    fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    }).catch(() => {});
-  }, [isOnline, token]);
 
   // Heartbeat & GPS Keep-Alive: keeps WebSocket connection warm & keeps MySQL coordinates fresh
   useEffect(() => {
@@ -465,49 +516,80 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           console.log('[Driver WS] Event received on ' + topic, data);
           if (!data) return;
 
-          // Handle cancellation or re-assignment from backend
-          if (data.type === 'RIDE_CANCELLED' || data.status === 'CANCELLED' || data.rideStatus === 'CANCELLED') {
-            setIncomingRequest((prev) => {
-              if (prev && (prev.rideId === data.rideId || !data.rideId)) return null;
-              return prev;
-            });
-            if (activeTrip && (activeTrip.rideId === data.rideId || !data.rideId)) {
-              setActiveTrip(null);
+          const rideStatus = data.status || data.rideStatus;
+          const targetRideId = data.rideId || (data.ride ? data.ride.rideId : null);
+
+          // Case B: CANCELLED (Pre-acceptance passenger cancel or during broadcast or after acceptance)
+          if (
+            data.type === 'RIDE_CANCELLED' ||
+            rideStatus === 'CANCELLED'
+          ) {
+            // Unconditionally clear BOTH incomingRequest AND activeTrip
+            setIncomingRequest(null);
+            setActiveTrip(null);
+            wsService.clearRideSubscriptions();
+            try {
+              localStorage.removeItem('activeRide');
+              localStorage.removeItem('rideId');
+              localStorage.removeItem('driverActiveTrip');
+              sessionStorage.removeItem('activeRide');
+              sessionStorage.removeItem('rideId');
+              sessionStorage.removeItem('driverActiveTrip');
+            } catch (e) {}
+            if (gpsIntervalRef.current) {
+              clearInterval(gpsIntervalRef.current);
+              gpsIntervalRef.current = null;
             }
-            setStatusMessage({
-              text: `Ride #${data.rideId || ''} was cancelled by passenger. Waiting for next request...`,
-              isError: false,
-            });
-            // Ensure DB status is AVAILABLE for immediate next matching
-            fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-              method: 'PATCH',
-              headers: getAuthHeaders(),
-            }).catch(() => {});
+            showCancellationAlert(`Ride #${targetRideId || ''} was cancelled by the passenger.`);
+            apiClient.patch('/api/driver/status?status=AVAILABLE').catch(() => {});
             return;
           }
 
-          if (data.type === 'RIDE_TAKEN') {
+          // Case C: ACCEPTED (by another driver) or IN_PROGRESS or COMPLETED
+          if (
+            data.type === 'RIDE_TAKEN' ||
+            rideStatus === 'ACCEPTED' ||
+            rideStatus === 'IN_PROGRESS' ||
+            rideStatus === 'COMPLETED'
+          ) {
             setIncomingRequest((prev) => {
-              if (prev && prev.rideId === data.rideId) return null;
+              if (prev && (!targetRideId || Number(prev.rideId) === Number(targetRideId))) {
+                return null;
+              }
               return prev;
             });
             setStatusMessage({
-              text: `Ride #${data.rideId} was accepted by another driver.`,
+              text: `Ride #${targetRideId || ''} was accepted by another driver.`,
               isError: false,
             });
             return;
           }
 
+          // Case D: TIMEOUT / RIDE_TIMEOUT
           if (data.type === 'TIMEOUT' || data.type === 'RIDE_TIMEOUT') {
             setIncomingRequest((prev) => {
-              if (prev && (prev.rideId === data.rideId || !data.rideId)) return null;
+              if (prev && (!targetRideId || Number(prev.rideId) === Number(targetRideId))) {
+                return null;
+              }
               return prev;
             });
             return;
           }
 
-          // Valid incoming ride request
-          if (data.status === 'REQUESTED' || (data.rideId && !data.type)) {
+          // Case A: REQUESTED (New Ride Broadcast)
+          if (rideStatus === 'REQUESTED' || (targetRideId && !data.type)) {
+            // If activeTrip somehow has status === 'CANCELLED' or 'COMPLETED', ignore and clear it!
+            setActiveTrip((current) => {
+              const s = (current?.status || current?.rideStatus || '').toUpperCase();
+              if (s === 'CANCELLED' || s === 'COMPLETED') {
+                return null;
+              }
+              return current;
+            });
+
+            // Clear any lingering cancellation alert timer & text
+            if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
+
             setIncomingRequest(data);
             setStatusMessage({
               text: `New ride request received for ₹${data.fare ? Number(data.fare).toFixed(2) : '50.00'}!`,
@@ -526,27 +608,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   }, [isDriverVerified, driverProfile.id, isOnline]);
 
-  // Listen to the specific ride topic while incomingRequest is pending to catch passenger cancel instantly
-  useEffect(() => {
-    if (!incomingRequest?.rideId) return;
-
-    const rideTopic = `/topic/ride/${incomingRequest.rideId}`;
-    const unsub = wsService.subscribe(rideTopic, (data) => {
-      console.log('[Driver WS] Pending ride topic update:', data);
-      if (data && (data.status === 'CANCELLED' || data.rideStatus === 'CANCELLED')) {
-        setIncomingRequest(null);
-        setStatusMessage({
-          text: `Ride #${incomingRequest.rideId} was cancelled by passenger.`,
-          isError: true,
-        });
-      }
-    });
-
-    return () => {
-      if (unsub) unsub();
-    };
-  }, [incomingRequest?.rideId]);
-
   // Accept Ride API handler
   const handleAcceptRide = async (rideToAccept) => {
     const targetRide = rideToAccept || incomingRequest;
@@ -556,49 +617,45 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     setStatusMessage({ text: 'Accepting ride...', isError: false });
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/accept/${targetRide.rideId}?driverId=${driverProfile.id}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
+      const response = await apiClient.put(
+        `/api/rides/accept/${targetRide.rideId}?driverId=${driverProfile.id}`
       );
+      const data = response.data || {};
 
-      let data = {};
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json().catch(() => ({}));
-      } else {
-        const text = await response.text();
-        data = { message: text };
-      }
+      setActiveTrip({ ...targetRide, ...data, status: 'ACCEPTED' });
+      setIncomingRequest(null);
+      setStatusMessage({
+        text: `Ride #${targetRide.rideId} accepted! Heading to pickup location.`,
+        isError: false,
+      });
+    } catch (err) {
+      setIncomingRequest(null);
+      const data = err.response?.data || {};
+      const errMsg =
+        data.message ||
+        data.error ||
+        (typeof data === 'string' ? data : '') ||
+        '';
+      const lower = errMsg.toLowerCase();
 
-      if (response.ok) {
-        setActiveTrip({ ...targetRide, ...data, status: 'ACCEPTED' });
-        setIncomingRequest(null);
+      if (lower.includes('cancel')) {
+        showCancellationAlert(`Ride #${targetRide.rideId} was cancelled by the passenger.`);
+      } else if (
+        lower.includes('accept') ||
+        lower.includes('already') ||
+        lower.includes('taken') ||
+        lower.includes('too late')
+      ) {
         setStatusMessage({
-          text: `Ride #${targetRide.rideId} accepted! Heading to pickup location.`,
+          text: `Ride #${targetRide.rideId} was already accepted by another driver.`,
           isError: false,
         });
       } else {
-        // Dismiss the modal since this ride cannot be accepted
-        setIncomingRequest(null);
-        const errMsg = data.message || data.error || '';
-        if (errMsg.toLowerCase().includes('cancel') || response.status === 409) {
-          setStatusMessage({
-            text: `Ride #${targetRide.rideId} was cancelled by passenger.`,
-            isError: true,
-          });
-        } else {
-          setStatusMessage({
-            text: errMsg || `Ride #${targetRide.rideId} is no longer available.`,
-            isError: true,
-          });
-        }
+        setStatusMessage({
+          text: errMsg || 'This ride is no longer available.',
+          isError: true,
+        });
       }
-    } catch (err) {
-      setIncomingRequest(null);
-      setStatusMessage({ text: 'Error connecting to backend.', isError: true });
     } finally {
       setIsAccepting(false);
     }
@@ -611,45 +668,62 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
       text: 'Ride request declined. Waiting for next request...',
       isError: false,
     });
-    fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    }).catch(() => {});
+    apiClient.patch('/api/driver/status?status=AVAILABLE').catch(() => {});
   };
 
-  // Sync ride updates: listens to /topic/ride/{rideId} for IN_PROGRESS, COMPLETED, or CANCELLED events
+  // Sync ride updates: listens to /topic/ride/{rideId} ONLY for the ASSIGNED driver when activeTrip exists
   useEffect(() => {
     if (!activeTrip?.rideId) return;
 
-    const rideTopic = `/topic/ride/${activeTrip.rideId}`;
+    const currentRideId = activeTrip.rideId;
+    const rideTopic = `/topic/ride/${currentRideId}`;
     const unsubscribeRide = wsService.subscribe(rideTopic, (data) => {
       console.log('[Driver WS] Live ride topic update:', data);
-      if (data && (data.status === 'IN_PROGRESS' || data.rideStatus === 'IN_PROGRESS')) {
-        setActiveTrip((prev) => ({ ...prev, status: 'IN_PROGRESS', rideStatus: 'IN_PROGRESS' }));
-        setStatusMessage({
-          text: `🚀 Ride #${activeTrip.rideId} is now IN_PROGRESS. Heading to passenger destination.`,
-          isError: false,
-        });
-      } else if (data && (data.status === 'COMPLETED' || data.rideStatus === 'COMPLETED')) {
-        setCompletedTripReceipt({
-          rideId: activeTrip.rideId,
-          fare: activeTrip.fare || (data.fare ?? 0),
-        });
-        setStatusMessage({
-          text: `🏁 Ride #${activeTrip.rideId} completed! Please collect ₹${(activeTrip.fare || data.fare || 0).toFixed(2)} from passenger.`,
-          isError: false,
-        });
+      if (!data) return;
+
+      const currentStatus = (data?.status || data?.rideStatus || '').toUpperCase();
+
+      // Check cancellation FIRST
+      if (currentStatus === 'CANCELLED' || data?.type === 'RIDE_CANCELLED') {
+        console.log('[Driver WS] Ride cancelled on ride topic:', currentRideId);
+        // Unconditionally clear activeTrip and incomingRequest
         setActiveTrip(null);
+        setIncomingRequest(null);
+        wsService.clearRideSubscriptions();
+        try {
+          localStorage.removeItem('activeRide');
+          localStorage.removeItem('rideId');
+          localStorage.removeItem('driverActiveTrip');
+          sessionStorage.removeItem('activeRide');
+          sessionStorage.removeItem('rideId');
+          sessionStorage.removeItem('driverActiveTrip');
+        } catch (e) {}
         if (gpsIntervalRef.current) {
           clearInterval(gpsIntervalRef.current);
           gpsIntervalRef.current = null;
         }
-      } else if (data && (data.status === 'CANCELLED' || data.rideStatus === 'CANCELLED')) {
+        showCancellationAlert(`Ride #${data.rideId || currentRideId} was cancelled by the passenger.`);
+        apiClient.patch('/api/driver/status?status=AVAILABLE').catch(() => {});
+        return;
+      }
+
+      if (currentStatus === 'IN_PROGRESS') {
+        setActiveTrip((prev) => ({ ...prev, status: 'IN_PROGRESS', rideStatus: 'IN_PROGRESS' }));
         setStatusMessage({
-          text: `⚠️ Ride #${activeTrip.rideId} was cancelled by the passenger.`,
-          isError: true,
+          text: `🚀 Ride #${currentRideId} is now IN_PROGRESS. Heading to passenger destination.`,
+          isError: false,
+        });
+      } else if (currentStatus === 'COMPLETED') {
+        setCompletedTripReceipt({
+          rideId: currentRideId,
+          fare: activeTrip.fare || (data.fare ?? 0),
+        });
+        setStatusMessage({
+          text: `🏁 Ride #${currentRideId} completed! Please collect ₹${(activeTrip.fare || data.fare || 0).toFixed(2)} from passenger.`,
+          isError: false,
         });
         setActiveTrip(null);
+        wsService.clearRideSubscriptions();
         if (gpsIntervalRef.current) {
           clearInterval(gpsIntervalRef.current);
           gpsIntervalRef.current = null;
@@ -659,6 +733,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
     return () => {
       if (unsubscribeRide) unsubscribeRide();
+      wsService.clearRideSubscriptions();
     };
   }, [activeTrip?.rideId]);
 
@@ -710,35 +785,16 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const handleStartTrip = async () => {
     if (!activeTrip) return;
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/start/${activeTrip.rideId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
-      );
+      await apiClient.put(`/api/rides/start/${activeTrip.rideId}`);
 
-      if (response.ok) {
-        setActiveTrip((prev) => ({ ...prev, status: 'IN_PROGRESS', rideStatus: 'IN_PROGRESS' }));
-        setStatusMessage({
-          text: `🚀 Trip #${activeTrip.rideId} is now IN_PROGRESS! Heading to drop location.`,
-          isError: false,
-        });
-      } else {
-        let errJson = {};
-        try {
-          errJson = await response.json();
-        } catch {
-          const text = await response.text().catch(() => '');
-          errJson = { message: text };
-        }
-        setStatusMessage({
-          text: errJson.message || `Unable to start trip (${response.status})`,
-          isError: true,
-        });
-      }
+      setActiveTrip((prev) => ({ ...prev, status: 'IN_PROGRESS', rideStatus: 'IN_PROGRESS' }));
+      setStatusMessage({
+        text: `🚀 Trip #${activeTrip.rideId} is now IN_PROGRESS! Heading to drop location.`,
+        isError: false,
+      });
     } catch (err) {
-      setStatusMessage({ text: 'Network issue while starting trip.', isError: true });
+      const msg = err.response?.data?.message || 'Unable to start trip';
+      setStatusMessage({ text: msg, isError: true });
     }
   };
 
@@ -746,53 +802,32 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const handleCompleteRide = async () => {
     if (!activeTrip) return;
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/rides/complete/${activeTrip.rideId}`,
-        {
-          method: 'PUT',
-          headers: getAuthHeaders(),
-        }
-      );
+      await apiClient.put(`/api/rides/complete/${activeTrip.rideId}`);
 
-      if (response.ok) {
-        setCompletedTripReceipt({
-          rideId: activeTrip.rideId,
-          fare: activeTrip.fare || 0,
-        });
-        setStatusMessage({
-          text: `Trip #${activeTrip.rideId} completed! Please collect ₹${activeTrip.fare ? activeTrip.fare.toFixed(2) : '0.00'} from passenger.`,
-          isError: false,
-        });
-        setActiveTrip(null);
-        if (gpsIntervalRef.current) {
-          clearInterval(gpsIntervalRef.current);
-          gpsIntervalRef.current = null;
-        }
-      } else {
-        let errJson = {};
-        try {
-          errJson = await response.json();
-        } catch {
-          const text = await response.text().catch(() => '');
-          errJson = { message: text };
-        }
-        setStatusMessage({
-          text: errJson.message || 'Failed to complete trip.',
-          isError: true,
-        });
+      setCompletedTripReceipt({
+        rideId: activeTrip.rideId,
+        fare: activeTrip.fare || 0,
+      });
+      setStatusMessage({
+        text: `Trip #${activeTrip.rideId} completed! Please collect ₹${activeTrip.fare ? activeTrip.fare.toFixed(2) : '0.00'} from passenger.`,
+        isError: false,
+      });
+      setActiveTrip(null);
+      if (gpsIntervalRef.current) {
+        clearInterval(gpsIntervalRef.current);
+        gpsIntervalRef.current = null;
       }
     } catch (err) {
-      setStatusMessage({ text: 'Network failure completing trip.', isError: true });
+      const msg = err.response?.data?.message || 'Failed to complete trip.';
+      setStatusMessage({ text: msg, isError: true });
     }
   };
 
   // Handler when driver acknowledges completed trip payment
   const handleDismissReceipt = () => {
     setCompletedTripReceipt(null);
-    fetch('http://localhost:8080/api/driver/status?status=AVAILABLE', {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-    }).catch(() => {});
+    wsService.clearRideSubscriptions();
+    apiClient.patch('/api/driver/status?status=AVAILABLE').catch(() => {});
     wsService.ensureConnected().then(() => {
       wsService.sendLocationUpdate(0, driverProfile.id, currentCoords.lat, currentCoords.lng);
     }).catch(() => {});
@@ -804,7 +839,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
   // Open & Save handlers for vehicle details
   const handleOpenEditVehicle = () => {
-    setEditVehicleType(driverProfile.vehicleType || 'BIKE');
+    setEditVehicleType(driverProfile.vehicleType || 'CAR');
     setEditVehicleModel(driverProfile.model || '');
     setEditPlateNumber(driverProfile.plateNumber || '');
     setShowEditVehicleModal(true);
@@ -813,19 +848,29 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const handleSaveVehicle = (e) => {
     if (e) e.preventDefault();
     const cleanType = editVehicleType.toUpperCase();
-    const cleanModel = editVehicleModel.trim() || (cleanType === 'BIKE' ? 'Honda Activa (Scooter)' : 'Standard');
-    const cleanPlate = editPlateNumber.trim().toUpperCase() || 'TS-09-KL-2026';
+    const cleanModel = editVehicleModel.trim() || (cleanType === 'BIKE' ? 'Hero Splendor Plus' : cleanType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
+    const cleanPlate = editPlateNumber.trim().toUpperCase() || 'BMW-TS-2026';
 
     const updated = {
       ...driverProfile,
       vehicleType: cleanType,
       model: cleanModel,
       plateNumber: cleanPlate,
+      isCustomEdit: true,
     };
     setDriverProfile(updated);
     setStorageItem('driverVehicleType', cleanType);
     setStorageItem('driverVehicleModel', cleanModel);
     setStorageItem('driverPlateNumber', cleanPlate);
+
+    if (userEmail && KNOWN_DRIVERS[userEmail.toLowerCase().trim()]) {
+      KNOWN_DRIVERS[userEmail.toLowerCase().trim()] = {
+        ...KNOWN_DRIVERS[userEmail.toLowerCase().trim()],
+        vehicleType: cleanType,
+        model: cleanModel,
+        plateNumber: cleanPlate,
+      };
+    }
 
     try {
       const raw = localStorage.getItem('safarx_drivers_registry');
@@ -836,6 +881,8 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
       reg[cleanPlate] = updated;
       localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
     } catch (err) {}
+
+    registerDriverProfile(updated);
 
     setShowEditVehicleModal(false);
     setStatusMessage({
@@ -1107,7 +1154,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         )}
 
         {/* Incoming Ride Alert Modal / Banner: White & Golden */}
-        {incomingRequest && !activeTrip && (
+        {incomingRequest && (!activeTrip || !['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase())) && (
           <div className="bg-gradient-to-br from-white via-amber-50/30 to-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/20 space-y-6 ring-8 ring-[#d4af37]/10 animate-in zoom-in-95">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1163,14 +1210,23 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         )}
 
         {/* Active Trip Mode Card: White & Golden */}
-        {activeTrip ? (
+        {activeTrip && ['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase()) ? (
           <div className="bg-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/10 space-y-6">
             <div className="flex items-center justify-between border-b border-amber-100 pb-4">
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
                 <div>
-                  <h3 className="text-lg font-black text-neutral-950">Active Trip in Progress</h3>
-                  <p className="text-xs text-neutral-500">Ride #{activeTrip.rideId} • Passenger on board</p>
+                  <h3 className="text-lg font-black text-neutral-950">
+                    {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED'
+                      ? 'Ride Accepted'
+                      : 'Active Trip in Progress'}
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    Ride #{activeTrip.rideId} •{' '}
+                    {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED'
+                      ? 'En route to pickup'
+                      : 'Passenger on board'}
+                  </p>
                 </div>
               </div>
               <span className="text-2xl font-black text-neutral-950">
@@ -1186,7 +1242,9 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                   {dropAddressName || 'Destination reached upon arrival'}
                 </div>
                 <div className="text-xs text-emerald-600 font-bold">
-                  ● En route to passenger destination
+                  {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED'
+                    ? '● En route to passenger pickup point'
+                    : '● En route to passenger destination'}
                 </div>
               </div>
 
@@ -1208,26 +1266,28 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </div>
             </div>
 
-            {/* Trip Action Buttons */}
-            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {(activeTrip.status !== 'IN_PROGRESS' && activeTrip.rideStatus !== 'IN_PROGRESS') && (
+            {/* Trip Action Buttons: ONLY Start Trip when ACCEPTED, ONLY Complete Ride when IN_PROGRESS */}
+            <div className="pt-2">
+              {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED' && (
                 <button
                   type="button"
                   onClick={handleStartTrip}
-                  className="py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Start Trip</span>
                   <span>🚀</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={handleCompleteRide}
-                className={`${(activeTrip.status === 'IN_PROGRESS' || activeTrip.rideStatus === 'IN_PROGRESS') ? 'col-span-full' : ''} py-4 bg-black hover:bg-neutral-800 text-white font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2`}
-              >
-                <span>Complete Ride</span>
-                <span>✓</span>
-              </button>
+              {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'IN_PROGRESS' && (
+                <button
+                  type="button"
+                  onClick={handleCompleteRide}
+                  className="w-full py-4 bg-black hover:bg-neutral-800 text-white font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Complete Ride</span>
+                  <span>✓</span>
+                </button>
+              )}
             </div>
           </div>
         ) : !isOnline ? (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
-import { getAuthToken, clearAuthToken, setAuthToken, parseJwt } from '../utils/auth';
+import { getAuthToken, clearAuthToken, setAuthToken, parseJwt, getStorageItem, setStorageItem } from '../utils/auth';
 
 /**
  * CompleteProfile Component
@@ -12,7 +12,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
   const navigate = useNavigate();
 
   // State
-  const [name, setName] = useState(() => localStorage.getItem('userName') || '');
+  const [name, setName] = useState(() => getStorageItem('userName') || '');
   const [phone, setPhone] = useState(() => localStorage.getItem('userPhone') || '');
   const [role] = useState(() => localStorage.getItem('userRole') || 'ROLE_RIDER');
   const [userEmail, setUserEmail] = useState(() => localStorage.getItem('userEmail') || '');
@@ -82,10 +82,10 @@ export default function CompleteProfile({ onProfileCompleted }) {
         setSuccessMessage('Profile setup complete! Welcome to SafarX.');
 
         // Update local session
-        localStorage.setItem('userName', cleanName);
-        localStorage.setItem('userPhone', cleanPhone);
-        localStorage.setItem('userRole', role);
-        localStorage.setItem('profileCompleted', 'true');
+        setStorageItem('userName', cleanName);
+        setStorageItem('userPhone', cleanPhone);
+        setStorageItem('userRole', role);
+        setStorageItem('profileCompleted', 'true');
         setAuthToken(token, userEmail, role);
 
         if (onProfileCompleted) {
@@ -116,9 +116,9 @@ export default function CompleteProfile({ onProfileCompleted }) {
           err.response?.status === 403 ||
           errorText.toLowerCase().includes('already completed')
         ) {
-          localStorage.setItem('userName', cleanName);
-          localStorage.setItem('userPhone', cleanPhone);
-          localStorage.setItem('profileCompleted', 'true');
+          setStorageItem('userName', cleanName);
+          setStorageItem('userPhone', cleanPhone);
+          setStorageItem('profileCompleted', 'true');
           setSuccessMessage('✓ Profile verified and active! Heading to dashboard...');
           setTimeout(() => {
             navigate('/dashboard', { replace: true });

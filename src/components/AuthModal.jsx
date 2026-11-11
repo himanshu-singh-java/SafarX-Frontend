@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { setAuthToken, parseJwt } from '../utils/auth';
+import { setAuthToken, parseJwt, setStorageItem } from '../utils/auth';
+import apiClient from '../utils/apiClient';
+import { API_BASE_URL } from '../config';
 
 export default function AuthModal({
   isOpen,
@@ -56,61 +58,56 @@ export default function AuthModal({
     const normalizedEmail = email.trim().toLowerCase();
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: normalizedEmail,
-          password: password.trim(),
-        }),
+      const response = await apiClient.post('/api/auth/login', {
+        email: normalizedEmail,
+        password: password.trim(),
       });
 
-      if (response.ok) {
-        const rawToken = await response.text();
-        const token = rawToken.replace(/^["']|["']$/g, '').trim();
+      const rawToken = typeof response.data === 'string' ? response.data : response.data?.token || '';
+      const token = rawToken.replace(/^["']|["']$/g, '').trim();
 
-        if (token && token !== 'Fail') {
+      if (token && token !== 'Fail') {
+        let resolvedRole = 'ROLE_RIDER';
+        try {
+          const meRes = await apiClient.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (meRes.data?.role) resolvedRole = meRes.data.role;
+          if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
+          if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+          if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+        } catch {
           const decoded = parseJwt(token);
-          let resolvedRole = decoded?.role;
-          if (!resolvedRole) {
-            resolvedRole = normalizedEmail.includes('admin')
-              ? 'ROLE_ADMIN'
-              : normalizedEmail.includes('driver')
-              ? 'ROLE_DRIVER'
-              : 'ROLE_RIDER';
-          }
-          setAuthToken(token, normalizedEmail, resolvedRole);
-          setSuccessMessage(
-            resolvedRole === 'ROLE_ADMIN'
-              ? 'Admin verified! Redirecting to Admin Console...'
-              : resolvedRole === 'ROLE_DRIVER'
-              ? 'Driver verified! Redirecting to Driver Partner Console...'
-              : 'Signed in successfully! Loading Rider Dashboard...'
-          );
-          setTimeout(() => {
-            if (onLoginSuccess) {
-              onLoginSuccess(token, normalizedEmail, resolvedRole);
-            }
-            if (onClose) {
-              onClose();
-            }
-          }, 350);
-        } else {
-          setErrorMessage('Invalid credentials. Please verify your email and password.');
+          if (decoded?.role) resolvedRole = decoded.role;
         }
-      } else if (response.status === 401) {
-        const errorText = await response.text();
-        setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+
+        setAuthToken(token, normalizedEmail, resolvedRole);
+        setSuccessMessage(
+          resolvedRole === 'ROLE_ADMIN'
+            ? 'Admin verified! Redirecting to Admin Console...'
+            : resolvedRole === 'ROLE_DRIVER'
+            ? 'Driver verified! Redirecting to Driver Partner Console...'
+            : 'Signed in successfully! Loading Rider Dashboard...'
+        );
+        setTimeout(() => {
+          if (onLoginSuccess) {
+            onLoginSuccess(token, normalizedEmail, resolvedRole);
+          }
+          if (onClose) {
+            onClose();
+          }
+        }, 350);
       } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText || `Authentication failed with status ${response.status}.`);
+        setErrorMessage('Invalid credentials. Please verify your email and password.');
       }
     } catch (err) {
-      setErrorMessage(
-        'Unable to connect to backend server at http://localhost:8080. Please ensure your Spring Boot application is running.'
-      );
+      const status = err.response?.status;
+      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      if (status === 401) {
+        setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+      } else {
+        setErrorMessage(errorText || 'Unable to connect to service. Please check your connection and try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -140,59 +137,54 @@ export default function AuthModal({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: password.trim(),
-          role: 'ROLE_RIDER',
-        }),
+      await apiClient.post('/api/auth/register', {
+        email: email.trim(),
+        password: password.trim(),
+        role: 'ROLE_RIDER',
       });
 
-      if (response.ok) {
-        setSuccessMessage('Account registered! Signing you in automatically...');
-        
-        // Auto-login upon successful registration
-        setTimeout(async () => {
-          try {
-            const loginRes = await fetch('http://localhost:8080/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: email.trim(), password: password.trim() }),
-            });
+      setSuccessMessage('Account registered! Signing you in automatically...');
+      
+      // Auto-login upon successful registration
+      setTimeout(async () => {
+        try {
+          const loginRes = await apiClient.post('/api/auth/login', {
+            email: email.trim(),
+            password: password.trim(),
+          });
 
-            if (loginRes.ok) {
-              const rawToken = await loginRes.text();
-              const token = rawToken.replace(/^["']|["']$/g, '').trim();
-              const decoded = parseJwt(token);
-              const resolvedRole = decoded?.role || 'ROLE_RIDER';
-              setAuthToken(token, email.trim(), resolvedRole);
-              if (onLoginSuccess) {
-                onLoginSuccess(token, email.trim(), resolvedRole);
-              }
-              if (onClose) {
-                onClose();
-              }
-            } else {
-              setMode('login');
-              setSuccessMessage('Account created! Please sign in with your password.');
-            }
+          const rawToken = typeof loginRes.data === 'string' ? loginRes.data : loginRes.data?.token || '';
+          const token = rawToken.replace(/^["']|["']$/g, '').trim();
+
+          let resolvedRole = 'ROLE_RIDER';
+          try {
+            const meRes = await apiClient.get('/api/auth/me', {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (meRes.data?.role) resolvedRole = meRes.data.role;
+            if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
+            if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+            if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
           } catch {
-            setMode('login');
-            setSuccessMessage('Account created! Please sign in with your credentials.');
+            const decoded = parseJwt(token);
+            if (decoded?.role) resolvedRole = decoded.role;
           }
-        }, 600);
-      } else {
-        const errorText = await response.text();
-        setErrorMessage(errorText || `Registration failed (${response.status}). Email may already be registered.`);
-      }
+
+          setAuthToken(token, email.trim(), resolvedRole);
+          if (onLoginSuccess) {
+            onLoginSuccess(token, email.trim(), resolvedRole);
+          }
+          if (onClose) {
+            onClose();
+          }
+        } catch {
+          setMode('login');
+          setSuccessMessage('Account created! Please sign in with your password.');
+        }
+      }, 500);
     } catch (err) {
-      setErrorMessage(
-        'Unable to connect to backend server at http://localhost:8080. Please ensure your Spring Boot application is running.'
-      );
+      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      setErrorMessage(errorText || 'Unable to register account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -380,7 +372,7 @@ export default function AuthModal({
 
           {/* Google OAuth2 Button */}
           <a
-            href="http://localhost:8080/oauth2/authorization/google"
+            href={`${API_BASE_URL}/oauth2/authorization/google`}
             className="w-full py-3 px-4 bg-white hover:bg-neutral-50 active:bg-neutral-100 border border-neutral-300 rounded-xl text-xs font-bold text-neutral-800 flex items-center justify-center gap-2.5 transition-all shadow-sm"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">

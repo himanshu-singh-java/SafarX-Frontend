@@ -1,11 +1,12 @@
 import { Client } from '@stomp/stompjs';
+import { WS_URL } from '../config';
 import { getAuthToken } from './auth';
 
 /**
  * SafarX WebSocket & STOMP Service
- * Uses native browser WebSocket connecting directly to Spring Boot at ws://localhost:8080/ws-ride/websocket
+ * Uses native browser WebSocket connecting to Spring Boot STOMP broker at WS_URL
  * Authenticated via JWT Bearer token on CONNECT (matches Spring Boot WebSocketConfig).
- * Handles multi-tab resilience, background tab sleep, auto-resubscription on reconnect, and location streaming.
+ * Handles multi-tab resilience, auto-resubscription on reconnect, and location streaming.
  */
 class WebSocketService {
   constructor() {
@@ -30,7 +31,7 @@ class WebSocketService {
 
       if (!this.client) {
         this.client = new Client({
-          brokerURL: 'ws://localhost:8080/ws-ride/websocket',
+          brokerURL: WS_URL,
           connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
           beforeConnect: () => {
             const freshToken = getAuthToken();
@@ -43,7 +44,7 @@ class WebSocketService {
           heartbeatOutgoing: 10000,
           debug: () => {},
           onConnect: () => {
-            console.log('[STOMP] Connected to ws://localhost:8080/ws-ride/websocket');
+            console.log('[STOMP] Connected to broker at', WS_URL);
             this.connected = true;
             this.connectionPromise = null;
 
@@ -68,7 +69,17 @@ class WebSocketService {
             resolve(this.client);
           },
           onStompError: (frame) => {
-            console.warn('[STOMP Warning frame]', frame?.headers?.message || frame);
+            const errorMsg = (frame?.headers?.message || '').toLowerCase();
+            console.warn('[STOMP Error frame]', frame?.headers?.message || frame);
+            // Stop reconnecting on authentication failure
+            if (errorMsg.includes('unauthorized') || errorMsg.includes('forbidden') || errorMsg.includes('jwt') || errorMsg.includes('auth')) {
+              console.warn('[STOMP] Authentication failure detected. Halting reconnect attempts.');
+              if (this.client) {
+                this.client.reconnectDelay = 0;
+              }
+              this.disconnect();
+              reject(new Error('WebSocket authentication failed'));
+            }
           },
           onWebSocketClose: () => {
             console.log('[STOMP] WebSocket connection closed. Invalidating subscription handles.');
@@ -155,6 +166,27 @@ class WebSocketService {
         console.log('[STOMP] Cleanly unsubscribed from topic:', topic);
       }
     };
+  }
+
+  unsubscribeTopic(topic) {
+    if (this.subscriptions.has(topic)) {
+      const subData = this.subscriptions.get(topic);
+      if (subData?.subHandle) {
+        try {
+          subData.subHandle.unsubscribe();
+        } catch (e) {}
+      }
+      this.subscriptions.delete(topic);
+      console.log('[STOMP] Explicitly removed topic subscription:', topic);
+    }
+  }
+
+  clearRideSubscriptions() {
+    Array.from(this.subscriptions.keys()).forEach((topic) => {
+      if (topic.startsWith('/topic/ride/')) {
+        this.unsubscribeTopic(topic);
+      }
+    });
   }
 
   publish(destination, body) {
