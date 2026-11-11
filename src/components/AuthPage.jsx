@@ -252,7 +252,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                   placeholder="rider@safarx.in"
                   className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
                 />

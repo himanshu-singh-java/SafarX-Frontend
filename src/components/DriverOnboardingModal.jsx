@@ -356,7 +356,7 @@ export default function DriverOnboardingModal({
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                   placeholder="driver@example.com"
                   className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
                 />
