@@ -150,8 +150,18 @@ function App() {
     };
 
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+
+    const handleUserUpdated = (e) => {
+      const newName = e.detail?.name || e.detail?.userName || getStorageItem('userName');
+      if (newName) {
+        setUserName(newName);
+      }
+    };
+    window.addEventListener('auth:user_updated', handleUserUpdated);
+
     return () => {
       window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
+      window.removeEventListener('auth:user_updated', handleUserUpdated);
     };
   }, [token]);
 
@@ -243,7 +253,7 @@ function App() {
   const handleDriverOnboardingSuccess = (newToken, email, driverId) => {
     setToken(newToken);
     setUserEmail(email);
-    const resolvedName = resolveUserName(null, email);
+    const resolvedName = resolveUserName(getStorageItem('userName'), email);
     setUserName(resolvedName);
     setStorageItem('userName', resolvedName);
     setUserRole('ROLE_DRIVER');
@@ -394,6 +404,7 @@ function App() {
               userEmail={userEmail}
               userName={userName}
               userRole={userRole}
+              onUserNameChange={setUserName}
               onManageAccount={() => navigate('/complete-profile')}
               onSignOut={handleLogout}
             />

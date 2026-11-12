@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { setAuthToken, setStorageItem, getStorageItem } from '../utils/auth';
 import apiClient from '../utils/apiClient';
+import { registerDriverProfile } from '../utils/driverDirectory';
 
 /**
  * DriverOnboardingModal Component
@@ -180,6 +181,28 @@ export default function DriverOnboardingModal({
         setStorageItem('driverVehicleType', vehicleType);
         setStorageItem('driverVehicleModel', resolvedModel);
         setStorageItem('driverPlateNumber', resolvedPlate);
+
+        // Register profile into dynamic driver directory immediately
+        const activeProfile = {
+          driverId: resolvedDriverId ? Number(resolvedDriverId) : 1,
+          id: resolvedDriverId ? Number(resolvedDriverId) : 1,
+          name: fullName.trim(),
+          vehicleType: vehicleType,
+          model: resolvedModel,
+          plateNumber: resolvedPlate,
+          phone: phone.trim(),
+          isCustomEdit: true,
+        };
+        registerDriverProfile(activeProfile);
+
+        try {
+          const raw = localStorage.getItem('safarx_drivers_registry');
+          const reg = raw ? JSON.parse(raw) : {};
+          if (resolvedDriverId) reg[resolvedDriverId] = activeProfile;
+          if (normalizedEmail) reg[normalizedEmail] = activeProfile;
+          reg[resolvedPlate] = activeProfile;
+          localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
+        } catch (e) {}
       } catch (storageErr) {
         console.warn('[DriverOnboarding] Local profile storage warning:', storageErr);
       }

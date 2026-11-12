@@ -123,55 +123,29 @@ function getInitialDriverProfile(userEmail) {
   const savedId = getStorageItem('driverId');
   const normalizedEmail = (userEmail || getStorageItem('userEmail') || '').toLowerCase().trim();
 
-  // 1. Check verified KNOWN_DRIVERS first (matches MySQL truth directly)
-  if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {
-    const base = { ...KNOWN_DRIVERS[normalizedEmail] };
-    if (savedId) base.id = Number(savedId);
-    base.name = resolveUserName(base.name, normalizedEmail);
-
-    // Check if driver has an explicit custom vehicle edit saved in local registry
-    try {
-      const raw = localStorage.getItem('safarx_drivers_registry');
-      if (raw) {
-        const reg = JSON.parse(raw);
-        const match = reg[normalizedEmail] || (savedId && reg[String(savedId)]);
-        if (match && match.isCustomEdit) {
-          base.vehicleType = match.vehicleType || base.vehicleType;
-          base.model = match.model || base.model;
-          base.plateNumber = match.plateNumber || base.plateNumber;
-        }
-      }
-    } catch (e) {}
-
-    // Synchronize storage items so old cached values never corrupt the state
-    try {
-      setStorageItem('driverVehicleType', base.vehicleType);
-      setStorageItem('driverVehicleModel', base.model);
-      setStorageItem('driverPlateNumber', base.plateNumber);
-    } catch (e) {}
-
-    return base;
-  }
-
-  // 2. Check tab session storage
+  // 1. Check persistent tab storage first (if vehicle model is explicitly saved)
   const storedVehicleType = getStorageItem('driverVehicleType');
   const storedVehicleModel = getStorageItem('driverVehicleModel');
   const storedPlate = getStorageItem('driverPlateNumber');
-  if (storedVehicleType) {
+  if (storedVehicleModel) {
+    const vType = (storedVehicleType || 'CAR').toUpperCase();
+    const vModel = storedVehicleModel;
+    const vPlate = storedPlate || (vType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888');
+
     return {
       id: savedId ? Number(savedId) : 1,
       name: resolveUserName(getStorageItem('userName'), normalizedEmail),
       rating: 5.0,
-      vehicleType: storedVehicleType,
-      model: storedVehicleModel || (storedVehicleType === 'BIKE' ? 'Hero Splendor Plus' : storedVehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
-      plateNumber: storedPlate || (storedVehicleType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
+      vehicleType: vType,
+      model: vModel,
+      plateNumber: vPlate,
       city: 'Hyderabad',
       lat: 17.4435,
       lng: 78.4532,
     };
   }
 
-  // 3. Check dynamic local drivers registry
+  // 2. Check dynamic local drivers registry
   try {
     const raw = localStorage.getItem('safarx_drivers_registry');
     if (raw) {
@@ -184,15 +158,16 @@ function getInitialDriverProfile(userEmail) {
           (d.driverId && String(d.driverId) === String(savedId))
         );
 
-      if (match && match.vehicleType) {
+      if (match && (match.model || match.vehicleType)) {
         const isNearHub = match.lat && Math.abs(match.lat - 17.4435) < 0.05;
+        const vType = (match.vehicleType || 'CAR').toUpperCase();
         return {
           id: match.driverId ? Number(match.driverId) : (savedId ? Number(savedId) : 1),
           name: resolveUserName(match.name, normalizedEmail),
           rating: match.rating || 5.0,
-          vehicleType: match.vehicleType,
-          model: match.model || (match.vehicleType === 'BIKE' ? 'Hero Splendor Plus' : match.vehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
-          plateNumber: match.plateNumber || (match.vehicleType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
+          vehicleType: vType,
+          model: match.model || (vType === 'BIKE' ? 'Hero Splendor Plus' : vType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
+          plateNumber: match.plateNumber || (vType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
           city: match.city || 'Hyderabad',
           lat: isNearHub ? match.lat : 17.4435,
           lng: isNearHub ? match.lng : 78.4532,
@@ -200,6 +175,14 @@ function getInitialDriverProfile(userEmail) {
       }
     }
   } catch (e) {}
+
+  // 3. Check verified KNOWN_DRIVERS
+  if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {
+    const base = { ...KNOWN_DRIVERS[normalizedEmail] };
+    if (savedId) base.id = Number(savedId);
+    base.name = resolveUserName(base.name, normalizedEmail);
+    return base;
+  }
 
   // 4. Dynamic fallback matching email or ID
   const fallbackId = savedId
@@ -368,28 +351,34 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             setIsOnline(data.status === 'AVAILABLE');
           }
           const realName = resolveUserName(data.name, userEmail);
-          const nextVehicleType = data.vehicleType || 'CAR';
-          const nextModel = data.vehicleModel || (nextVehicleType === 'BIKE' ? 'Hero Splendor Plus' : nextVehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
-          const nextPlate = data.plateNumber || 'TS-09-UB-8888';
 
-          const activeProfile = {
-            id: realId,
-            driverId: realId,
-            name: realName,
-            vehicleType: nextVehicleType,
-            model: nextModel,
-            plateNumber: nextPlate,
-            rating: data.rating || 5.0,
-          };
-          registerDriverProfile(activeProfile);
+          setDriverProfile((prev) => {
+            const currentStoredType = getStorageItem('driverVehicleType');
+            const currentStoredModel = getStorageItem('driverVehicleModel');
+            const currentStoredPlate = getStorageItem('driverPlateNumber');
 
-          setDriverProfile((prev) => ({
-            ...prev,
-            ...activeProfile,
-          }));
-          if (data.vehicleType) setStorageItem('driverVehicleType', data.vehicleType);
-          if (data.vehicleModel) setStorageItem('driverVehicleModel', data.vehicleModel);
-          if (data.plateNumber) setStorageItem('driverPlateNumber', data.plateNumber);
+            const effectiveType = (data.vehicleType || prev?.vehicleType || currentStoredType || 'CAR').toUpperCase();
+            const effectiveModel = data.vehicleModel || prev?.model || currentStoredModel || (effectiveType === 'BIKE' ? 'Hero Splendor Plus' : effectiveType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
+            const effectivePlate = (data.plateNumber || prev?.plateNumber || currentStoredPlate || 'TS-09-UB-8888').toUpperCase();
+
+            const activeProfile = {
+              ...prev,
+              id: realId || prev?.id || 1,
+              driverId: realId || prev?.driverId || prev?.id || 1,
+              name: realName || prev?.name,
+              vehicleType: effectiveType,
+              model: effectiveModel,
+              plateNumber: effectivePlate,
+              rating: data.rating || prev?.rating || 5.0,
+            };
+
+            registerDriverProfile(activeProfile);
+            setStorageItem('driverVehicleType', effectiveType);
+            setStorageItem('driverVehicleModel', effectiveModel);
+            setStorageItem('driverPlateNumber', effectivePlate);
+
+            return activeProfile;
+          });
 
           // Initial location update
           if (realId) {

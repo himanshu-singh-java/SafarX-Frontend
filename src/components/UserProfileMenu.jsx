@@ -17,6 +17,7 @@ export default function UserProfileMenu({
   userEmail,
   userName,
   userRole,
+  onUserNameChange,
   onManageAccount,
   onSignOut,
 }) {
@@ -28,8 +29,29 @@ export default function UserProfileMenu({
   const [statusNotice, setStatusNotice] = useState('');
   const containerRef = useRef(null);
 
-  // Compute display name with reliable tab-scoped resolution
-  const displayName = resolveUserName(userName || getStorageItem('userName'), userEmail);
+  // Reactive state for instantaneous UI updates without page refresh
+  const [localName, setLocalName] = useState(() =>
+    resolveUserName(userName || getStorageItem('userName'), userEmail)
+  );
+
+  useEffect(() => {
+    if (userName) {
+      setLocalName(resolveUserName(userName, userEmail));
+    }
+  }, [userName, userEmail]);
+
+  useEffect(() => {
+    const handleUserUpdate = (e) => {
+      const updated = e.detail?.name || e.detail?.userName;
+      if (updated) {
+        setLocalName(updated);
+      }
+    };
+    window.addEventListener('auth:user_updated', handleUserUpdate);
+    return () => window.removeEventListener('auth:user_updated', handleUserUpdate);
+  }, []);
+
+  const displayName = localName;
   const userPhone = getStorageItem('userPhone') || '';
 
   useEffect(() => {
@@ -47,7 +69,17 @@ export default function UserProfileMenu({
     const cleanPhone = editPhone.trim();
 
     if (cleanName) {
+      // 1. Optimistic Instant Local State & Event Dispatch
+      setLocalName(cleanName);
       setStorageItem('userName', cleanName);
+      if (onUserNameChange) {
+        onUserNameChange(cleanName);
+      }
+      window.dispatchEvent(
+        new CustomEvent('auth:user_updated', {
+          detail: { name: cleanName, phone: cleanPhone },
+        })
+      );
     }
     if (cleanPhone) {
       setStorageItem('userPhone', cleanPhone);

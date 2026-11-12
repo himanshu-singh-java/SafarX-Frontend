@@ -88,6 +88,12 @@ export default function CompleteProfile({ onProfileCompleted }) {
         setStorageItem('profileCompleted', 'true');
         setAuthToken(token, userEmail, role);
 
+        window.dispatchEvent(
+          new CustomEvent('auth:user_updated', {
+            detail: { name: cleanName, phone: cleanPhone, role: role },
+          })
+        );
+
         // Authoritatively sync newly generated riderId or driverId from /api/auth/me
         try {
           const meRes = await apiClient.get('/api/auth/me', {
