@@ -258,8 +258,27 @@ export default function LiveRouteMap({
     }
 
     const { lat, lng } = liveDriverGps;
+    const driverObj = activeRide?.driver || activeRide?.vehicle?.driver || {};
     const driverInfo = getDriverDetails(activeRide);
-    const driverBadgeText = `${driverInfo.name} • ${driverInfo.plateNumber}`;
+
+    const driverName =
+      driverObj.name ||
+      driverObj.driverName ||
+      driverObj.fullName ||
+      activeRide?.driverName ||
+      activeRide?.vehicle?.driverName ||
+      driverInfo?.name ||
+      (activeRide?.driverId ? `Driver #${activeRide.driverId}` : 'Driver Partner');
+
+    const driverPlate =
+      driverObj.vehicleNumber ||
+      driverObj.plateNumber ||
+      activeRide?.plateNumber ||
+      activeRide?.vehicle?.plateNumber ||
+      driverInfo?.plateNumber ||
+      '';
+
+    const driverBadgeText = driverPlate && driverPlate !== '—' ? `${driverName} • ${driverPlate}` : driverName;
 
     // Dynamically resolve driver's vehicle icon image matching their actual vehicle
     const effectiveType = (

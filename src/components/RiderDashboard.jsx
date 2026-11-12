@@ -1924,10 +1924,48 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                       </div>
                     ) : (
                       (() => {
+                        const driverObj = activeRide?.driver || activeRide?.vehicle?.driver || {};
                         const driverInfo = getDriverDetails(activeRide);
-                        const driverName = activeRide?.driverName || driverInfo.name;
-                        const driverPlate = activeRide?.plateNumber || driverInfo.plateNumber;
-                        const driverModel = driverInfo.model || (activeRide?.vehicleType ? `SafarX ${activeRide.vehicleType}` : 'Comfort Cab');
+
+                        const driverName =
+                          driverObj.name ||
+                          driverObj.driverName ||
+                          driverObj.fullName ||
+                          activeRide?.driverName ||
+                          activeRide?.vehicle?.driverName ||
+                          driverInfo?.name ||
+                          (activeRide?.driverId ? `Driver #${activeRide.driverId}` : 'Driver Partner');
+
+                        const driverPlate =
+                          driverObj.vehicleNumber ||
+                          driverObj.plateNumber ||
+                          activeRide?.plateNumber ||
+                          activeRide?.vehicle?.plateNumber ||
+                          driverInfo?.plateNumber ||
+                          '—';
+
+                        const driverModel =
+                          driverObj.model ||
+                          driverObj.vehicleModel ||
+                          activeRide?.vehicleModel ||
+                          activeRide?.vehicle?.carModel ||
+                          activeRide?.vehicle?.autoModel ||
+                          activeRide?.vehicle?.bikeModel ||
+                          driverInfo?.model ||
+                          (activeRide?.vehicleType ? `SafarX ${activeRide.vehicleType}` : 'Comfort Cab');
+
+                        const driverRating =
+                          driverObj.rating ||
+                          activeRide?.driverRating ||
+                          driverInfo?.rating ||
+                          5.0;
+
+                        const driverPhone =
+                          driverObj.phone ||
+                          driverObj.phoneNumber ||
+                          activeRide?.driverPhone ||
+                          driverInfo?.phone ||
+                          '';
 
                         return (
                           <div className="space-y-4">
@@ -1940,9 +1978,17 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                                 <div className="space-y-0.5">
                                   <h4 className="text-sm font-extrabold text-black">{driverName}</h4>
                                   <div className="flex items-center gap-1.5 text-xs text-neutral-600 font-semibold">
-                                    <span className="text-black font-bold">★ 5.0</span>
+                                    <span className="text-black font-bold">★ {Number(driverRating).toFixed(1)}</span>
                                     <span>•</span>
                                     <span>{driverModel}</span>
+                                    {driverPhone && (
+                                      <>
+                                        <span>•</span>
+                                        <a href={`tel:${driverPhone}`} className="text-emerald-600 hover:underline font-mono">
+                                          📞 {driverPhone}
+                                        </a>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>

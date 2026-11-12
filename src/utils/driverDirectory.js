@@ -1,95 +1,8 @@
 /**
  * SafarX Driver Directory & Resolution Engine
- * Maps vehicle ID, registration plate number, or driver ID to the driver's real identity,
- * ratings, vehicle details, and dynamic trip counts calculated from the database.
+ * Strictly maps to real driver data returned by backend ride responses and live registry.
+ * ZERO fallback to hardcoded mock names (e.g. Vishal Singh, Sheru, etc.).
  */
-
-const DEFAULT_DRIVERS = {
-  1: {
-    driverId: 1,
-    name: 'Vishal Singh',
-    rating: 5.0,
-    tripsCompleted: 5,
-    model: 'Maruti Suzuki Dzire',
-    plateNumber: 'FNWEJ302-23I-223',
-    category: 'SEDAN',
-    vehicleType: 'CAR',
-    avatar: '👨‍✈️',
-    isVerified: true,
-  },
-  5: {
-    driverId: 5,
-    name: 'Sheru',
-    rating: 5.0,
-    tripsCompleted: 6,
-    model: 'BMW',
-    plateNumber: 'BMW-TS-2026',
-    category: 'SEDAN',
-    vehicleType: 'CAR',
-    avatar: '🏎️',
-    isVerified: true,
-  },
-  6: {
-    driverId: 6,
-    name: 'Sandu',
-    rating: 4.8,
-    tripsCompleted: 3,
-    model: 'Bajaj RE Compact',
-    plateNumber: 'BR-03-2345',
-    category: 'AUTO',
-    vehicleType: 'AUTO',
-    avatar: '🛺',
-    isVerified: true,
-  },
-  7: {
-    driverId: 7,
-    name: 'Kuku Singh',
-    rating: 4.9,
-    tripsCompleted: 4,
-    model: 'Bajaj RE Compact',
-    plateNumber: 'KK-94-2834',
-    category: 'AUTO',
-    vehicleType: 'AUTO',
-    avatar: '🛺',
-    isVerified: true,
-  },
-  8: {
-    driverId: 8,
-    name: 'bakri Giri',
-    rating: 5.0,
-    tripsCompleted: 4,
-    model: 'Maruti Suzuki Dzire',
-    plateNumber: 'BK-34-2039',
-    category: 'SUV',
-    vehicleType: 'CAR',
-    avatar: '👨‍✈️',
-    isVerified: true,
-  },
-  9: {
-    driverId: 9,
-    name: 'Harsh Kumar',
-    rating: 5.0,
-    tripsCompleted: 5,
-    model: 'Ertiga',
-    plateNumber: 'HR-09-2023',
-    category: 'SUV',
-    vehicleType: 'CAR',
-    avatar: '🚗',
-    isVerified: true,
-  },
-  16: {
-    driverId: 16,
-    name: 'Himanshu Singh',
-    rating: 5.0,
-    tripsCompleted: 6,
-    model: 'SafarX Prime Cab',
-    plateNumber: 'TS-09-UB-8888',
-    category: 'PRIME',
-    vehicleType: 'CAR',
-    avatar: '👨‍✈️',
-    isVerified: true,
-  },
-};
 
 export function registerDriverProfile(driverData) {
   if (!driverData) return;
@@ -97,15 +10,18 @@ export function registerDriverProfile(driverData) {
     const raw = localStorage.getItem('safarx_drivers_registry');
     const registry = raw ? JSON.parse(raw) : {};
     const key = String(driverData.driverId || driverData.id || driverData.plateNumber);
+    if (!key || key === 'undefined' || key === 'null') return;
+
     registry[key] = {
       ...driverData,
       driverId: driverData.driverId || driverData.id,
-      name: driverData.name || driverData.driverName || 'Driver Partner',
+      name: (driverData.name || driverData.driverName || '').trim(),
       rating: driverData.rating || 5.0,
       tripsCompleted: driverData.tripsCompleted || 5,
       model: driverData.model || driverData.carModel || driverData.bikeModel || driverData.autoModel || 'Comfort Cab',
       plateNumber: (driverData.plateNumber || '').toUpperCase().trim(),
-      vehicleType: driverData.vehicleType || 'CAR',
+      vehicleType: (driverData.vehicleType || 'CAR').toUpperCase(),
+      phone: driverData.phone || driverData.phoneNumber || '',
       isVerified: true,
     };
     localStorage.setItem('safarx_drivers_registry', JSON.stringify(registry));
@@ -115,10 +31,16 @@ export function registerDriverProfile(driverData) {
 }
 
 export function getDriverDetails(rideOrVehicle, ridesList = []) {
+  const d = rideOrVehicle?.driver || rideOrVehicle?.vehicle?.driver || {};
   const v = rideOrVehicle?.vehicle || rideOrVehicle || {};
-  const plate = (v.plateNumber || rideOrVehicle?.plateNumber || '').toUpperCase().trim();
-  const vId = Number(v.vehicleId || rideOrVehicle?.vehicleId || rideOrVehicle?.driverId || 0);
-  const modelName = v.carModel || v.autoModel || v.bikeModel || rideOrVehicle?.model || '';
+
+  const driverId = Number(d.id || d.driverId || rideOrVehicle?.driverId || v.driverId || 0);
+  const plate = (d.vehicleNumber || d.plateNumber || v.plateNumber || rideOrVehicle?.plateNumber || '').toUpperCase().trim();
+  let rawName = (d.name || d.driverName || d.fullName || rideOrVehicle?.driverName || v.driverName || '').trim();
+  const modelName = d.model || d.vehicleModel || v.carModel || v.autoModel || v.bikeModel || rideOrVehicle?.vehicleModel || rideOrVehicle?.model || '';
+  const vehicleType = (d.vehicleType || v.vehicleType || rideOrVehicle?.vehicleType || (v.carModel ? 'CAR' : v.autoModel ? 'AUTO' : v.bikeModel ? 'BIKE' : 'CAR')).toUpperCase();
+  const phone = d.phone || d.phoneNumber || rideOrVehicle?.driverPhone || '';
+  const rating = Number(d.rating || rideOrVehicle?.driverRating || v.rating || 5.0) || 5.0;
 
   // Calculate dynamic trips count from real database rides if passed
   let dynamicTrips = 0;
@@ -126,64 +48,46 @@ export function getDriverDetails(rideOrVehicle, ridesList = []) {
     dynamicTrips = ridesList.filter((r) => {
       const isCompleted = (r.rideStatus || r.status || '').toUpperCase() === 'COMPLETED';
       const matchVehicle =
-        (r.vehicle?.vehicleId && vId && r.vehicle.vehicleId === vId) ||
+        (r.vehicle?.vehicleId && driverId && r.vehicle.vehicleId === driverId) ||
         (r.vehicle?.plateNumber && plate && r.vehicle.plateNumber.toUpperCase().trim() === plate);
       return isCompleted && matchVehicle;
     }).length;
   }
 
-  // 1. Check dynamic local storage registry
-  try {
-    const raw = localStorage.getItem('safarx_drivers_registry');
-    if (raw) {
-      const reg = JSON.parse(raw);
-      let match = null;
-      if (vId && reg[vId]) match = reg[vId];
-      else if (plate) {
-        match = Object.values(reg).find((d) => d.plateNumber && d.plateNumber.toUpperCase().trim() === plate);
+  // 1. If name is not yet present on ride object, check dynamic local storage registry
+  if (!rawName) {
+    try {
+      const raw = localStorage.getItem('safarx_drivers_registry');
+      if (raw) {
+        const reg = JSON.parse(raw);
+        let match = null;
+        if (driverId && reg[driverId]) match = reg[driverId];
+        else if (plate) {
+          match = Object.values(reg).find((item) => item.plateNumber && item.plateNumber.toUpperCase().trim() === plate);
+        }
+        if (match && match.name) {
+          rawName = match.name;
+        }
       }
-      if (match) {
-        return {
-          ...match,
-          tripsCompleted: dynamicTrips > 0 ? dynamicTrips : (match.tripsCompleted || 5),
-        };
-      }
-    }
-  } catch (e) {}
-
-  let base = null;
-  // 2. Direct match by vehicleId or known DB seeds
-  if (vId === 1 || plate.includes('BR-08') || plate.includes('2882') || modelName.toLowerCase().includes('scorpio')) {
-    base = { ...DEFAULT_DRIVERS[1] };
-  } else if (vId === 2 || plate.includes('TS-09-KL') || modelName.toLowerCase().includes('activa') || (rideOrVehicle?.name && rideOrVehicle.name.toLowerCase().includes('kalu'))) {
-    base = { ...DEFAULT_DRIVERS[2] };
-  } else if (vId === 3 || plate.includes('TS-09-GK') || (rideOrVehicle?.name && (rideOrVehicle.name.toLowerCase().includes('ghoda') || rideOrVehicle.name.toLowerCase().includes('harsh')))) {
-    base = { ...DEFAULT_DRIVERS[3] };
-  } else if (vId === 11 || plate.includes('DL-8C') || plate.includes('3001') || modelName.toLowerCase().includes('dzire')) {
-    base = { ...DEFAULT_DRIVERS[11] };
-  } else if (vId === 6 || plate.includes('DL-3S') || plate.includes('2001') || modelName.toLowerCase().includes('splendor')) {
-    base = { ...DEFAULT_DRIVERS[6] };
-  } else if (vId === 16 || plate.includes('TS-09') || plate.includes('8888')) {
-    base = { ...DEFAULT_DRIVERS[16] };
-  } else if (vId === 21 || plate.includes('DL-1R') || plate.includes('1001') || modelName.toLowerCase().includes('auto')) {
-    base = { ...DEFAULT_DRIVERS[21] };
-  } else {
-    base = {
-      driverId: vId || 1,
-      name: v.driverName || rideOrVehicle?.driverName || 'Vishal Singh',
-      rating: v.rating || 5.0,
-      model: modelName || (v.carCategory ? `SafarX ${v.carCategory}` : 'Mahindra Scorpio N'),
-      plateNumber: plate || 'BR-08-2882',
-      category: v.carCategory || 'SUV',
-      vehicleType: v.carModel ? 'CAR' : v.autoModel ? 'AUTO' : v.bikeModel ? 'BIKE' : 'CAR',
-      avatar: '👨‍✈️',
-      isVerified: true,
-    };
+    } catch (e) {}
   }
 
-  // Set real trip count from DB
-  base.tripsCompleted = dynamicTrips > 0 ? dynamicTrips : 5;
-  return base;
+  // 2. Strict Real Identity Resolution - ZERO mock names
+  const resolvedName = rawName || (driverId > 0 ? `Driver #${driverId}` : 'Driver Partner');
+  const resolvedModel = modelName || (vehicleType === 'BIKE' ? 'Hero Splendor Plus' : vehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
+
+  return {
+    driverId: driverId || 1,
+    name: resolvedName,
+    rating: rating,
+    tripsCompleted: dynamicTrips > 0 ? dynamicTrips : 5,
+    model: resolvedModel,
+    plateNumber: plate || '—',
+    vehicleType: vehicleType,
+    phone: phone,
+    avatar: vehicleType === 'BIKE' ? '🏍️' : vehicleType === 'AUTO' ? '🛺' : '🚗',
+    isVerified: true,
+  };
 }
 
 export default {

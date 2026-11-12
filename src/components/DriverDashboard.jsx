@@ -29,17 +29,6 @@ const KNOWN_DRIVERS = {
     lat: 17.4435,
     lng: 78.4532,
   },
-  'kmrvishalsingh122@gmail.com': {
-    id: 1,
-    name: 'Vishal Singh',
-    rating: 5.0,
-    vehicleType: 'CAR',
-    model: 'Maruti Suzuki Dzire',
-    plateNumber: 'FNWEJ302-23I-223',
-    city: 'Hyderabad',
-    lat: 17.4435,
-    lng: 78.4532,
-  },
   'sheru@gmail.com': {
     id: 5,
     name: 'Sheru',
@@ -212,36 +201,22 @@ function getInitialDriverProfile(userEmail) {
     }
   } catch (e) {}
 
-  // 4. Default fallback matching email or ID
+  // 4. Dynamic fallback matching email or ID
   const fallbackId = savedId
     ? Number(savedId)
-    : normalizedEmail.includes('vishal')
-    ? 1
-    : normalizedEmail.includes('sheru')
-    ? 5
-    : normalizedEmail.includes('sandu')
-    ? 6
-    : normalizedEmail.includes('kuku')
-    ? 7
-    : normalizedEmail.includes('bakri')
-    ? 8
-    : normalizedEmail.includes('harsh')
-    ? 9
-    : normalizedEmail.includes('himanshu')
-    ? 16
     : 1;
 
   const fallbackVehicle =
     storedVehicleType ||
-    (fallbackId === 6 || fallbackId === 7 ? 'AUTO' : 'CAR');
+    (storedVehicleType === 'AUTO' || storedVehicleType === 'BIKE' ? storedVehicleType : 'CAR');
 
   return {
     id: fallbackId,
     name: resolveUserName(null, normalizedEmail),
     rating: 5.0,
     vehicleType: fallbackVehicle,
-    model: fallbackId === 1 ? 'Maruti Suzuki Dzire' : fallbackId === 5 ? 'BMW' : fallbackId === 9 ? 'Ertiga' : fallbackId === 8 ? 'Maruti Suzuki Dzire' : fallbackId === 16 ? 'SafarX Prime Cab' : fallbackVehicle === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire',
-    plateNumber: fallbackId === 1 ? 'FNWEJ302-23I-223' : fallbackId === 5 ? 'BMW-TS-2026' : fallbackId === 9 ? 'HR-09-2023' : fallbackId === 8 ? 'BK-34-2039' : fallbackId === 6 ? 'BR-03-2345' : fallbackId === 7 ? 'KK-94-2834' : 'TS-09-UB-8888',
+    model: fallbackVehicle === 'BIKE' ? 'Hero Splendor Plus' : fallbackVehicle === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire',
+    plateNumber: 'TS-09-UB-8888',
     city: 'Hyderabad',
     lat: 17.4435,
     lng: 78.4532,
@@ -392,19 +367,26 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           if (data.status) {
             setIsOnline(data.status === 'AVAILABLE');
           }
-          setDriverProfile((prev) => {
-            const nextVehicleType = data.vehicleType || prev.vehicleType || 'CAR';
-            const nextModel = data.vehicleModel || prev.model || (nextVehicleType === 'BIKE' ? 'Hero Splendor Plus' : nextVehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
-            const nextPlate = data.plateNumber || prev.plateNumber || 'TS-09-UB-8888';
-            return {
-              ...prev,
-              id: realId || prev.id,
-              name: resolveUserName(data.name, userEmail),
-              vehicleType: nextVehicleType,
-              model: nextModel,
-              plateNumber: nextPlate,
-            };
-          });
+          const realName = resolveUserName(data.name, userEmail);
+          const nextVehicleType = data.vehicleType || 'CAR';
+          const nextModel = data.vehicleModel || (nextVehicleType === 'BIKE' ? 'Hero Splendor Plus' : nextVehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
+          const nextPlate = data.plateNumber || 'TS-09-UB-8888';
+
+          const activeProfile = {
+            id: realId,
+            driverId: realId,
+            name: realName,
+            vehicleType: nextVehicleType,
+            model: nextModel,
+            plateNumber: nextPlate,
+            rating: data.rating || 5.0,
+          };
+          registerDriverProfile(activeProfile);
+
+          setDriverProfile((prev) => ({
+            ...prev,
+            ...activeProfile,
+          }));
           if (data.vehicleType) setStorageItem('driverVehicleType', data.vehicleType);
           if (data.vehicleModel) setStorageItem('driverVehicleModel', data.vehicleModel);
           if (data.plateNumber) setStorageItem('driverPlateNumber', data.plateNumber);
@@ -617,6 +599,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     setStatusMessage({ text: 'Accepting ride...', isError: false });
 
     try {
+      registerDriverProfile(driverProfile);
       const response = await apiClient.put(
         `/api/rides/accept/${targetRide.rideId}?driverId=${driverProfile.id}`
       );
