@@ -88,6 +88,17 @@ export default function CompleteProfile({ onProfileCompleted }) {
         setStorageItem('profileCompleted', 'true');
         setAuthToken(token, userEmail, role);
 
+        // Authoritatively sync newly generated riderId or driverId from /api/auth/me
+        try {
+          const meRes = await apiClient.get('/api/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+          if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+        } catch (meErr) {
+          console.warn('[CompleteProfile] Could not fetch me profile:', meErr);
+        }
+
         if (onProfileCompleted) {
           onProfileCompleted(role);
         }

@@ -68,14 +68,42 @@ export default function AuthModal({
 
       if (token && token !== 'Fail') {
         let resolvedRole = 'ROLE_RIDER';
+        let resolvedRiderId = null;
         try {
           const meRes = await apiClient.get('/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (meRes.data?.role) resolvedRole = meRes.data.role;
           if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
-          if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+          if (meRes.data?.riderId) {
+            resolvedRiderId = meRes.data.riderId;
+            setStorageItem('riderId', String(meRes.data.riderId));
+          }
           if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+
+          // Eagerly initialize rider profile if role is rider and no riderId returned
+          if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
+            try {
+              await apiClient.post(
+                '/api/auth/complete-profile',
+                {
+                  role: 'ROLE_RIDER',
+                  name: meRes.data?.name || normalizedEmail.split('@')[0],
+                  phone: '',
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              const retryMe = await apiClient.get('/api/auth/me', {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (retryMe.data?.riderId) {
+                resolvedRiderId = retryMe.data.riderId;
+                setStorageItem('riderId', String(retryMe.data.riderId));
+              }
+            } catch (initErr) {
+              console.warn('[AuthModal] Auto-profile creation error:', initErr);
+            }
+          }
         } catch {
           const decoded = parseJwt(token);
           if (decoded?.role) resolvedRole = decoded.role;
@@ -157,14 +185,41 @@ export default function AuthModal({
           const token = rawToken.replace(/^["']|["']$/g, '').trim();
 
           let resolvedRole = 'ROLE_RIDER';
+          let resolvedRiderId = null;
           try {
             const meRes = await apiClient.get('/api/auth/me', {
               headers: { Authorization: `Bearer ${token}` },
             });
             if (meRes.data?.role) resolvedRole = meRes.data.role;
             if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
-            if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
+            if (meRes.data?.riderId) {
+              resolvedRiderId = meRes.data.riderId;
+              setStorageItem('riderId', String(meRes.data.riderId));
+            }
             if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+
+            // Automatically initialize rider profile for new registration
+            if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
+              try {
+                await apiClient.post(
+                  '/api/auth/complete-profile',
+                  {
+                    role: 'ROLE_RIDER',
+                    name: email.trim().split('@')[0],
+                    phone: '',
+                  },
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const retryMe = await apiClient.get('/api/auth/me', {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (retryMe.data?.riderId) {
+                  setStorageItem('riderId', String(retryMe.data.riderId));
+                }
+              } catch (regInitErr) {
+                console.warn('[AuthModal] Auto-profile creation on register:', regInitErr);
+              }
+            }
           } catch {
             const decoded = parseJwt(token);
             if (decoded?.role) resolvedRole = decoded.role;

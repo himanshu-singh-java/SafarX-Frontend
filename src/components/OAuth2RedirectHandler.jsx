@@ -73,6 +73,26 @@ export default function OAuth2RedirectHandler() {
           }
           if (meRes.data.riderId) {
             setStorageItem('riderId', String(meRes.data.riderId));
+          } else if (role === 'ROLE_RIDER' || !role) {
+            try {
+              await apiClient.post(
+                '/api/auth/complete-profile',
+                {
+                  role: 'ROLE_RIDER',
+                  name: meRes.data.name || name || email.split('@')[0],
+                  phone: '',
+                },
+                { headers: { Authorization: `Bearer ${cleanToken}` } }
+              );
+              const retryMe = await apiClient.get('/api/auth/me', {
+                headers: { Authorization: `Bearer ${cleanToken}` },
+              });
+              if (retryMe.data?.riderId) {
+                setStorageItem('riderId', String(retryMe.data.riderId));
+              }
+            } catch (autoErr) {
+              console.warn('OAuth2 auto-profile creation error:', autoErr);
+            }
           }
           if (meRes.data.driverId) {
             setStorageItem('driverId', String(meRes.data.driverId));

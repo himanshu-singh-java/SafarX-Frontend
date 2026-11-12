@@ -181,10 +181,27 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     const fetchMe = async () => {
       try {
         const res = await apiClient.get('/api/auth/me');
-        if (res.data?.riderId && isMounted) {
+        if (!isMounted) return;
+        if (res.data?.riderId) {
           const id = Number(res.data.riderId);
           setRiderId(id);
           setStorageItem('riderId', String(id));
+        } else if (res.data?.role === 'ROLE_RIDER' || !res.data?.role) {
+          try {
+            await apiClient.post('/api/auth/complete-profile', {
+              role: 'ROLE_RIDER',
+              name: res.data?.name || (userEmail ? userEmail.split('@')[0] : 'SafarX Rider'),
+              phone: '',
+            });
+            const retryRes = await apiClient.get('/api/auth/me');
+            if (retryRes.data?.riderId && isMounted) {
+              const id = Number(retryRes.data.riderId);
+              setRiderId(id);
+              setStorageItem('riderId', String(id));
+            }
+          } catch (initErr) {
+            console.warn('[RiderDashboard] Auto-init rider failed:', initErr);
+          }
         }
       } catch (err) {
         console.warn('[RiderDashboard] Could not fetch rider profile from /api/auth/me', err);
@@ -374,8 +391,9 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
     const pollInterval = setInterval(async () => {
       try {
-        if (!riderId) return;
-        const res = await apiClient.get(`/api/rides/history/${riderId}`);
+        const effectiveRiderId = riderId || (getStorageItem('riderId') ? Number(getStorageItem('riderId')) : null);
+        if (!effectiveRiderId) return;
+        const res = await apiClient.get(`/api/rides/history/${effectiveRiderId}`);
         const myRides = Array.isArray(res.data) ? res.data : [];
         const current = myRides.find((r) => r.rideId === activeRide.rideId);
         if (current) {
@@ -692,6 +710,16 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
   // ================= API: BOOK RIDE =================
   const handleBookRide = async () => {
+    // 1. First ensure user is logged in
+    const activeToken = token || getAuthToken();
+    if (!activeToken) {
+      if (onOpenAuth) {
+        onOpenAuth('login', 'Please sign in or create an account to confirm your ride.');
+      }
+      return;
+    }
+
+    // 2. Prevent booking if there is already an active ride
     if (activeRide && (activeRide.status === 'REQUESTED' || activeRide.status === 'ACCEPTED' || activeRide.status === 'IN_PROGRESS')) {
       setStatusMessage({
         text: `You already have an active trip (#${activeRide.rideId}) in progress! Please complete or cancel it first before booking a new vehicle.`,
@@ -701,28 +729,13 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
       return;
     }
 
-    if (!riderId) {
-      setStatusMessage({ text: 'Please enter a valid Rider ID.', isError: true });
-      return;
-    }
+    // 3. Location validation
     if (pickupCoords.lat === dropCoords.lat && pickupCoords.lng === dropCoords.lng) {
       setStatusMessage({ text: 'Pickup and Drop locations cannot be identical.', isError: true });
       return;
     }
 
-    const activeToken = token || getAuthToken();
-    if (!activeToken) {
-      if (onOpenAuth) {
-        onOpenAuth('login', 'Please sign in or create an account to confirm your ride.');
-      }
-      return;
-    }
-
-    setIsLoading(true);
-    setStatusMessage({ text: '', isError: false });
-
     const selectedTier = VEHICLE_TIERS.find((v) => v.type === selectedVehicle) || VEHICLE_TIERS[0];
-
     const finalDropLat = parseFloat(dropCoords.lat);
     const finalDropLng = parseFloat(dropCoords.lng);
     const initialDist = calculateDistanceKm(pickupCoords.lat, pickupCoords.lng, finalDropLat, finalDropLng);
@@ -731,12 +744,58 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
         text: 'Drop location must be at least 0.5 km away from pickup location. Please choose a different drop point.',
         isError: true,
       });
+      return;
+    }
+
+    setIsLoading(true);
+    setStatusMessage({ text: '', isError: false });
+
+    // 4. Resolve valid riderId from state, storage, or live API
+    let activeRiderId = riderId;
+    if (!activeRiderId) {
+      const stored = getStorageItem('riderId');
+      if (stored && !isNaN(Number(stored)) && Number(stored) > 0) {
+        activeRiderId = Number(stored);
+        setRiderId(activeRiderId);
+      }
+    }
+
+    if (!activeRiderId) {
+      try {
+        const meRes = await apiClient.get('/api/auth/me');
+        if (meRes.data?.riderId) {
+          activeRiderId = Number(meRes.data.riderId);
+          setRiderId(activeRiderId);
+          setStorageItem('riderId', String(activeRiderId));
+        } else if (meRes.data?.role === 'ROLE_RIDER' || !meRes.data?.role) {
+          await apiClient.post('/api/auth/complete-profile', {
+            role: 'ROLE_RIDER',
+            name: meRes.data?.name || (userEmail ? userEmail.split('@')[0] : 'SafarX Rider'),
+            phone: '',
+          });
+          const retryMe = await apiClient.get('/api/auth/me');
+          if (retryMe.data?.riderId) {
+            activeRiderId = Number(retryMe.data.riderId);
+            setRiderId(activeRiderId);
+            setStorageItem('riderId', String(activeRiderId));
+          }
+        }
+      } catch (err) {
+        console.warn('[RiderDashboard] Failed to resolve riderId:', err);
+      }
+    }
+
+    if (!activeRiderId) {
       setIsLoading(false);
+      setStatusMessage({
+        text: 'Unable to verify your Rider account. Please sign out and sign in again.',
+        isError: true,
+      });
       return;
     }
 
     const requestPayload = {
-      riderId: parseInt(riderId, 10),
+      riderId: parseInt(activeRiderId, 10),
       vehicleType: selectedTier.backendType, // 'BIKE' | 'AUTO' | 'CAR'
       pickupLat: parseFloat(pickupCoords.lat),
       pickupLng: parseFloat(pickupCoords.lng),

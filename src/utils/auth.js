@@ -76,17 +76,24 @@ export const setStorageItem = (key, value) => {
   if (value === undefined || value === null) return;
   const strVal = String(value);
 
-  // Strictly save tab-scoped items in sessionStorage to guarantee 100% isolation across tabs
+  // Tab-scoped isolation in sessionStorage
   try {
     sessionStorage.setItem(key, strVal);
   } catch (e) {}
 
-  // Only replicate non-tab-scoped keys to localStorage
-  if (!TAB_SCOPED_KEYS.has(key)) {
-    try {
-      localStorage.setItem(key, strVal);
-    } catch (e) {}
+  // Always mirror to localStorage for persistence across reloads & sessions
+  try {
+    localStorage.setItem(key, strVal);
+  } catch (e) {}
+};
+
+export const getRiderId = () => {
+  const saved = getStorageItem('riderId');
+  if (saved && saved !== 'null' && saved !== 'undefined') {
+    const num = Number(saved);
+    if (!isNaN(num) && num > 0) return num;
   }
+  return null;
 };
 
 export const removeStorageItem = (key) => {

@@ -102,6 +102,20 @@ function App() {
 
               if (profile.riderId) {
                 setStorageItem('riderId', String(profile.riderId));
+              } else if (profile.role === 'ROLE_RIDER' || (!profile.role && userRole === 'ROLE_RIDER')) {
+                apiClient
+                  .post(
+                    '/api/auth/complete-profile',
+                    { role: 'ROLE_RIDER', name: effectiveName, phone: '' },
+                    { silentAuth: true }
+                  )
+                  .then(() => apiClient.get('/api/auth/me', { silentAuth: true }))
+                  .then((retry) => {
+                    if (retry.data?.riderId) {
+                      setStorageItem('riderId', String(retry.data.riderId));
+                    }
+                  })
+                  .catch(() => {});
               }
               if (profile.driverId) {
                 setStorageItem('driverId', String(profile.driverId));
