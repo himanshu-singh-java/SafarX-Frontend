@@ -72,7 +72,7 @@ const DEFAULT_RECENT_LOCATIONS = [
  * - Bike: ₹31.00 base/short trip (Backend: BIKE)
  * - Bike Saver: ₹30.00 (Backend: BIKE)
  * - Auto: ₹53.64 (Backend: AUTO)
- * - Uber Go AC: ₹124.90 (Backend: CAR)
+ * - SafarX AC: ₹124.90 (Backend: CAR)
  * - Sedan Premier: ₹145.00 (Backend: CAR)
  */
 const VEHICLE_TIERS = [
@@ -106,7 +106,7 @@ const VEHICLE_TIERS = [
   {
     type: 'CAR',
     backendType: 'CAR',
-    name: 'Uber Go AC',
+    name: 'SafarX AC',
     capacity: 4,
     badge: '❄️',
     icon: '🚗',
@@ -288,7 +288,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
   const [showCoordsModal, setShowCoordsModal] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [locationFetched, setLocationFetched] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState('CAR'); // Default to Uber Go AC (CAR) to match driver fleet
+  const [selectedVehicle, setSelectedVehicle] = useState('CAR'); // Default to SafarX AC (CAR) to match driver fleet
   const [pickupTime, setPickupTime] = useState('Pickup now');
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [passengerMode, setPassengerMode] = useState('For me');
@@ -1422,7 +1422,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
       )}
 
       {/* MAIN HOMEPAGE & PRODUCT SELECTION ROUTER */}
-      <main className={currentScreen === 'home' && (!isLoggedIn || homeViewMode === 'motion') ? "w-full px-2 sm:px-4 py-2" : "max-w-[1440px] mx-auto px-4 sm:px-8 py-6 space-y-6"}>
+      <main className={`${currentScreen === 'home' && (!isLoggedIn || homeViewMode === 'motion') ? "w-full px-2 sm:px-4 py-2" : "max-w-[1440px] mx-auto px-4 sm:px-8 py-6 space-y-6"} ${selectedRideReceipt ? 'print:hidden' : ''}`}>
 
         {currentScreen === 'home' && (!isLoggedIn || homeViewMode === 'motion') ? (
           /* ========================================================
@@ -2098,7 +2098,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
       {/* 3. TRIP HISTORY DRAWER */}
       {showHistory && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
+        <div className="print:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
           <div className="w-full max-w-md bg-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
@@ -2183,11 +2183,11 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
       {/* 4. UBER-STYLE TRIP RECEIPT & DETAILS MODAL */}
       {selectedRideReceipt && (
-        <div className="fixed inset-0 z-[70] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 my-8">
+        <div className="receipt-modal-backdrop fixed inset-0 z-[70] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in print:p-0 print:m-0 print:bg-transparent print:static print:block print:overflow-visible">
+          <div className="receipt-print-card bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 my-8 print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
             
             {/* Modal Header */}
-            <div className="bg-neutral-900 text-white p-6 flex items-start justify-between">
+            <div className="receipt-header bg-neutral-900 text-white p-6 flex items-start justify-between print:p-4 print:rounded-t-2xl">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs uppercase font-extrabold tracking-widest text-neutral-400">
@@ -2213,13 +2213,13 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
               <button
                 onClick={() => setSelectedRideReceipt(null)}
-                className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center font-bold text-lg transition-all"
+                className="print:hidden w-9 h-9 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white flex items-center justify-center font-bold text-lg transition-all"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+            <div className="receipt-scroll-body p-6 space-y-6 max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-4 print:space-y-3.5">
               
               {/* Vehicle & Driver Profile */}
               {(() => {
@@ -2228,7 +2228,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                 const rPlate = selectedRideReceipt?.plateNumber || rDriver.plateNumber;
                 const rModel = rDriver.model || (selectedRideReceipt?.vehicleType ? `SafarX ${selectedRideReceipt.vehicleType}` : 'Comfort Cab');
                 return (
-                  <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
+                  <div className="receipt-avoid-break p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between print:p-3 print:bg-neutral-50">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-12 rounded-xl bg-white border border-neutral-200 overflow-hidden flex items-center justify-center p-1 shadow-sm shrink-0">
                         <img
@@ -2267,7 +2267,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
               })()}
 
               {/* Journey Route & Location Breakdown */}
-              <div className="space-y-4">
+              <div className="receipt-avoid-break space-y-4 print:space-y-2.5">
                 <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">
                   Route Details & GPS Telemetry
                 </div>
@@ -2334,7 +2334,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
 
                 {/* Real-time Map Preview Embed */}
                 {selectedRideReceipt.dropLat && selectedRideReceipt.dropLng && (
-                  <div className="relative rounded-2xl overflow-hidden border border-neutral-200 h-36 bg-neutral-100 shadow-inner">
+                  <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-neutral-200 h-36 bg-neutral-100 shadow-inner print:h-24 print:rounded-xl">
                     <iframe
                       title="Trip Route Map"
                       width="100%"
@@ -2353,7 +2353,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
               </div>
 
               {/* Itemized Fare Receipt */}
-              <div className="p-4 rounded-2xl bg-[#f8f9fa] border border-neutral-200 space-y-2.5">
+              <div className="receipt-avoid-break p-4 rounded-2xl bg-[#f8f9fa] border border-neutral-200 space-y-2.5 print:p-3 print:space-y-1.5">
                 <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 pb-1 border-b border-neutral-200">
                   Itemized Fare Receipt
                 </div>
@@ -2399,7 +2399,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
               </div>
 
               {/* Rider Identity Footer */}
-              <div className="flex items-center justify-between text-xs text-neutral-500 px-1">
+              <div className="receipt-avoid-break flex items-center justify-between text-xs text-neutral-500 px-1 print:pt-1">
                 <div>
                   Rider: <strong className="text-neutral-800">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
                 </div>
@@ -2411,7 +2411,7 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
             </div>
 
             {/* Modal Actions */}
-            <div className="p-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-end gap-3">
+            <div className="print:hidden p-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-end gap-3">
               <button
                 onClick={() => window.print()}
                 className="px-4 py-2 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95"

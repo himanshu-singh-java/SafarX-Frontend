@@ -1007,7 +1007,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                   <span className="text-neutral-800 font-bold">{driverProfile.vehicleType}</span>
                   <span>•</span>
                   <span className="px-2.5 py-0.5 bg-amber-100/90 text-amber-950 border border-amber-300/80 rounded-md font-sans text-[11px] font-bold">
-                    Matches: {driverProfile.vehicleType === 'CAR' ? 'Uber Go AC & Sedan Premier' : driverProfile.vehicleType === 'BIKE' ? 'Bike' : 'Auto'}
+                    Matches: {driverProfile.vehicleType === 'CAR' ? 'SafarX AC & Sedan Premier' : driverProfile.vehicleType === 'BIKE' ? 'Bike' : 'Auto'}
                   </span>
                 </div>
               </div>

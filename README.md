@@ -8,7 +8,7 @@ SafarX is an enterprise-grade ride-hailing web application built with React 19, 
 
 - **Rider Console**:
   - Interactive OpenStreetMap route visualizer with live driver location tracking.
-  - Multi-tier product selection: Uber Go AC, Sedan Premier (Car), SafarX Moto (Bike), and City Auto.
+  - Multi-tier product selection: SafarX AC, Sedan Premier (Car), SafarX Moto (Bike), and City Auto.
   - Atomic booking with minimum 0.5 km route distance validation.
   - Razorpay online payment integration & cash-to-driver payment modes.
   - RBAC-isolated ride history & itemized digital receipts.
@@ -83,6 +83,6 @@ npm run build
 1. Open **Tab 1**: Log in as Rider (or register a rider).
 2. Open **Tab 2**: Log in as Driver 1 (e.g. Vishal, Car) and click **Online**.
 3. Open **Tab 3**: Log in as Driver 2 (e.g. Sheru, Car) and click **Online**.
-4. In **Tab 1**, select **Uber Go AC (Car)** and click **Book SafarX Ride**.
+4. In **Tab 1**, select **SafarX AC (Car)** and click **Book SafarX Ride**.
 5. Both Driver tabs will receive the incoming ride request pop-up simultaneously in Wave 1.
 6. When one driver clicks **Accept Ride Now**, the other driver's pop-up closes with *"Ride was accepted by another driver"*.

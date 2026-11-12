@@ -304,7 +304,7 @@ function App() {
           <div className={`min-h-screen ${viewMode === 'admin' ? 'bg-[#0a0706]' : 'bg-[#faf8f5]'}`}>
       
       {/* 1. TOP NAVBAR (MATCHING OFFICIAL UBER SCREENSHOT - ZERO ADMIN CONTROLS FOR PUBLIC) */}
-      <header className="sticky top-0 z-40 bg-black text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-neutral-900 shadow-sm">
+      <header className="sticky top-0 z-40 bg-black text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-neutral-900 shadow-sm print:hidden">
         
         {/* Left: Brand */}
         <div className="flex items-center gap-6 md:gap-8">
