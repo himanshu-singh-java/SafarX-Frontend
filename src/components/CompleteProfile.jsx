@@ -14,7 +14,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
   // State
   const [name, setName] = useState(() => getStorageItem('userName') || '');
   const [phone, setPhone] = useState(() => localStorage.getItem('userPhone') || '');
-  const [role] = useState(() => localStorage.getItem('userRole') || 'ROLE_RIDER');
+  const [role, setRole] = useState(() => localStorage.getItem('userRole') || 'ROLE_RIDER');
   const [userEmail, setUserEmail] = useState(() => localStorage.getItem('userEmail') || '');
 
   const [isLoading, setIsLoading] = useState(false);
@@ -233,22 +233,43 @@ export default function CompleteProfile({ onProfileCompleted }) {
             <p className="text-[10px] text-neutral-400">Used for ride OTPs and driver contact</p>
           </div>
 
-          {/* 3. Account Role Status (Auto-assigned: ROLE_RIDER for standard users) */}
-          <div className="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center text-lg shadow-sm">
-                {role === 'ROLE_DRIVER' ? '🚗' : role === 'ROLE_ADMIN' ? '🛡️' : '👤'}
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Account Role</div>
-                <div className="text-xs font-black text-neutral-900">
-                  {role === 'ROLE_DRIVER' ? 'Driver Partner' : role === 'ROLE_ADMIN' ? 'Administrator' : 'SafarX Rider'}
+          <div className="space-y-2">
+            <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+              Choose Account Type
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole('ROLE_RIDER')}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                  role === 'ROLE_RIDER'
+                    ? 'border-black bg-neutral-900 text-white shadow-md'
+                    : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800'
+                }`}
+              >
+                <div className="text-xl mb-1.5">👤</div>
+                <div className="font-extrabold text-xs">SafarX Rider</div>
+                <div className={`text-[10px] mt-0.5 ${role === 'ROLE_RIDER' ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                  Book rides & travel seamlessly
                 </div>
-              </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRole('ROLE_DRIVER')}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                  role === 'ROLE_DRIVER'
+                    ? 'border-[#d4af37] bg-amber-50 text-amber-950 shadow-md'
+                    : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800'
+                }`}
+              >
+                <div className="text-xl mb-1.5">🚗</div>
+                <div className="font-extrabold text-xs">Driver Partner</div>
+                <div className={`text-[10px] mt-0.5 ${role === 'ROLE_DRIVER' ? 'text-amber-800' : 'text-neutral-500'}`}>
+                  Accept trips & drive with us
+                </div>
+              </button>
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-neutral-200/70 text-neutral-700">
-              Verified
-            </span>
           </div>
 
           {/* Submit Button */}

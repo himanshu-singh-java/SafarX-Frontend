@@ -817,62 +817,55 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     setShowEditVehicleModal(true);
   };
 
-  const handleSaveVehicle = (e) => {
+  const handleSaveVehicle = async (e) => {
     if (e) e.preventDefault();
     const cleanType = editVehicleType.toUpperCase();
-    const cleanModel = editVehicleModel.trim() || (cleanType === 'BIKE' ? 'Hero Splendor Plus' : cleanType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
-    const cleanPlate = editPlateNumber.trim().toUpperCase() || 'BMW-TS-2026';
+    const cleanModel = editVehicleModel.trim();
+    const cleanPlate = editPlateNumber.trim().toUpperCase();
 
-    const updated = {
-      ...driverProfile,
-      vehicleType: cleanType,
-      model: cleanModel,
-      plateNumber: cleanPlate,
-      isCustomEdit: true,
-    };
-    setDriverProfile(updated);
-    setStorageItem('driverVehicleType', cleanType);
-    setStorageItem('driverVehicleModel', cleanModel);
-    setStorageItem('driverPlateNumber', cleanPlate);
-
-    if (userEmail && KNOWN_DRIVERS[userEmail.toLowerCase().trim()]) {
-      KNOWN_DRIVERS[userEmail.toLowerCase().trim()] = {
-        ...KNOWN_DRIVERS[userEmail.toLowerCase().trim()],
-        vehicleType: cleanType,
-        model: cleanModel,
-        plateNumber: cleanPlate,
-      };
+    if (!cleanModel) {
+      setStatusMessage({ text: 'Please enter a valid vehicle model.', isError: true });
+      return;
+    }
+    if (!cleanPlate) {
+      setStatusMessage({ text: 'Please enter a valid license plate number.', isError: true });
+      return;
     }
 
     try {
-      const raw = localStorage.getItem('safarx_drivers_registry');
-      const reg = raw ? JSON.parse(raw) : {};
-      const dId = String(updated.id);
-      reg[dId] = updated;
-      if (userEmail) reg[userEmail.toLowerCase().trim()] = updated;
-      reg[cleanPlate] = updated;
-      localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
-    } catch (err) {}
-
-    registerDriverProfile(updated);
-
-    try {
-      apiClient.put('/api/driver/vehicle', {
+      const payload = {
         vehicleType: cleanType,
-        carModel: cleanType === 'CAR' ? cleanModel : '',
-        bikeModel: cleanType === 'BIKE' ? cleanModel : '',
-        autoModel: cleanType === 'AUTO' ? cleanModel : '',
         plateNumber: cleanPlate,
-      }).catch((err) => {
-        console.warn('Driver vehicle backend sync error:', err);
-      });
-    } catch (e) {}
+        carModel: cleanType === 'CAR' ? cleanModel : undefined,
+        bikeModel: cleanType === 'BIKE' ? cleanModel : undefined,
+        autoModel: cleanType === 'AUTO' ? cleanModel : undefined,
+      };
 
-    setShowEditVehicleModal(false);
-    setStatusMessage({
-      text: `✓ Vehicle updated: ${cleanModel} (${cleanType}) • Plate: ${cleanPlate}`,
-      isError: false,
-    });
+      const res = await apiClient.put('/api/driver/vehicle', payload);
+      const resData = res.data || {};
+
+      const updated = {
+        ...driverProfile,
+        vehicleType: resData.vehicleType || cleanType,
+        model: resData.model || cleanModel,
+        plateNumber: resData.plateNumber || cleanPlate,
+        isCustomEdit: true,
+      };
+      setDriverProfile(updated);
+      setStorageItem('driverVehicleType', updated.vehicleType);
+      setStorageItem('driverVehicleModel', updated.model);
+      setStorageItem('driverPlateNumber', updated.plateNumber);
+      registerDriverProfile(updated);
+
+      setShowEditVehicleModal(false);
+      setStatusMessage({
+        text: `✓ Vehicle updated: ${updated.model} (${updated.vehicleType}) • Plate: ${updated.plateNumber}`,
+        isError: false,
+      });
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message || 'Failed to update vehicle details.';
+      setStatusMessage({ text: errMsg, isError: true });
+    }
   };
 
   const avatarInitial = (driverProfile.name || 'D').charAt(0).toUpperCase();

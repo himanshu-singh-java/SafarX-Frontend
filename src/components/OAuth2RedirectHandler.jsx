@@ -73,7 +73,7 @@ export default function OAuth2RedirectHandler() {
           }
           if (meRes.data.riderId) {
             setStorageItem('riderId', String(meRes.data.riderId));
-          } else if (role === 'ROLE_RIDER' || !role) {
+          } else if ((role === 'ROLE_RIDER' || !role) && !isNew) {
             try {
               await apiClient.post(
                 '/api/auth/complete-profile',

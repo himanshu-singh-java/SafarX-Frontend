@@ -3,46 +3,11 @@
  */
 
 try {
-  const raw = localStorage.getItem('safarx_drivers_registry');
-  if (raw && (raw.includes('Vishal') || raw.includes('vishal'))) {
-    const reg = JSON.parse(raw);
-    let changed = false;
-    for (const key of Object.keys(reg)) {
-      if (reg[key]?.name && reg[key].name.toLowerCase().includes('vishal')) {
-        delete reg[key];
-        changed = true;
-      }
-    }
-    if (changed) {
-      localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
-    }
-  }
+  localStorage.removeItem('safarx_drivers_registry');
 } catch (e) {}
 
 export function registerDriverProfile(driverData) {
-  if (!driverData) return;
-  try {
-    const raw = localStorage.getItem('safarx_drivers_registry');
-    const registry = raw ? JSON.parse(raw) : {};
-    const key = String(driverData.driverId || driverData.id || driverData.plateNumber);
-    if (!key || key === 'undefined' || key === 'null') return;
-
-    registry[key] = {
-      ...driverData,
-      driverId: driverData.driverId || driverData.id,
-      name: (driverData.name || driverData.driverName || '').trim(),
-      rating: driverData.rating || 5.0,
-      tripsCompleted: driverData.tripsCompleted || 5,
-      model: driverData.model || driverData.carModel || driverData.bikeModel || driverData.autoModel || 'Comfort Cab',
-      plateNumber: (driverData.plateNumber || '').toUpperCase().trim(),
-      vehicleType: (driverData.vehicleType || 'CAR').toUpperCase(),
-      phone: driverData.phone || driverData.phoneNumber || '',
-      isVerified: true,
-    };
-    localStorage.setItem('safarx_drivers_registry', JSON.stringify(registry));
-  } catch (e) {
-    console.warn('Error saving to driver registry:', e);
-  }
+  // Deprecated in favor of authoritative backend database state
 }
 
 export function getDriverDetails(rideOrVehicle, ridesList = []) {

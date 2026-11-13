@@ -121,6 +121,19 @@ export default function DriverOnboardingModal({
       return;
     }
 
+    if (vehicleType === 'CAR' && !carModel.trim()) {
+      setErrorMessage('Please enter your car model name.');
+      return;
+    }
+    if (vehicleType === 'BIKE' && !bikeModel.trim()) {
+      setErrorMessage('Please enter your bike model name.');
+      return;
+    }
+    if (vehicleType === 'AUTO' && !autoModel.trim()) {
+      setErrorMessage('Please enter your auto model name.');
+      return;
+    }
+
     // Prepare Payload matching backend DriverOnboardingRequest.java
     const payload = {
       fullName: fullName.trim(),

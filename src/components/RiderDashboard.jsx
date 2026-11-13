@@ -863,7 +863,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       const isConflict = status === 409 || errMsg.toLowerCase().includes('already have an active ride');
       setStatusMessage({
         text: isConflict
-          ? `${errMsg} (Tip: Ongoing ride ko complete ya cancel karein tabhi nayi ride book hogi!)`
+          ? `${errMsg} (Please complete or cancel your active ride before requesting a new one.)`
           : errMsg,
         isError: true,
         hasActiveRideConflict: isConflict,
@@ -2000,13 +2000,14 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           driverInfo?.rating ||
                           5.0;
 
-                        const driverPhone =
+                        const rawPhone =
                           activeRide?.driver?.phone ||
                           driverObj.phone ||
                           driverObj.phoneNumber ||
                           activeRide?.driverPhone ||
                           driverInfo?.phone ||
                           '';
+                        const driverPhone = rawPhone && !rawPhone.includes('@') ? String(rawPhone).trim() : '';
 
                         return (
                           <div className="space-y-4">
