@@ -99,6 +99,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
           const meRes = await apiClient.get('/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
           });
+          if (meRes.data?.name) setStorageItem('userName', meRes.data.name);
           if (meRes.data?.riderId) setStorageItem('riderId', String(meRes.data.riderId));
           if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
         } catch (meErr) {

@@ -96,7 +96,9 @@ function App() {
             if (profile) {
               const effectiveEmail = profile.email || userEmail;
               if (effectiveEmail) setUserEmail(effectiveEmail);
-              const effectiveName = resolveUserName(profile.name, effectiveEmail);
+              const effectiveName = profile.name && profile.name.trim() && profile.name.trim() !== 'null'
+                ? profile.name.trim()
+                : resolveUserName(getStorageItem('userName'), effectiveEmail);
               setUserName(effectiveName);
               setStorageItem('userName', effectiveName);
 

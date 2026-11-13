@@ -44,17 +44,31 @@ export const resolveUserName = (rawName, email) => {
 };
 
 export const getStorageItem = (key) => {
+  // 1. Tab-scoped sessionStorage first
   try {
     const sessionVal = sessionStorage.getItem(key);
     if (sessionVal && sessionVal !== 'null' && sessionVal !== 'undefined') {
       if (key === 'userName') {
-        const email = sessionStorage.getItem('userEmail');
+        const email = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail');
         return resolveUserName(sessionVal, email);
       }
       return sessionVal;
     }
   } catch (e) {}
 
+  // 2. Persistent localStorage
+  try {
+    const localVal = localStorage.getItem(key);
+    if (localVal && localVal !== 'null' && localVal !== 'undefined') {
+      if (key === 'userName') {
+        const email = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail');
+        return resolveUserName(localVal, email);
+      }
+      return localVal;
+    }
+  } catch (e) {}
+
+  // 3. Fall back to email prefix only if neither storage has a stored value
   if (key === 'userName') {
     const email = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail');
     if (email) {
@@ -62,13 +76,6 @@ export const getStorageItem = (key) => {
     }
   }
 
-  // Only fall back to localStorage for non-conflicting initial loads if sessionStorage is empty
-  try {
-    const localVal = localStorage.getItem(key);
-    if (localVal && localVal !== 'null' && localVal !== 'undefined') {
-      return localVal;
-    }
-  } catch (e) {}
   return null;
 };
 
