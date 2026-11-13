@@ -82,7 +82,6 @@ export async function initiateRazorpayPayment({
     return;
   }
 
-  // 1. Create Razorpay Order in Backend with JWT Auth via apiClient
   let orderData = null;
   try {
     const res = await apiClient.post('/api/payment/create-order', {
@@ -107,10 +106,9 @@ export async function initiateRazorpayPayment({
     return;
   }
 
-  // 2. Open Razorpay Standard Checkout Popup
   const options = {
     key: RAZORPAY_KEY_ID,
-    amount: orderData.amount, // in paise
+    amount: orderData.amount,
     currency: orderData.currency || 'INR',
     name: 'SafarX Technologies',
     description: `Ride Settlement #${rideId || 'Trip'} • Instant Checkout`,
@@ -126,7 +124,7 @@ export async function initiateRazorpayPayment({
       platform: 'SafarX Web',
     },
     theme: {
-      color: '#10b981', // SafarX emerald green brand accent
+      color: '#10b981',
     },
     modal: {
       ondismiss: () => {
@@ -134,7 +132,6 @@ export async function initiateRazorpayPayment({
       },
     },
     handler: async function (response) {
-      // 3. Cryptographic Signature Verification in Backend via apiClient
       try {
         const verifyRes = await apiClient.post('/api/payment/verify', {
           rideId: Number(rideId),

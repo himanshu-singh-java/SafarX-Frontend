@@ -69,7 +69,6 @@ export default function UserProfileMenu({
     const cleanPhone = editPhone.trim();
 
     if (cleanName) {
-      // 1. Optimistic Instant Local State & Event Dispatch
       setLocalName(cleanName);
       setStorageItem('userName', cleanName);
       if (onUserNameChange) {
@@ -77,6 +76,11 @@ export default function UserProfileMenu({
       }
       window.dispatchEvent(
         new CustomEvent('auth:user_updated', {
+          detail: { name: cleanName, phone: cleanPhone },
+        })
+      );
+      window.dispatchEvent(
+        new CustomEvent('safarx:profile-updated', {
           detail: { name: cleanName, phone: cleanPhone },
         })
       );

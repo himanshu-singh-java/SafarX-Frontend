@@ -262,18 +262,23 @@ export default function LiveRouteMap({
     const driverInfo = getDriverDetails(activeRide);
 
     const driverName =
+      activeRide?.driver?.name ||
+      activeRide?.driverName ||
+      activeRide?.driver?.driverName ||
       driverObj.name ||
       driverObj.driverName ||
       driverObj.fullName ||
-      activeRide?.driverName ||
       activeRide?.vehicle?.driverName ||
       driverInfo?.name ||
       (activeRide?.driverId ? `Driver #${activeRide.driverId}` : 'Driver Partner');
 
     const driverPlate =
+      activeRide?.driver?.vehicleNumber ||
+      activeRide?.driver?.plateNumber ||
+      activeRide?.vehicleNumber ||
+      activeRide?.plateNumber ||
       driverObj.vehicleNumber ||
       driverObj.plateNumber ||
-      activeRide?.plateNumber ||
       activeRide?.vehicle?.plateNumber ||
       driverInfo?.plateNumber ||
       '';

@@ -62,6 +62,21 @@ function App() {
     setResetHomeTrigger((prev) => prev + 1);
   };
 
+  // Listen for instant real-time profile name updates across the application
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.name) {
+        setUserName(e.detail.name);
+      }
+    };
+    window.addEventListener('safarx:profile-updated', handleProfileUpdate);
+    window.addEventListener('auth:user_updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('safarx:profile-updated', handleProfileUpdate);
+      window.removeEventListener('auth:user_updated', handleProfileUpdate);
+    };
+  }, []);
+
   // Verify token expiration on initial load & handle global 401/403 events
   useEffect(() => {
     if (token) {
@@ -449,6 +464,7 @@ function App() {
           <RiderDashboard
             token={token}
             userEmail={userEmail}
+            userName={userName}
             onOpenAuth={openAuth}
             openHistoryTrigger={openHistoryTrigger}
             resetHomeTrigger={resetHomeTrigger}

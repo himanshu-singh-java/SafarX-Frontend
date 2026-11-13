@@ -62,7 +62,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
     try {
       const token = getAuthToken();
 
-      // Send POST to http://localhost:8080/api/auth/complete-profile
+      
       const response = await apiClient.post(
         '/api/auth/complete-profile',
         {
@@ -200,7 +200,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           
-          {/* 1. Full Name */}
+          
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
               Full Name
@@ -215,7 +215,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
             />
           </div>
 
-          {/* 2. Phone Number */}
+          
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
               Phone Number

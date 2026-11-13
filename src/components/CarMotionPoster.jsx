@@ -68,12 +68,12 @@ export default function CarMotionPoster({ onOpenAuth }) {
   return (
     <div className="relative w-full h-full min-h-[520px] lg:min-h-[590px] rounded-3xl overflow-hidden bg-gradient-to-br from-[#0a0c10] via-[#12151c] to-[#0a0c10] border border-neutral-800/80 shadow-2xl flex flex-col justify-between p-6 sm:p-8 select-none text-white isolate">
       
-      {/* 1. CINEMATIC BACKGROUND ELEMENTS (Matching Pinterest Design) */}
+      
       <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
         {/* Subtle diagonal studio spotlight beam */}
         <div className="absolute -top-32 right-1/4 w-[350px] h-[750px] bg-gradient-to-b from-white/10 via-[#d4af37]/5 to-transparent rotate-[28deg] blur-2xl" />
         
-        {/* Giant Watermark Typography (Pinterest '718 CAYMAN' / '2026 VIS' Vibe) */}
+        
         <div className="absolute top-12 left-6 right-6 flex items-center justify-between text-neutral-800/40 font-black tracking-tighter select-none">
           <span className="text-5xl sm:text-7xl lg:text-8xl opacity-30 font-mono">2026</span>
           <span className="text-4xl sm:text-6xl font-black opacity-20 uppercase tracking-widest hidden sm:inline">
@@ -85,7 +85,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#d4af37]/10 rounded-full blur-3xl" />
       </div>
 
-      {/* 2. TOP BAR: FLEET BADGE & SPEED TELEMETRY */}
+      
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className="px-3.5 py-1 bg-white/10 backdrop-blur-md border border-white/15 rounded-full text-[11px] font-black uppercase tracking-wider text-[#d4af37]">
@@ -115,7 +115,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
         </div>
       </div>
 
-      {/* 3. CENTER: ANIMATED HIGHWAY & CAR DRIVING FROM LEFT TO RIGHT */}
+      
       <div className="relative my-auto py-8 sm:py-12 overflow-hidden flex flex-col justify-end min-h-[260px] sm:min-h-[300px]">
         
         {/* Floating Vehicle Title */}
@@ -128,7 +128,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
           </p>
         </div>
 
-        {/* ROAD SURFACE & SPEED STRIPES */}
+        
         <div className="relative w-full h-20 bg-gradient-to-b from-[#11141b] to-[#090b0e] border-y border-neutral-800 flex items-center overflow-hidden shadow-inner">
           
           {/* Moving Asphalt Dashes (Road moving underneath) */}
@@ -146,7 +146,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/5 to-transparent animate-speed-streaks pointer-events-none" />
         </div>
 
-        {/* THE ANIMATED DRIVING CAR (Left to Right smooth cruising animation) */}
+        
         <div className="absolute bottom-3 left-0 right-0 h-44 sm:h-52 pointer-events-none overflow-hidden flex items-end">
           
           <div className="relative w-full flex items-end animate-car-drive-across">
@@ -181,10 +181,10 @@ export default function CarMotionPoster({ onOpenAuth }) {
 
       </div>
 
-      {/* 4. BOTTOM BAR: PERFORMANCE SPECS & 1-CLICK SIGN IN CTA (Pinterest Specs Style) */}
+      
       <div className="relative z-10 pt-4 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
         
-        {/* Specs Grid matching Cayman UI */}
+        
         <div className="grid grid-cols-3 gap-4 sm:gap-6 text-center sm:text-left">
           <div className="space-y-0.5">
             <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider block">Max Power</span>
@@ -202,7 +202,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
           </div>
         </div>
 
-        {/* 1-Click Sign In / Book CTA for Guests */}
+        
         <button
           type="button"
           onClick={() => {
@@ -218,7 +218,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
 
       </div>
 
-      {/* EMBEDDED CSS ANIMATION KEYFRAMES (Self-contained 60FPS fluid physics) */}
+      
       <style>{`
         @keyframes carDriveAcross {
           0% {

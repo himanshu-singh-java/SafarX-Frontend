@@ -856,6 +856,18 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
     registerDriverProfile(updated);
 
+    try {
+      apiClient.put('/api/driver/vehicle', {
+        vehicleType: cleanType,
+        carModel: cleanType === 'CAR' ? cleanModel : '',
+        bikeModel: cleanType === 'BIKE' ? cleanModel : '',
+        autoModel: cleanType === 'AUTO' ? cleanModel : '',
+        plateNumber: cleanPlate,
+      }).catch((err) => {
+        console.warn('Driver vehicle backend sync error:', err);
+      });
+    } catch (e) {}
+
     setShowEditVehicleModal(false);
     setStatusMessage({
       text: `✓ Vehicle updated: ${cleanModel} (${cleanType}) • Plate: ${cleanPlate}`,

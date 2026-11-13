@@ -420,7 +420,7 @@ export default function DriverOnboardingModal({
             <div>
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3 text-xs">
                 
-                {/* 1. CAR */}
+                
                 <button
                   type="button"
                   onClick={() => setVehicleType('CAR')}
@@ -450,7 +450,7 @@ export default function DriverOnboardingModal({
                   </div>
                 </button>
 
-                {/* 2. BIKE */}
+                
                 <button
                   type="button"
                   onClick={() => setVehicleType('BIKE')}
@@ -480,7 +480,7 @@ export default function DriverOnboardingModal({
                   </div>
                 </button>
 
-                {/* 3. AUTO */}
+                
                 <button
                   type="button"
                   onClick={() => setVehicleType('AUTO')}

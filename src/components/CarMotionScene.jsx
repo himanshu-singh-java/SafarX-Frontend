@@ -78,18 +78,18 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
           </linearGradient>
         </defs>
 
-        {/* 1. Ground Contact Shadow */}
+        
         <ellipse cx="270" cy="168" rx="245" ry="10" fill="#000000" opacity="0.85" filter="blur(3px)" />
         <ellipse cx="270" cy="166" rx="210" ry="6" fill="#020617" opacity="0.95" />
 
-        {/* 2. Car Chassis / Main Body Silhouette */}
+        
         {/* Rear Bumper & Diffuser */}
         <path
           d="M 32 135 C 30 145, 38 152, 54 154 L 88 154 C 88 140, 102 124, 126 124 C 150 124, 164 140, 164 154 L 376 154 C 376 140, 390 124, 414 124 C 438 124, 452 140, 452 154 L 500 154 C 516 152, 526 142, 520 126 C 516 116, 502 108, 482 104 L 434 94 C 382 82, 334 50, 268 46 C 210 42, 166 48, 120 74 L 74 98 C 48 106, 34 118, 32 135 Z"
           fill="url(#bodyGrad)"
         />
 
-        {/* 3. Aerodynamic Body Sculpting & Shadow Creases */}
+        
         {/* Lower Door Sill / Rocker Panel */}
         <path d="M 164 150 L 376 150 L 370 142 L 170 142 Z" fill="#475569" />
 
@@ -118,7 +118,7 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
           opacity="0.8"
         />
 
-        {/* 4. Greenhouse / Cabin Roof & Tinted Windows */}
+        
         {/* Black Roofline Arch */}
         <path
           d="M 136 78 C 172 54, 222 48, 276 50 C 330 52, 362 76, 404 88 L 136 78 Z"
@@ -145,7 +145,7 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
         {/* Windshield Reflection Line */}
         <line x1="288" y1="56" x2="378" y2="82" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
 
-        {/* 5. Aerodynamic Side Mirror */}
+        
         <path
           d="M 282 82 C 282 78, 298 78, 304 82 C 304 86, 292 88, 284 86 Z"
           fill="#1e293b"
@@ -153,7 +153,7 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
           strokeWidth="1"
         />
 
-        {/* 6. Front LED Headlight System */}
+        
         <path
           d="M 478 100 L 512 108 C 504 116, 484 114, 472 108 Z"
           fill="#e2e8f0"
@@ -163,7 +163,7 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
         <circle cx="498" cy="109" r="3" fill="#ffffff" />
         <path d="M 474 102 L 508 110" stroke="#fef08a" strokeWidth="2" strokeLinecap="round" />
 
-        {/* 7. Rear Ruby-Red LED Lightbar */}
+        
         <path
           d="M 32 128 L 52 128 C 54 133, 44 136, 34 136 Z"
           fill="#ef4444"
@@ -171,11 +171,11 @@ export function RealisticLuxuryCar({ className = '', scale = 1 }) {
         />
         <line x1="33" y1="130" x2="50" y2="130" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" />
 
-        {/* 8. Front Bumper Air Intake & Splitter */}
+        
         <path d="M 494 132 L 518 134 L 516 148 L 476 148 Z" fill="#0f172a" />
         <rect x="496" y="146" width="22" height="4" rx="2" fill="#020617" />
 
-        {/* 9. WHEELS & BRAKES (Spinning alloy rims) */}
+        
         
         {/* REAR WHEEL ASSEMBLY */}
         <g className="animate-wheel-spin" style={{ transformOrigin: '126px 154px' }}>
@@ -234,7 +234,7 @@ export default function FullPageCarMotionScene() {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none bg-[#07090e]">
       
-      {/* 1. ATMOSPHERIC NIGHT SKY & CITY HORIZON */}
+      
       <div className="absolute inset-0 bg-gradient-to-b from-[#05070a] via-[#0a0e17] to-[#0e121a]">
         
         {/* Soft Ambient Horizon Light Glow */}
@@ -262,7 +262,7 @@ export default function FullPageCarMotionScene() {
         <div className="absolute top-[48%] left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-neutral-700/40 to-transparent" />
       </div>
 
-      {/* 2. THE HIGHWAY & ASPHALT ROADBED */}
+      
       <div className="absolute bottom-0 left-0 right-0 h-[48%] sm:h-[46%] bg-gradient-to-b from-[#11141b] via-[#090b0f] to-[#040507] border-t border-neutral-800/60 flex flex-col justify-between shadow-2xl">
         
         {/* Upper Road Shoulder / Guardrail with Reflectors */}
@@ -291,7 +291,7 @@ export default function FullPageCarMotionScene() {
 
       </div>
 
-      {/* 3. THE ANIMATED LUXURY VEHICLE GLIDING LEFT TO RIGHT */}
+      
       <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 w-full overflow-hidden flex items-end pointer-events-none">
         <div className="inline-block animate-car-drive-across">
           <div className="animate-suspension-bob">
@@ -300,7 +300,7 @@ export default function FullPageCarMotionScene() {
         </div>
       </div>
 
-      {/* 4. PASSING OVERHEAD HIGHWAY LIGHTS (Adds Realistic Lighting Passing Overhead) */}
+      
       <div className="absolute top-[35%] left-0 right-0 h-44 overflow-hidden pointer-events-none opacity-40">
         <div className="absolute inset-0 flex items-center animate-ambient-lights">
           {[...Array(6)].map((_, i) => (
@@ -312,7 +312,7 @@ export default function FullPageCarMotionScene() {
         </div>
       </div>
 
-      {/* 5. EMBEDDED HIGH-PERFORMANCE FLUID CSS ANIMATIONS */}
+      
       <style>{`
         @keyframes carDriveAcross {
           0% {

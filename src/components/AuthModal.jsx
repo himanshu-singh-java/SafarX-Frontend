@@ -251,13 +251,13 @@ export default function AuthModal({
       {/* Click outside to close backdrop */}
       <div className="fixed inset-0" onClick={onClose} />
 
-      {/* Modal Container: CLEAN WHITE UBER THEME */}
+      
       <div className="w-full max-w-md relative z-10 bg-white border border-neutral-200 rounded-3xl shadow-2xl p-6 sm:p-8 text-black space-y-5 animate-in zoom-in-95">
         
         {/* Modal Top Bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* 3D Vehicle Icon (Real 3D White Car from yesterday) */}
+            
             <div className="w-12 h-10 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
@@ -289,7 +289,7 @@ export default function AuthModal({
           </button>
         </div>
 
-        {/* Tab Switcher: White Segmented Pill */}
+        
         <div className="flex p-1 bg-neutral-100 rounded-2xl border border-neutral-200">
           <button
             type="button"
@@ -397,7 +397,7 @@ export default function AuthModal({
             </div>
           )}
 
-          {/* Submit Button: Uber Solid Black Button */}
+          
           <button
             type="submit"
             disabled={isLoading}

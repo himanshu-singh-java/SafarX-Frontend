@@ -1,12 +1,5 @@
-/**
- * SafarX Tab-Isolated Authentication & JWT Utilities
- * Prioritizes tab-scoped sessionStorage so multiple tabs (Rider, Driver, Admin)
- * can run simultaneously in the same browser without overwriting each other's credentials!
- */
-
 export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized';
 
-// Keys that are strictly tab-isolated so Rider, Driver, and Admin never cross-contaminate
 const TAB_SCOPED_KEYS = new Set([
   'jwtToken',
   'token',
@@ -23,8 +16,7 @@ const TAB_SCOPED_KEYS = new Set([
 ]);
 
 /**
- * Authoritative user name resolver based on verified credentials & database mapping.
- * Eliminates cross-tab naming race conditions permanently without hardcoded identities.
+ * Resolves user display name from name or email.
  */
 export const resolveUserName = (rawName, email) => {
   const cleanName = (rawName || '').trim();
@@ -44,7 +36,6 @@ export const resolveUserName = (rawName, email) => {
 };
 
 export const getStorageItem = (key) => {
-  // 1. Tab-scoped sessionStorage first
   try {
     const sessionVal = sessionStorage.getItem(key);
     if (sessionVal && sessionVal !== 'null' && sessionVal !== 'undefined') {
@@ -56,7 +47,6 @@ export const getStorageItem = (key) => {
     }
   } catch (e) {}
 
-  // 2. Persistent localStorage
   try {
     const localVal = localStorage.getItem(key);
     if (localVal && localVal !== 'null' && localVal !== 'undefined') {
@@ -68,7 +58,6 @@ export const getStorageItem = (key) => {
     }
   } catch (e) {}
 
-  // 3. Fall back to email prefix only if neither storage has a stored value
   if (key === 'userName') {
     const email = sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail');
     if (email) {
@@ -83,12 +72,10 @@ export const setStorageItem = (key, value) => {
   if (value === undefined || value === null) return;
   const strVal = String(value);
 
-  // Tab-scoped isolation in sessionStorage
   try {
     sessionStorage.setItem(key, strVal);
   } catch (e) {}
 
-  // Always mirror to localStorage for persistence across reloads & sessions
   try {
     localStorage.setItem(key, strVal);
   } catch (e) {}
@@ -178,8 +165,6 @@ export const getAuthHeaders = (extraHeaders = {}) => {
 };
 
 export const handleAuthResponse = (response) => {
-  // Only 401 indicates genuine session expiration.
-  // 403 Forbidden is a permission/role issue and must NOT wipe the session!
   if (response && response.status === 401) {
     clearAuthToken();
     window.dispatchEvent(
@@ -187,7 +172,7 @@ export const handleAuthResponse = (response) => {
         detail: { status: response.status },
       })
     );
-    return true; // handled as unauthorized
+    return true;
   }
   return false;
 };

@@ -132,7 +132,28 @@ const VEHICLE_TIERS = [
   },
 ];
 
-export default function RiderDashboard({ token, userEmail, onOpenAuth, openHistoryTrigger, resetHomeTrigger }) {
+export default function RiderDashboard({ token, userEmail, userName: propUserName, onOpenAuth, openHistoryTrigger, resetHomeTrigger }) {
+  const [currentRiderName, setCurrentRiderName] = useState(() => propUserName || getStorageItem('userName') || resolveUserName(null, userEmail));
+
+  useEffect(() => {
+    if (propUserName) {
+      setCurrentRiderName(propUserName);
+    }
+  }, [propUserName]);
+
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.name) {
+        setCurrentRiderName(e.detail.name);
+      }
+    };
+    window.addEventListener('safarx:profile-updated', handleProfileUpdate);
+    window.addEventListener('auth:user_updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('safarx:profile-updated', handleProfileUpdate);
+      window.removeEventListener('auth:user_updated', handleProfileUpdate);
+    };
+  }, []);
   // Screen mode: 'home' (City Hub Homepage) | 'product-selection' (Uber Product Selection)
   const [currentScreen, setCurrentScreen] = useState('home');
   // Home view mode: 'motion' (Cinematic Vector Car Scene) | 'map' (Standard 2-Column Live Route Map)
@@ -325,42 +346,41 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
     const unsubscribe = wsService.subscribe(topic, (data) => {
       console.log('[Rider WS] Live update on ' + topic, data);
       if (data && data.status) {
-        setActiveRide((prev) => (prev ? { ...prev, ...data } : data));
+        setActiveRide((prev) => {
+          const base = prev ? { ...prev, ...data } : data;
+          return {
+            ...base,
+            status: data.status,
+            fare: data.fare || prev?.fare,
+            driver: data.driver || prev?.driver,
+            driverName: data.driverName || data.driver?.name || prev?.driverName,
+            driverPhone: data.driverPhone || data.driver?.phone || prev?.driverPhone,
+            driverRating: data.driverRating || data.driver?.rating || prev?.driverRating,
+            plateNumber: data.plateNumber || data.vehicleNumber || data.driver?.plateNumber || prev?.plateNumber,
+            vehicleModel: data.vehicleModel || data.driver?.model || prev?.vehicleModel,
+            vehicleType: data.vehicleType || data.driver?.vehicleType || prev?.vehicleType,
+            driverId: data.driverId || data.driver?.id || prev?.driverId,
+          };
+        });
         if (data.status === 'ACCEPTED') {
           setStatusMessage({
             text: `🎉 Driver accepted your ride #${data.rideId}! Driver is on the way.`,
             isError: false,
           });
-          // Immediate initial driver location fallback if not yet streamed
           setLiveDriverGps((prev) => prev || {
             lat: data.pickupLat ? data.pickupLat + 0.004 : pickupCoords.lat + 0.004,
             lng: data.pickupLng ? data.pickupLng + 0.004 : pickupCoords.lng + 0.004,
           });
-          setActiveRide((prev) => ({
-            ...prev,
-            status: 'ACCEPTED',
-            fare: data.fare || prev?.fare,
-          }));
         } else if (data.status === 'IN_PROGRESS') {
           setStatusMessage({
             text: `🚀 Driver started the trip for Ride #${data.rideId}! En route to destination.`,
             isError: false,
           });
-          setActiveRide((prev) => ({
-            ...prev,
-            status: 'IN_PROGRESS',
-            fare: data.fare || prev?.fare,
-          }));
         } else if (data.status === 'COMPLETED') {
           setStatusMessage({
             text: `🏁 Ride #${data.rideId} completed! Please complete settlement below.`,
             isError: false,
           });
-          setActiveRide((prev) => ({
-            ...prev,
-            status: 'COMPLETED',
-            fare: data.fare || prev?.fare,
-          }));
           setLiveDriverGps(null);
           fetchHistory(true);
         } else if (data.status === 'CANCELLED') {
@@ -374,9 +394,32 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
         }
       } else if (data && data.latitude && data.longitude) {
         setLiveDriverGps({ lat: data.latitude, lng: data.longitude });
-        if (data.driverId && !activeRide.driverId) {
-          setActiveRide((prev) => (prev ? { ...prev, driverId: data.driverId } : prev));
-        }
+        setActiveRide((prev) => {
+          if (!prev) return prev;
+          const updatedDriver = {
+            ...(prev.driver || {}),
+            id: data.driverId || prev.driver?.id || prev.driverId,
+            driverId: data.driverId || prev.driver?.driverId || prev.driverId,
+            name: data.driverName || prev.driver?.name || prev.driverName,
+            driverName: data.driverName || prev.driver?.driverName || prev.driverName,
+            vehicleNumber: data.vehicleNumber || prev.driver?.vehicleNumber || prev.plateNumber,
+            plateNumber: data.vehicleNumber || prev.driver?.plateNumber || prev.plateNumber,
+            model: data.vehicleModel || prev.driver?.model || prev.vehicleModel,
+            vehicleModel: data.vehicleModel || prev.driver?.vehicleModel || prev.vehicleModel,
+            vehicleType: data.vehicleType || prev.driver?.vehicleType || prev.vehicleType,
+            rating: data.rating || prev.driver?.rating || prev.driverRating,
+          };
+          return {
+            ...prev,
+            driverId: data.driverId || prev.driverId,
+            driverName: data.driverName || prev.driverName,
+            plateNumber: data.vehicleNumber || prev.plateNumber,
+            vehicleModel: data.vehicleModel || prev.vehicleModel,
+            vehicleType: data.vehicleType || prev.vehicleType,
+            driverRating: data.rating || prev.driverRating,
+            driver: updatedDriver,
+          };
+        });
       }
     });
 
@@ -398,39 +441,30 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
         const current = myRides.find((r) => r.rideId === activeRide.rideId);
         if (current) {
           const currentStatus = current.rideStatus || current.status;
-          if (currentStatus === 'COMPLETED' && activeRide.status !== 'COMPLETED') {
-            setActiveRide((prev) => ({
+          setActiveRide((prev) => {
+            if (!prev) return prev;
+            return {
               ...prev,
-              status: 'COMPLETED',
-              fare: current.fare ?? prev?.fare,
-              vehicle: current.vehicle || prev?.vehicle,
-              driverName: current.driverName || prev?.driverName,
-              plateNumber: current.plateNumber || prev?.plateNumber,
-            }));
+              ...current,
+              status: currentStatus,
+              fare: current.fare ?? prev.fare,
+              driver: current.driver || prev.driver,
+              driverName: current.driverName || current.driver?.name || prev.driverName,
+              plateNumber: current.plateNumber || current.vehicleNumber || current.driver?.plateNumber || prev.plateNumber,
+              vehicleModel: current.vehicleModel || current.driver?.model || prev.vehicleModel,
+              vehicleType: current.vehicleType || current.driver?.vehicleType || prev.vehicleType,
+              driverPhone: current.driverPhone || current.driver?.phone || prev.driverPhone,
+              driverRating: current.driverRating || current.driver?.rating || prev.driverRating,
+              driverId: current.driverId || current.driver?.id || prev.driverId,
+            };
+          });
+          if (currentStatus === 'COMPLETED' && activeRide.status !== 'COMPLETED') {
             setStatusMessage({
               text: `🏁 Ride #${current.rideId} completed! Please complete settlement below.`,
               isError: false,
             });
             setLiveDriverGps(null);
             fetchHistory(true);
-          } else if (currentStatus === 'IN_PROGRESS' && activeRide.status !== 'IN_PROGRESS') {
-            setActiveRide((prev) => ({
-              ...prev,
-              status: 'IN_PROGRESS',
-              fare: current.fare ?? prev?.fare,
-              vehicle: current.vehicle || prev?.vehicle,
-              driverName: current.driverName || prev?.driverName,
-              plateNumber: current.plateNumber || prev?.plateNumber,
-            }));
-          } else if (currentStatus === 'ACCEPTED' && activeRide.status === 'REQUESTED') {
-            setActiveRide((prev) => ({
-              ...prev,
-              status: 'ACCEPTED',
-              fare: current.fare ?? prev?.fare,
-              vehicle: current.vehicle || prev?.vehicle,
-              driverName: current.driverName || prev?.driverName,
-              plateNumber: current.plateNumber || prev?.plateNumber,
-            }));
           }
         }
       } catch (e) {
@@ -1928,39 +1962,46 @@ export default function RiderDashboard({ token, userEmail, onOpenAuth, openHisto
                         const driverInfo = getDriverDetails(activeRide);
 
                         const driverName =
+                          activeRide?.driver?.name ||
+                          activeRide?.driverName ||
+                          activeRide?.driver?.driverName ||
                           driverObj.name ||
                           driverObj.driverName ||
                           driverObj.fullName ||
-                          activeRide?.driverName ||
                           activeRide?.vehicle?.driverName ||
                           driverInfo?.name ||
                           (activeRide?.driverId ? `Driver #${activeRide.driverId}` : 'Driver Partner');
 
                         const driverPlate =
+                          activeRide?.driver?.vehicleNumber ||
+                          activeRide?.driver?.plateNumber ||
+                          activeRide?.vehicleNumber ||
+                          activeRide?.plateNumber ||
                           driverObj.vehicleNumber ||
                           driverObj.plateNumber ||
-                          activeRide?.plateNumber ||
                           activeRide?.vehicle?.plateNumber ||
                           driverInfo?.plateNumber ||
                           '—';
 
                         const driverModel =
+                          activeRide?.driver?.model ||
+                          activeRide?.driver?.vehicleModel ||
+                          activeRide?.vehicleModel ||
                           driverObj.model ||
                           driverObj.vehicleModel ||
-                          activeRide?.vehicleModel ||
                           activeRide?.vehicle?.carModel ||
-                          activeRide?.vehicle?.autoModel ||
-                          activeRide?.vehicle?.bikeModel ||
                           driverInfo?.model ||
                           (activeRide?.vehicleType ? `SafarX ${activeRide.vehicleType}` : 'Comfort Cab');
 
                         const driverRating =
+                          activeRide?.driver?.rating ||
                           driverObj.rating ||
                           activeRide?.driverRating ||
                           driverInfo?.rating ||
                           5.0;
 
                         const driverPhone =
+                          activeRide?.driver?.phone ||
                           driverObj.phone ||
                           driverObj.phoneNumber ||
                           activeRide?.driverPhone ||

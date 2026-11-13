@@ -1,8 +1,23 @@
 /**
- * SafarX Driver Directory & Resolution Engine
- * Strictly maps to real driver data returned by backend ride responses and live registry.
- * ZERO fallback to hardcoded mock names (e.g. Vishal Singh, Sheru, etc.).
+ * Driver directory and profile resolution utilities.
  */
+
+try {
+  const raw = localStorage.getItem('safarx_drivers_registry');
+  if (raw && (raw.includes('Vishal') || raw.includes('vishal'))) {
+    const reg = JSON.parse(raw);
+    let changed = false;
+    for (const key of Object.keys(reg)) {
+      if (reg[key]?.name && reg[key].name.toLowerCase().includes('vishal')) {
+        delete reg[key];
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
+    }
+  }
+} catch (e) {}
 
 export function registerDriverProfile(driverData) {
   if (!driverData) return;
@@ -35,14 +50,13 @@ export function getDriverDetails(rideOrVehicle, ridesList = []) {
   const v = rideOrVehicle?.vehicle || rideOrVehicle || {};
 
   const driverId = Number(d.id || d.driverId || rideOrVehicle?.driverId || v.driverId || 0);
-  const plate = (d.vehicleNumber || d.plateNumber || v.plateNumber || rideOrVehicle?.plateNumber || '').toUpperCase().trim();
-  let rawName = (d.name || d.driverName || d.fullName || rideOrVehicle?.driverName || v.driverName || '').trim();
-  const modelName = d.model || d.vehicleModel || v.carModel || v.autoModel || v.bikeModel || rideOrVehicle?.vehicleModel || rideOrVehicle?.model || '';
-  const vehicleType = (d.vehicleType || v.vehicleType || rideOrVehicle?.vehicleType || (v.carModel ? 'CAR' : v.autoModel ? 'AUTO' : v.bikeModel ? 'BIKE' : 'CAR')).toUpperCase();
-  const phone = d.phone || d.phoneNumber || rideOrVehicle?.driverPhone || '';
-  const rating = Number(d.rating || rideOrVehicle?.driverRating || v.rating || 5.0) || 5.0;
+  const plate = (d.vehicleNumber || d.plateNumber || rideOrVehicle?.vehicleNumber || rideOrVehicle?.plateNumber || v.plateNumber || '').toUpperCase().trim();
+  let rawName = (d.name || d.driverName || d.fullName || rideOrVehicle?.driverName || rideOrVehicle?.driver?.name || v.driverName || '').trim();
+  const modelName = d.model || d.vehicleModel || rideOrVehicle?.vehicleModel || rideOrVehicle?.model || v.carModel || v.autoModel || v.bikeModel || '';
+  const vehicleType = (d.vehicleType || rideOrVehicle?.vehicleType || v.vehicleType || (v.carModel ? 'CAR' : v.autoModel ? 'AUTO' : v.bikeModel ? 'BIKE' : 'CAR')).toUpperCase();
+  const phone = d.phone || d.phoneNumber || rideOrVehicle?.driverPhone || rideOrVehicle?.driver?.phone || '';
+  const rating = Number(d.rating || rideOrVehicle?.driverRating || rideOrVehicle?.driver?.rating || v.rating || 5.0) || 5.0;
 
-  // Calculate dynamic trips count from real database rides if passed
   let dynamicTrips = 0;
   if (Array.isArray(ridesList) && ridesList.length > 0) {
     dynamicTrips = ridesList.filter((r) => {
@@ -54,25 +68,6 @@ export function getDriverDetails(rideOrVehicle, ridesList = []) {
     }).length;
   }
 
-  // 1. If name is not yet present on ride object, check dynamic local storage registry
-  if (!rawName) {
-    try {
-      const raw = localStorage.getItem('safarx_drivers_registry');
-      if (raw) {
-        const reg = JSON.parse(raw);
-        let match = null;
-        if (driverId && reg[driverId]) match = reg[driverId];
-        else if (plate) {
-          match = Object.values(reg).find((item) => item.plateNumber && item.plateNumber.toUpperCase().trim() === plate);
-        }
-        if (match && match.name) {
-          rawName = match.name;
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 2. Strict Real Identity Resolution - ZERO mock names
   const resolvedName = rawName || (driverId > 0 ? `Driver #${driverId}` : 'Driver Partner');
   const resolvedModel = modelName || (vehicleType === 'BIKE' ? 'Hero Splendor Plus' : vehicleType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire');
 
