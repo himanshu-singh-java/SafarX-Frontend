@@ -208,14 +208,7 @@ export default function DriverOnboardingModal({
         };
         registerDriverProfile(activeProfile);
 
-        try {
-          const raw = localStorage.getItem('safarx_drivers_registry');
-          const reg = raw ? JSON.parse(raw) : {};
-          if (resolvedDriverId) reg[resolvedDriverId] = activeProfile;
-          if (normalizedEmail) reg[normalizedEmail] = activeProfile;
-          reg[resolvedPlate] = activeProfile;
-          localStorage.setItem('safarx_drivers_registry', JSON.stringify(reg));
-        } catch (e) {}
+
       } catch (storageErr) {
         console.warn('[DriverOnboarding] Local profile storage warning:', storageErr);
       }

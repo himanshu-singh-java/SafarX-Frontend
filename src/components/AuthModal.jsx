@@ -133,6 +133,8 @@ export default function AuthModal({
       const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
       if (status === 401) {
         setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+      } else if (status === 403) {
+        setErrorMessage(errorText || 'Access forbidden. This account may be linked with Google.');
       } else {
         setErrorMessage(errorText || 'Unable to connect to service. Please check your connection and try again.');
       }

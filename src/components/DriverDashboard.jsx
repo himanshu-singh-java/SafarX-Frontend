@@ -145,36 +145,7 @@ function getInitialDriverProfile(userEmail) {
     };
   }
 
-  // 2. Check dynamic local drivers registry
-  try {
-    const raw = localStorage.getItem('safarx_drivers_registry');
-    if (raw) {
-      const reg = JSON.parse(raw);
-      const match =
-        (normalizedEmail && reg[normalizedEmail]) ||
-        (savedId && reg[String(savedId)]) ||
-        Object.values(reg).find((d) => 
-          (d.email && d.email.toLowerCase() === normalizedEmail) ||
-          (d.driverId && String(d.driverId) === String(savedId))
-        );
 
-      if (match && (match.model || match.vehicleType)) {
-        const isNearHub = match.lat && Math.abs(match.lat - 17.4435) < 0.05;
-        const vType = (match.vehicleType || 'CAR').toUpperCase();
-        return {
-          id: match.driverId ? Number(match.driverId) : (savedId ? Number(savedId) : 1),
-          name: resolveUserName(match.name, normalizedEmail),
-          rating: match.rating || 5.0,
-          vehicleType: vType,
-          model: match.model || (vType === 'BIKE' ? 'Hero Splendor Plus' : vType === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire'),
-          plateNumber: match.plateNumber || (vType === 'BIKE' ? 'TS-09-GK-2026' : 'TS-09-UB-8888'),
-          city: match.city || 'Hyderabad',
-          lat: isNearHub ? match.lat : 17.4435,
-          lng: isNearHub ? match.lng : 78.4532,
-        };
-      }
-    }
-  } catch (e) {}
 
   // 3. Check verified KNOWN_DRIVERS
   if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {

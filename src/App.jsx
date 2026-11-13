@@ -189,14 +189,16 @@ function App() {
     }
   }, [location.pathname, token, navigate]);
 
-  // Auto-open login modal if route is /login and user is not authenticated
+  // Auto-open login modal if route is /login or if OAuth returns with ?error=...
   useEffect(() => {
-    if (location.pathname === '/login' && !token) {
+    const params = new URLSearchParams(location.search);
+    const oauthError = params.get('error');
+    if ((location.pathname === '/login' || oauthError) && !token) {
       setAuthModalMode('login');
-      const params = new URLSearchParams(location.search);
-      const oauthError = params.get('error');
-      if (oauthError === 'account_exists_use_password') {
-        setAuthAlertNotice('⚠️ This email is already registered with password. Please enter your password to sign in, or enable Google login in backend.');
+      if (oauthError === 'unverified_email') {
+        setAuthAlertNotice('⚠️ Your Google email is unverified. Please verify your email with Google or sign in using your password.');
+      } else if (oauthError === 'account_exists_use_password') {
+        setAuthAlertNotice('⚠️ This email is registered with password. Please enter your password to sign in.');
       } else if (oauthError) {
         setAuthAlertNotice(`Notice: ${oauthError.replace(/_/g, ' ')}`);
       }
