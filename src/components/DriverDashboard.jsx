@@ -139,9 +139,9 @@ function getInitialDriverProfile(userEmail) {
       vehicleType: vType,
       model: vModel,
       plateNumber: vPlate,
-      city: 'Hyderabad',
-      lat: 17.4435,
-      lng: 78.4532,
+      city: '',
+      lat: null,
+      lng: null,
     };
   }
 
@@ -171,9 +171,9 @@ function getInitialDriverProfile(userEmail) {
     vehicleType: fallbackVehicle,
     model: fallbackVehicle === 'BIKE' ? 'Hero Splendor Plus' : fallbackVehicle === 'AUTO' ? 'Bajaj RE Compact' : 'Maruti Suzuki Dzire',
     plateNumber: 'TS-09-UB-8888',
-    city: 'Hyderabad',
-    lat: 17.4435,
-    lng: 78.4532,
+    city: '',
+    lat: null,
+    lng: null,
   };
 }
 
@@ -183,11 +183,27 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const [driverProfile, setDriverProfile] = useState(() => getInitialDriverProfile(userEmail));
   const [currentCoords, setCurrentCoords] = useState(() => {
     const prof = getInitialDriverProfile(userEmail);
-    // Ensure coordinates default to active Hyderabad hub (17.4435, 78.4532) rather than out-of-range areas
-    const lat = prof.lat && Math.abs(prof.lat - 17.4435) < 0.05 ? prof.lat : 17.4435;
-    const lng = prof.lng && Math.abs(prof.lng - 78.4532) < 0.05 ? prof.lng : 78.4532;
-    return { lat, lng };
+    return {
+      lat: prof.lat || 17.4435,
+      lng: prof.lng || 78.4532,
+    };
   });
+
+  // Initial mount: Query real device GPS and synchronize with backend DB
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = parseFloat(pos.coords.latitude.toFixed(6));
+          const lng = parseFloat(pos.coords.longitude.toFixed(6));
+          setCurrentCoords({ lat, lng });
+          apiClient.put('/api/driver/location', { latitude: lat, longitude: lng }).catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+      );
+    }
+  }, []);
 
   const [isOnline, setIsOnline] = useState(true);
   const [wsConnected, setWsConnected] = useState(false);
@@ -198,6 +214,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const [isAccepting, setIsAccepting] = useState(false);
   const gpsIntervalRef = useRef(null);
   const cancelTimerRef = useRef(null);
+  const lastLocationSyncRef = useRef(0);
 
   // Auto-dismiss cancellation alert after 5 seconds
   const showCancellationAlert = (msg) => {
@@ -272,18 +289,49 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
   // Geolocation auto-detection: keeps driver location synchronized with device GPS or Hyderabad hub
 
-  // Handler to manually snap GPS location directly to active Hyderabad Hub (Nature Cure / Ameerpet)
-  const handleSnapToHub = () => {
-    const hubLat = 17.4435;
-    const hubLng = 78.4532;
-    setCurrentCoords({ lat: hubLat, lng: hubLng });
-    wsService.ensureConnected().then(() => {
-      wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, hubLat, hubLng);
-    }).catch(() => {});
-    setStatusMessage({
-      text: `📍 GPS snapped to Hyderabad Hub (${hubLat}, ${hubLng})`,
-      isError: false,
-    });
+  // Handler to manually update GPS location via live device browser coordinates
+  const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
+
+  const handleUpdateCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setStatusMessage({ text: 'Geolocation is not supported by your browser.', isError: true });
+      return;
+    }
+    setIsUpdatingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = parseFloat(pos.coords.latitude.toFixed(6));
+        const lng = parseFloat(pos.coords.longitude.toFixed(6));
+        setCurrentCoords({ lat, lng });
+
+        // 1. Persist to Backend DB via PUT /api/driver/location
+        try {
+          await apiClient.put('/api/driver/location', { latitude: lat, longitude: lng });
+        } catch (err) {
+          console.warn('[DriverDashboard] Failed to persist location to backend DB:', err);
+        }
+
+        // 2. Broadcast via WebSocket STOMP
+        wsService.ensureConnected().then(() => {
+          wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, lat, lng);
+        }).catch(() => {});
+
+        setIsUpdatingLocation(false);
+        setStatusMessage({
+          text: `📍 Location updated to live GPS (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
+          isError: false,
+        });
+      },
+      (err) => {
+        console.warn('[DriverDashboard] Failed to fetch current GPS:', err);
+        setIsUpdatingLocation(false);
+        setStatusMessage({
+          text: 'Could not access device GPS. Please check browser location permissions.',
+          isError: true,
+        });
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
   };
 
   // Edit Vehicle Modal State
@@ -296,7 +344,9 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   useEffect(() => {
     const resolved = getInitialDriverProfile(userEmail);
     setDriverProfile(resolved);
-    setCurrentCoords({ lat: resolved.lat, lng: resolved.lng });
+    if (resolved.lat && resolved.lng) {
+      setCurrentCoords({ lat: resolved.lat, lng: resolved.lng });
+    }
   }, [userEmail]);
 
   // Verified Driver ID state (Ensures WebSocket NEVER subscribes to unverified guessed IDs)
@@ -317,6 +367,9 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           if (realId) {
             setStorageItem('driverId', String(realId));
             setIsDriverVerified(true);
+          }
+          if (data.currentLat && data.currentLng) {
+            setCurrentCoords({ lat: data.currentLat, lng: data.currentLng });
           }
           if (data.status) {
             setIsOnline(data.status === 'AVAILABLE');
@@ -369,24 +422,40 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     return () => { isMounted = false; };
   }, [token, userEmail]);
 
-  // Live GPS tracking: uses watchPosition in production, demo hub simulation when IS_DEMO_MODE is true
+  // Live GPS background tracking: throttled 15s updates synchronizing coordinates with DB & STOMP
   useEffect(() => {
     if (!isOnline || !driverProfile.id) return;
 
     if (!IS_DEMO_MODE && navigator.geolocation) {
+      const sendLocationSync = async (lat, lng) => {
+        const now = Date.now();
+        if (now - lastLocationSyncRef.current < 15000) {
+          return;
+        }
+        lastLocationSyncRef.current = now;
+
+        try {
+          await apiClient.put('/api/driver/location', { latitude: lat, longitude: lng });
+        } catch (e) {
+          console.warn('[DriverDashboard] Throttled location sync error:', e);
+        }
+
+        wsService.ensureConnected().then(() => {
+          wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, lat, lng);
+        }).catch(() => {});
+      };
+
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
           const lat = parseFloat(pos.coords.latitude.toFixed(6));
           const lng = parseFloat(pos.coords.longitude.toFixed(6));
           setCurrentCoords({ lat, lng });
-          wsService.ensureConnected().then(() => {
-            wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, lat, lng);
-          }).catch(() => {});
+          sendLocationSync(lat, lng);
         },
         (err) => {
           console.warn('[DriverDashboard] Geolocation watch error:', err);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
       return () => navigator.geolocation.clearWatch(watchId);
     }
@@ -863,17 +932,25 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* GPS Hub Position Pill */}
+            {/* GPS Live Sync Pill */}
             <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-full text-[11px] font-mono font-bold text-neutral-700 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>GPS: {currentCoords.lat.toFixed(4)}, {currentCoords.lng.toFixed(4)}</span>
+              <span>
+                GPS: {currentCoords?.lat ? `${currentCoords.lat.toFixed(4)}, ${currentCoords.lng.toFixed(4)}` : 'Locating...'}
+              </span>
               <button
                 type="button"
-                onClick={handleSnapToHub}
-                className="text-[10px] bg-black hover:bg-neutral-800 text-white font-sans font-extrabold px-2 py-0.5 rounded-md cursor-pointer transition-colors"
-                title="Snap coordinates to Ameerpet / Nature Cure Hospital Hub"
+                onClick={handleUpdateCurrentLocation}
+                disabled={isUpdatingLocation}
+                className="text-[10px] bg-amber-400 hover:bg-amber-500 active:scale-95 text-neutral-950 font-sans font-extrabold px-2.5 py-1 rounded-md cursor-pointer transition-all flex items-center gap-1 shadow-sm border border-amber-500/30"
+                title="Update and synchronize current live GPS location with backend"
               >
-                Snap to Hub 📍
+                {isUpdatingLocation ? (
+                  <span className="animate-spin text-xs">⏳</span>
+                ) : (
+                  <span>📍</span>
+                )}
+                <span>Update Current Location</span>
               </button>
             </div>
 

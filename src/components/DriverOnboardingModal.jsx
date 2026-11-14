@@ -29,9 +29,9 @@ export default function DriverOnboardingModal({
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
 
-  // Location State (auto-fetched via device GPS or Hyderabad Hub)
-  const [coords, setCoords] = useState({ lat: 17.4435, lng: 78.4532 });
-  const [gpsStatus, setGpsStatus] = useState('Detecting GPS...');
+  // Location State (auto-fetched via live device GPS)
+  const [coords, setCoords] = useState(null);
+  const [gpsStatus, setGpsStatus] = useState('Detecting live GPS...');
 
   // Form State: Vehicle Selection
   const [vehicleType, setVehicleType] = useState('CAR'); // 'CAR' | 'BIKE' | 'AUTO'
@@ -73,25 +73,19 @@ export default function DriverOnboardingModal({
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
-            let detectedLat = parseFloat(pos.coords.latitude.toFixed(6));
-            let detectedLng = parseFloat(pos.coords.longitude.toFixed(6));
-            // Guard: If device is physically located outside Hyderabad, clamp coordinates to active Hyderabad Hub
-            if (detectedLat < 17.0 || detectedLat > 18.0 || detectedLng < 78.0 || detectedLng > 79.0) {
-              detectedLat = 17.4435;
-              detectedLng = 78.4532;
-            }
+            const detectedLat = parseFloat(pos.coords.latitude.toFixed(6));
+            const detectedLng = parseFloat(pos.coords.longitude.toFixed(6));
             setCoords({ lat: detectedLat, lng: detectedLng });
             setGpsStatus(`GPS Active (${detectedLat.toFixed(4)}, ${detectedLng.toFixed(4)})`);
           },
-          () => {
-            setCoords({ lat: 17.4435, lng: 78.4532 });
-            setGpsStatus('GPS Active (Hyderabad Hub: 17.4435, 78.4532)');
+          (err) => {
+            console.warn('[DriverOnboarding] GPS access denied or failed:', err);
+            setGpsStatus('GPS Permission Denied. Please enable location in browser.');
           },
-          { timeout: 6000 }
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
         );
       } else {
-        setCoords({ lat: 17.4435, lng: 78.4532 });
-        setGpsStatus('GPS Active (Hyderabad Hub: 17.4435, 78.4532)');
+        setGpsStatus('GPS not supported on this browser.');
       }
     }
   }, [isOpen]);
@@ -131,6 +125,11 @@ export default function DriverOnboardingModal({
     }
     if (vehicleType === 'AUTO' && !autoModel.trim()) {
       setErrorMessage('Please enter your auto model name.');
+      return;
+    }
+
+    if (!coords || !coords.lat || !coords.lng) {
+      setErrorMessage('Please enable device GPS access to register as an active driver partner.');
       return;
     }
 

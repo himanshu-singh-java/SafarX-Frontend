@@ -7,15 +7,6 @@ import FullPageCarMotionScene from './CarMotionScene';
 import { getDriverDetails } from '../utils/driverDirectory';
 import { initiateRazorpayPayment } from '../utils/razorpay';
 
-// Preset standard cities
-const CITIES = [
-  { name: 'Hyderabad, IN', lat: 17.3850, lng: 78.4867 },
-  { name: 'Jaipur, IN', lat: 26.9124, lng: 75.7873 },
-  { name: 'Bengaluru, IN', lat: 12.9716, lng: 77.5946 },
-  { name: 'Mumbai, IN', lat: 19.0760, lng: 72.8777 },
-  { name: 'Delhi NCR, IN', lat: 28.6139, lng: 77.2090 },
-];
-
 /**
  * EXACT 1:1 Implementation of Backend `LocationUtils.java`:
  * public static Double calculateDistance(Double startLat, Double startLng, Double endLat, Double endLng)
@@ -39,33 +30,7 @@ function calculateDistanceKm(startLat, startLng, endLat, endLng) {
   return EARTH_RADIUS_KM * c;
 }
 
-// Preset Hyderabad Recent Locations matching official Uber experience
-const DEFAULT_RECENT_LOCATIONS = [
-  {
-    title: 'Ameerpet Metro Station Near South India Shopping Mall',
-    subtitle: 'Yella Reddy Guda, Hyderabad, Telangana',
-    lat: 17.4375,
-    lng: 78.4482,
-  },
-  {
-    title: 'Street Number 2',
-    subtitle: 'Street No. 2, Vani Nagar, Malkajgiri, Secunderabad, Telangana',
-    lat: 17.4526,
-    lng: 78.5358,
-  },
-  {
-    title: 'Datapoint IT & Hardware Tech Pvt Ltd',
-    subtitle: 'Sanjeeva Reddy Nagar, Ameerpet, Hyderabad, Telangana',
-    lat: 17.4399,
-    lng: 78.4983,
-  },
-  {
-    title: 'Hostel',
-    subtitle: 'Near Metro Pillar 1042, Ameerpet, Hyderabad',
-    lat: 17.4410,
-    lng: 78.4490,
-  },
-];
+const DEFAULT_RECENT_LOCATIONS = [];
 
 /**
  * EXACT 1:1 Rates matching Backend Models & Official Uber Screenshot:
@@ -289,16 +254,17 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentScreen]);
 
-  // Selected City
-  const [selectedCity, setSelectedCity] = useState(CITIES[0]);
-  const [showCityPicker, setShowCityPicker] = useState(false);
+  // Active input tracking: 'pickup' | 'drop' (defaults to 'drop')
+  const [activeField, setActiveField] = useState('drop');
+  const dropInputRef = useRef(null);
+  const pickupInputRef = useRef(null);
 
-  // Locations state (Defaults matching official Hyderabad screenshot)
-  const [pickupText, setPickupText] = useState('Hostel');
-  const [pickupCoords, setPickupCoords] = useState({ lat: 17.4410, lng: 78.4490 });
+  // Locations state
+  const [pickupText, setPickupText] = useState('');
+  const [pickupCoords, setPickupCoords] = useState(null);
 
-  const [dropText, setDropText] = useState('Datapoint IT & Hardware Tech Pvt Ltd');
-  const [dropCoords, setDropCoords] = useState({ lat: 17.4399, lng: 78.4983 });
+  const [dropText, setDropText] = useState('');
+  const [dropCoords, setDropCoords] = useState(null);
 
   // Autocomplete Geocoding Suggestions
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
@@ -561,12 +527,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return vehicle.carModel || vehicle.autoModel || vehicle.bikeModel || (vehicle.vehicleType ? `SafarX ${vehicle.vehicleType}` : 'Comfort Sedan');
   };
 
-  // Real-time distance using backend formula (defaults to 5.5 km if identical or nearby test coords)
+  // Real-time distance using backend formula
   const rawDistance = calculateDistanceKm(
-    pickupCoords.lat,
-    pickupCoords.lng,
-    dropCoords.lat,
-    dropCoords.lng
+    pickupCoords?.lat,
+    pickupCoords?.lng,
+    dropCoords?.lat,
+    dropCoords?.lng
   );
   const displayDistance = rawDistance >= 0.5 ? rawDistance.toFixed(1) : '5.5';
 
@@ -589,7 +555,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return `Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
   };
 
-  // Auto-fetch rider live location on mount, on login, or when user clicks 📍
+  // Auto-fetch rider live location on mount, on login, or when user clicks GPS icon
   const fetchCurrentLocation = (isAuto = false) => {
     if (!navigator.geolocation) {
       if (!isAuto) {
@@ -610,6 +576,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       setIsFetchingLocation(false);
       setLocationFetched(true);
 
+      // Auto-transition activeField to 'drop' and shift focus to Destination input
+      setActiveField('drop');
+      setFocusedInput('drop');
+      setTimeout(() => {
+        dropInputRef.current?.focus();
+      }, 50);
+
       if (!isAuto) {
         setStatusMessage({
           text: `📍 Live location detected: ${address}`,
@@ -620,12 +593,11 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     };
 
     const onLocationFail = (err) => {
-      console.warn('High-accuracy GPS unavailable, falling back to standard network location:', err.message);
-      // Fallback: Wi-Fi / IP based location for laptops and desktop browsers
+      console.warn('High-accuracy GPS unavailable, attempting network fallback:', err.message);
       navigator.geolocation.getCurrentPosition(
         onLocationSuccess,
         (fallbackErr) => {
-          console.warn('All geolocation methods failed or permission denied:', fallbackErr.message);
+          console.warn('All geolocation methods failed:', fallbackErr.message);
           setIsFetchingLocation(false);
           if (!isAuto) {
             setStatusMessage({
@@ -634,18 +606,18 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             });
           }
         },
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
       );
     };
 
     navigator.geolocation.getCurrentPosition(
       onLocationSuccess,
       onLocationFail,
-      { enableHighAccuracy: true, timeout: 4000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  // Auto-fetch rider location when component loads and on login (Real-world Uber experience)
+  // Auto-fetch rider location when component loads and on login
   useEffect(() => {
     fetchCurrentLocation(true);
   }, [token]);
@@ -706,41 +678,38 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   };
 
   const handleSelectSuggestion = (place, type) => {
+    const targetType = type || activeField || 'drop';
     const title = place.shortName || place.name;
     const subtitle = place.name;
-    if (type === 'pickup') {
+    if (targetType === 'pickup') {
       setPickupText(title);
       setPickupCoords({ lat: place.lat, lng: place.lng });
       setPickupSuggestions([]);
       addToRecentLocations(title, subtitle, place.lat, place.lng);
+      setActiveField('drop');
+      setFocusedInput('drop');
+      setTimeout(() => {
+        dropInputRef.current?.focus();
+      }, 50);
     } else {
       setDropText(title);
       setDropCoords({ lat: place.lat, lng: place.lng });
       setDropSuggestions([]);
       addToRecentLocations(title, subtitle, place.lat, place.lng);
+      setFocusedInput(null);
     }
-    setFocusedInput(null);
-  };
-
-  // Switch City
-  const handleCityChange = (city) => {
-    setSelectedCity(city);
-    setPickupText(`City Center, ${city.name.split(',')[0]}`);
-    setPickupCoords({ lat: city.lat, lng: city.lng });
-    setDropText(`Central Station, ${city.name.split(',')[0]}`);
-    setDropCoords({
-      lat: parseFloat((city.lat - 0.05).toFixed(4)),
-      lng: parseFloat((city.lng + 0.03).toFixed(4)),
-    });
-    setShowCityPicker(false);
   };
 
   // Generate dynamic OpenStreetMap embed URL centered on both points
-  const minLng = Math.min(pickupCoords.lng, dropCoords.lng) - 0.05;
-  const minLat = Math.min(pickupCoords.lat, dropCoords.lat) - 0.05;
-  const maxLng = Math.max(pickupCoords.lng, dropCoords.lng) + 0.05;
-  const maxLat = Math.max(pickupCoords.lat, dropCoords.lat) + 0.05;
-  const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${pickupCoords.lat}%2C${pickupCoords.lng}`;
+  const pLng = pickupCoords?.lng ?? 78.4867;
+  const pLat = pickupCoords?.lat ?? 17.3850;
+  const dLng = dropCoords?.lng ?? pLng;
+  const dLat = dropCoords?.lat ?? pLat;
+  const minLng = Math.min(pLng, dLng) - 0.05;
+  const minLat = Math.min(pLat, dLat) - 0.05;
+  const maxLng = Math.max(pLng, dLng) + 0.05;
+  const maxLat = Math.max(pLat, dLat) + 0.05;
+  const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${pLat}%2C${pLng}`;
 
   // ================= API: BOOK RIDE =================
   const handleBookRide = async () => {
@@ -1000,54 +969,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       }
     >
       <div className="space-y-5">
-        {/* City Switcher */}
-        <div className={`flex items-center gap-1.5 text-xs font-semibold ${isFloating ? 'text-neutral-200 drop-shadow-sm' : 'text-neutral-600'}`}>
-          <span className="text-sm">📍</span>
-          <span>{selectedCity.name}</span>
-          <div className="relative inline-block ml-1">
-            <button
-              type="button"
-              onClick={() => setShowCityPicker(!showCityPicker)}
-              className={
-                isFloating
-                  ? "text-[#d4af37] font-bold underline hover:text-[#f3d97d] cursor-pointer drop-shadow-sm"
-                  : "text-black font-bold underline hover:text-neutral-600 cursor-pointer"
-              }
-            >
-              Change city
-            </button>
-            {showCityPicker && (
-              <div
-                className={`absolute left-0 top-6 rounded-xl shadow-2xl py-1 z-30 w-44 text-xs border ${
-                  isFloating
-                    ? 'bg-[#121620]/95 backdrop-blur-md border-neutral-700 text-white'
-                    : 'bg-white border-neutral-200 text-black'
-                }`}
-              >
-                {CITIES.map((c) => (
-                  <button
-                    key={c.name}
-                    type="button"
-                    onClick={() => handleCityChange(c)}
-                    className={`w-full text-left px-3 py-2 font-medium ${
-                      isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100'
-                    }`}
-                  >
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Title: Welcome to Hyderabad (matching Screenshot 1) */}
+        {/* Title: Welcome to SafarX */}
         <h2
           className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight ${
             isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-black'
           }`}
         >
-          Welcome to {selectedCity.name.split(',')[0]}
+          Welcome to SafarX
         </h2>
 
         {/* Pickup now dropdown */}
@@ -1119,16 +1047,27 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           {/* Pickup Input Container with Interactive Dropdown */}
           <div ref={pickupContainerRef} className="relative">
             <input
+              ref={pickupInputRef}
               type="text"
               value={pickupText}
-              onFocus={() => setFocusedInput('pickup')}
-              onClick={() => setFocusedInput('pickup')}
+              onFocus={() => {
+                setActiveField('pickup');
+                setFocusedInput('pickup');
+              }}
+              onClick={() => {
+                setActiveField('pickup');
+                setFocusedInput('pickup');
+              }}
               onChange={(e) => handlePickupChange(e.target.value)}
-              placeholder="Enter location"
+              placeholder="Enter pickup location"
               className={`w-full pl-10 pr-20 py-3.5 rounded-xl text-xs sm:text-sm font-semibold outline-none transition-all ${
-                isFloating
-                  ? 'bg-black/30 hover:bg-black/45 focus:bg-black/60 border-2 border-white/20 focus:border-amber-400 text-white placeholder:text-neutral-300 backdrop-blur-sm shadow-sm'
-                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] focus:bg-white border-2 border-transparent focus:border-black text-black placeholder:text-neutral-500'
+                activeField === 'pickup' || focusedInput === 'pickup'
+                  ? isFloating
+                    ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
+                    : 'bg-white border-2 border-amber-500 ring-2 ring-amber-500/20 text-black shadow-sm'
+                  : isFloating
+                  ? 'bg-black/30 hover:bg-black/45 border-2 border-white/20 text-white placeholder:text-neutral-300'
+                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] border-2 border-transparent text-black placeholder:text-neutral-500'
               }`}
             />
             <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
@@ -1136,21 +1075,17 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 type="button"
                 onClick={() => fetchCurrentLocation(false)}
                 disabled={isFetchingLocation}
-                className={`p-2 rounded-lg text-xs transition-all cursor-pointer flex items-center justify-center ${
-                  locationFetched
-                    ? isFloating
-                      ? 'bg-amber-400 text-black font-bold'
-                      : 'bg-neutral-900 text-white'
-                    : isFloating
-                    ? 'bg-black/40 hover:bg-black/60 text-white border border-white/20 backdrop-blur-sm'
-                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-300'
+                className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center shadow-sm ${
+                  isFetchingLocation
+                    ? 'bg-amber-300 text-neutral-900 animate-pulse'
+                    : 'bg-amber-400 hover:bg-amber-500 active:scale-95 text-neutral-950 border border-amber-500/40'
                 }`}
-                title="Auto-detect current GPS location"
+                title="Detect live GPS location for pickup"
               >
                 {isFetchingLocation ? (
                   <span className="text-xs animate-spin">⏳</span>
                 ) : (
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 text-neutral-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="7" />
                     <polyline points="12 2 12 5" />
                     <polyline points="12 19 12 22" />
@@ -1164,7 +1099,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   type="button"
                   onClick={() => {
                     setPickupText('');
+                    setPickupCoords(null);
                     setLocationFetched(false);
+                    setActiveField('pickup');
+                    pickupInputRef.current?.focus();
                   }}
                   className={`font-bold text-sm px-1 cursor-pointer ${
                     isFloating ? 'text-neutral-400 hover:text-white' : 'text-neutral-400 hover:text-black'
@@ -1250,37 +1188,41 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </div>
                 ) : (
                   /* 2. Recent Locations List */
-                  <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
-                    <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
-                      Recent locations
-                    </div>
-                    {recentLocations.map((item, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setPickupText(item.title);
-                          setPickupCoords({ lat: item.lat, lng: item.lng });
-                          setFocusedInput(null);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
-                          isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
-                        }`}
-                      >
-                        <span
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
+                  recentLocations.length > 0 && (
+                    <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
+                      <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
+                        Recent locations
+                      </div>
+                      {recentLocations.map((item, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            setPickupText(item.title);
+                            setPickupCoords({ lat: item.lat, lng: item.lng });
+                            setActiveField('drop');
+                            setFocusedInput('drop');
+                            setTimeout(() => dropInputRef.current?.focus(), 50);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
+                            isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
                           }`}
                         >
-                          🕒
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
-                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>{item.subtitle}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                          <span
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
+                              isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
+                            }`}
+                          >
+                            🕒
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
+                            <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>{item.subtitle}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )
                 )}
               </div>
             )}
@@ -1289,21 +1231,38 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           {/* Dropoff Input Container */}
           <div className="relative">
             <input
+              ref={dropInputRef}
               type="text"
               value={dropText}
-              onFocus={() => setFocusedInput('drop')}
+              onFocus={() => {
+                setActiveField('drop');
+                setFocusedInput('drop');
+              }}
+              onClick={() => {
+                setActiveField('drop');
+                setFocusedInput('drop');
+              }}
               onChange={(e) => handleDropChange(e.target.value)}
               placeholder="Enter destination"
               className={`w-full pl-10 pr-9 py-3.5 rounded-xl text-xs sm:text-sm font-semibold outline-none transition-all ${
-                isFloating
-                  ? 'bg-black/30 hover:bg-black/40 focus:bg-black/60 border-2 border-white/20 focus:border-amber-400 text-white placeholder:text-neutral-300 backdrop-blur-sm shadow-sm'
-                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] focus:bg-white border-2 border-transparent focus:border-black text-black placeholder:text-neutral-500'
+                activeField === 'drop' || focusedInput === 'drop'
+                  ? isFloating
+                    ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
+                    : 'bg-white border-2 border-amber-500 ring-2 ring-amber-500/20 text-black shadow-sm'
+                  : isFloating
+                  ? 'bg-black/30 hover:bg-black/40 border-2 border-white/20 text-white placeholder:text-neutral-300'
+                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] border-2 border-transparent text-black placeholder:text-neutral-500'
               }`}
             />
             {dropText && (
               <button
                 type="button"
-                onClick={() => setDropText('')}
+                onClick={() => {
+                  setDropText('');
+                  setDropCoords(null);
+                  setActiveField('drop');
+                  dropInputRef.current?.focus();
+                }}
                 className={`absolute right-3 top-3.5 font-bold text-sm cursor-pointer ${
                   isFloating ? 'text-neutral-400 hover:text-white' : 'text-neutral-400 hover:text-black'
                 }`}
@@ -1346,43 +1305,57 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           </div>
         </div>
 
-        {/* RECENT LOCATIONS LIST ON CARD (Matching Screenshot 1) */}
-        <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100'}`}>
-          {recentLocations.slice(0, 2).map((item, idx) => (
-            <div
-              key={idx}
-              onClick={() => {
-                setPickupText(item.title);
-                setPickupCoords({ lat: item.lat, lng: item.lng });
-              }}
-              className={`flex items-start gap-3.5 p-2 rounded-xl cursor-pointer transition-colors group ${
-                isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-50'
-              }`}
-            >
+        {/* RECENT DESTINATIONS LIST ON CARD */}
+        {recentLocations.length > 0 && (
+          <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100'}`}>
+            <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>
+              Recent destinations
+            </div>
+            {recentLocations.slice(0, 3).map((item, idx) => (
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5 ${
-                  isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-neutral-200 text-neutral-800'
+                key={idx}
+                onClick={() => {
+                  if (activeField === 'pickup') {
+                    setPickupText(item.title);
+                    setPickupCoords({ lat: item.lat, lng: item.lng });
+                    setActiveField('drop');
+                    setFocusedInput('drop');
+                    setTimeout(() => dropInputRef.current?.focus(), 50);
+                  } else {
+                    setDropText(item.title);
+                    setDropCoords({ lat: item.lat, lng: item.lng });
+                    setFocusedInput(null);
+                  }
+                }}
+                className={`flex items-start gap-3.5 p-2 rounded-xl cursor-pointer transition-colors group ${
+                  isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-50'
                 }`}
               >
-                🕒
-              </div>
-              <div className="min-w-0">
                 <div
-                  className={`text-xs sm:text-sm font-bold truncate transition-colors ${
-                    isFloating
-                      ? 'text-white group-hover:text-amber-300 drop-shadow-sm'
-                      : 'text-black group-hover:text-blue-600'
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5 ${
+                    isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-neutral-200 text-neutral-800'
                   }`}
                 >
-                  {item.title}
+                  🕒
                 </div>
-                <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-neutral-500'}`}>
-                  {item.subtitle}
+                <div className="min-w-0">
+                  <div
+                    className={`text-xs sm:text-sm font-bold truncate transition-colors ${
+                      isFloating
+                        ? 'text-white group-hover:text-amber-300 drop-shadow-sm'
+                        : 'text-black group-hover:text-blue-600'
+                    }`}
+                  >
+                    {item.title}
+                  </div>
+                  <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-neutral-500'}`}>
+                    {item.subtitle}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
 
