@@ -28,6 +28,33 @@ function calculateDistanceKm(startLat, startLng, endLat, endLng) {
 
 const DEFAULT_RECENT_LOCATIONS = [];
 
+const SUGGESTED_DESTINATIONS = [
+  {
+    title: 'City Center Mall',
+    subtitle: 'Central Shopping & Commercial Plaza',
+    lat: 17.4193,
+    lng: 78.4485,
+  },
+  {
+    title: 'Central Railway Station',
+    subtitle: 'Main Station Junction & Transit Hub',
+    lat: 17.4344,
+    lng: 78.5017,
+  },
+  {
+    title: 'International Airport (Terminal 1)',
+    subtitle: 'Airport Road, Departures & Arrivals Concourse',
+    lat: 17.2403,
+    lng: 78.4294,
+  },
+  {
+    title: 'Tech Park / Cyber City',
+    subtitle: 'Financial District & Innovation Campus',
+    lat: 17.4435,
+    lng: 78.3772,
+  },
+];
+
 const VEHICLE_TIERS = [
   {
     type: 'BIKE',
@@ -235,6 +262,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   const [activeField, setActiveField] = useState('drop');
   const dropInputRef = useRef(null);
   const pickupInputRef = useRef(null);
+  const dropContainerRef = useRef(null);
 
   const [pickupText, setPickupText] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
@@ -260,10 +288,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (pickupContainerRef.current && !pickupContainerRef.current.contains(e.target)) {
-        if (focusedInput === 'pickup') {
-          setFocusedInput(null);
-        }
+      if (
+        pickupContainerRef.current &&
+        !pickupContainerRef.current.contains(e.target) &&
+        focusedInput === 'pickup'
+      ) {
+        setFocusedInput(null);
+      }
+      if (
+        dropContainerRef.current &&
+        !dropContainerRef.current.contains(e.target) &&
+        focusedInput === 'drop'
+      ) {
+        setFocusedInput(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1135,19 +1172,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     ))}
                   </div>
                 ) : (
-                  
-                  recentLocations.length > 0 && (
+                  (recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
                     <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
                       <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
-                        Recent locations
+                        {recentLocations.length > 0 ? 'Recent locations' : 'Suggested locations'}
                       </div>
-                      {recentLocations.map((item, idx) => (
+                      {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).map((item, idx) => (
                         <button
                           key={idx}
                           type="button"
                           onClick={() => {
                             setPickupText(item.title);
                             setPickupCoords({ lat: item.lat, lng: item.lng });
+                            addToRecentLocations(item.title, item.subtitle, item.lat, item.lng);
                             setActiveField('drop');
                             setFocusedInput('drop');
                             setTimeout(() => dropInputRef.current?.focus(), 50);
@@ -1161,7 +1198,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
                             }`}
                           >
-                            🕒
+                            {recentLocations.length > 0 ? '🕒' : '📍'}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
@@ -1176,8 +1213,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             )}
           </div>
 
-          
-          <div className="relative">
+          <div ref={dropContainerRef} className="relative">
             <input
               ref={dropInputRef}
               type="text"
@@ -1220,46 +1256,88 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </button>
             )}
 
-            
-            {dropSuggestions.length > 0 && focusedInput === 'drop' && (
+            {focusedInput === 'drop' && (
               <div
-                className={`absolute top-14 left-0 right-0 rounded-xl shadow-2xl p-1.5 z-40 space-y-1 border ${
+                className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
                   isFloating
                     ? 'bg-[#121620]/95 backdrop-blur-2xl border-neutral-700 text-white'
                     : 'bg-white border-neutral-200 text-black'
                 }`}
               >
-                <div className="text-[10px] font-bold text-neutral-400 px-2 py-1 uppercase flex justify-between">
-                  <span>Search Results</span>
-                  <button type="button" onClick={() => setDropSuggestions([])}>✕</button>
-                </div>
-                {dropSuggestions.map((place, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => handleSelectSuggestion(place, 'drop')}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 border-b last:border-0 ${
-                      isFloating
-                        ? 'hover:bg-white/10 text-neutral-200 border-white/10'
-                        : 'hover:bg-neutral-100 text-neutral-800 border-neutral-50'
-                    }`}
-                  >
-                    <span className="text-xs mt-0.5">🏁</span>
-                    <span className="truncate">{place.name}</span>
-                  </button>
-                ))}
+                {dropSuggestions.length > 0 ? (
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold text-neutral-400 px-2 py-1 uppercase flex justify-between items-center">
+                      <span>Search Results</span>
+                      <button
+                        type="button"
+                        onClick={() => setDropSuggestions([])}
+                        className="hover:text-black dark:hover:text-white cursor-pointer px-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    {dropSuggestions.map((place, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectSuggestion(place, 'drop')}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 border-b last:border-0 ${
+                          isFloating
+                            ? 'hover:bg-white/10 text-neutral-200 border-white/10'
+                            : 'hover:bg-neutral-100 text-neutral-800 border-neutral-50'
+                        }`}
+                      >
+                        <span className="text-xs mt-0.5">🏁</span>
+                        <span className="truncate">{place.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
+                      {recentLocations.length > 0 ? 'Recent destinations' : 'Suggested destinations'}
+                    </div>
+                    {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).slice(0, 5).map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setDropText(item.title);
+                          setDropCoords({ lat: item.lat, lng: item.lng });
+                          addToRecentLocations(item.title, item.subtitle, item.lat, item.lng);
+                          setDropSuggestions([]);
+                          setFocusedInput(null);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
+                          isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
+                        }`}
+                      >
+                        <span
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
+                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
+                          }`}
+                        >
+                          {recentLocations.length > 0 ? '🕒' : '🏁'}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
+                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>{item.subtitle}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        
-        {recentLocations.length > 0 && (
+        {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
           <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100'}`}>
             <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>
-              Recent destinations
+              {recentLocations.length > 0 ? 'Recent destinations' : 'Suggested destinations'}
             </div>
-            {recentLocations.slice(0, 3).map((item, idx) => (
+            {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).slice(0, 3).map((item, idx) => (
               <div
                 key={idx}
                 onClick={() => {
