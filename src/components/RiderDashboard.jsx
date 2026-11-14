@@ -950,14 +950,14 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       className={
         isFloating
           ? "w-full bg-black/25 hover:bg-black/35 backdrop-blur-[4px] rounded-3xl border border-white/25 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-between space-y-5 transition-all text-white"
-          : "lg:col-span-6 bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-sm flex flex-col justify-between space-y-6"
+          : "lg:col-span-6 bg-white dark:bg-[#121620] rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 sm:p-8 shadow-sm flex flex-col justify-between space-y-6 text-black dark:text-white transition-colors"
       }
     >
       <div className="space-y-5">
         
         <h2
           className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight ${
-            isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-black'
+            isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-black dark:text-white'
           }`}
         >
           Welcome to SafarX
@@ -971,7 +971,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
               isFloating
                 ? 'bg-black/30 hover:bg-black/45 text-white border border-white/20 backdrop-blur-sm drop-shadow-sm'
-                : 'bg-[#f3f3f3] hover:bg-[#eaeaea] text-black'
+                : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 text-black dark:text-white'
             }`}
           >
             <span>🕒</span>
@@ -1049,10 +1049,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 activeField === 'pickup' || focusedInput === 'pickup'
                   ? isFloating
                     ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
-                    : 'bg-white border-2 border-amber-500 ring-2 ring-amber-500/20 text-black shadow-sm'
+                    : 'bg-white dark:bg-neutral-800 border-2 border-amber-500 ring-2 ring-amber-500/20 text-black dark:text-white shadow-sm'
                   : isFloating
                   ? 'bg-black/30 hover:bg-black/45 border-2 border-white/20 text-white placeholder:text-neutral-300'
-                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] border-2 border-transparent text-black placeholder:text-neutral-500'
+                  : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 border-2 border-transparent text-black dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400'
               }`}
             />
             <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
@@ -1232,10 +1232,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 activeField === 'drop' || focusedInput === 'drop'
                   ? isFloating
                     ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
-                    : 'bg-white border-2 border-amber-500 ring-2 ring-amber-500/20 text-black shadow-sm'
+                    : 'bg-white dark:bg-neutral-800 border-2 border-amber-500 ring-2 ring-amber-500/20 text-black dark:text-white shadow-sm'
                   : isFloating
                   ? 'bg-black/30 hover:bg-black/40 border-2 border-white/20 text-white placeholder:text-neutral-300'
-                  : 'bg-[#f3f3f3] hover:bg-[#eaeaea] border-2 border-transparent text-black placeholder:text-neutral-500'
+                  : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 border-2 border-transparent text-black dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400'
               }`}
             />
             {dropText && (
@@ -1393,7 +1393,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           className={
             isFloating
               ? "px-8 py-3.5 bg-gradient-to-r from-[#d4af37] via-[#f3d97d] to-[#d4af37] hover:brightness-110 text-black font-black rounded-xl text-sm transition-all shadow-[0_4px_25px_rgba(212,175,55,0.4)] active:scale-95 flex items-center gap-2 cursor-pointer"
-              : "px-8 py-3.5 bg-black hover:bg-neutral-800 text-white font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
+              : "px-8 py-3.5 bg-black dark:bg-[#d4af37] hover:bg-neutral-800 dark:hover:bg-amber-400 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
           }
         >
           <span>See prices</span>
@@ -1405,7 +1405,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   );
 
   return (
-    <div className="min-h-screen bg-white text-[#000000] font-sans antialiased">
+    <div className="min-h-screen bg-white dark:bg-[#0b0f19] text-[#000000] dark:text-neutral-100 font-sans antialiased transition-colors">
       
       
       {statusMessage.text && (

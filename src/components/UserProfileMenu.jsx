@@ -158,17 +158,17 @@ export default function UserProfileMenu({
 
         
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-neutral-200/80 py-2 text-neutral-900 z-50 animate-in fade-in zoom-in-95">
+          <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200/80 dark:border-neutral-800 py-2 text-neutral-900 dark:text-neutral-100 z-50 animate-in fade-in zoom-in-95">
             
-            <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-neutral-900 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm">
+            <div className="px-5 py-3 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-neutral-900 dark:bg-neutral-800 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm border border-neutral-700/50">
                 {avatarInitial}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-extrabold text-sm text-neutral-900 truncate">
+                <div className="font-extrabold text-sm text-neutral-900 dark:text-white truncate">
                   {displayName}
                 </div>
-                <div className="text-[11px] text-neutral-500 font-medium truncate">
+                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium truncate">
                   {userEmail || 'Active SafarX Account'}
                 </div>
                 <div className="mt-1">
@@ -188,14 +188,14 @@ export default function UserProfileMenu({
                   setIsOpen(false);
                   setIsAccountModalOpen(true);
                 }}
-                className="w-full flex items-center justify-between px-5 py-3 hover:bg-neutral-50 text-neutral-900 font-bold text-sm transition-colors text-left group"
+                className="w-full flex items-center justify-between px-5 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-bold text-sm transition-colors text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
-                  <svg className="w-4 h-4 text-neutral-500 group-hover:text-black transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="w-4 h-4 text-neutral-500 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                   </svg>
-                  <span className="group-hover:text-black">Account Info</span>
+                  <span className="group-hover:text-black dark:group-hover:text-white">Account Info</span>
                 </div>
                 <svg className="w-4 h-4 text-neutral-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -203,7 +203,7 @@ export default function UserProfileMenu({
               </button>
             </div>
 
-            <div className="border-t border-neutral-100 my-1" />
+            <div className="border-t border-neutral-100 dark:border-neutral-800 my-1" />
 
             
             <div className="px-2 pt-1 pb-1">
@@ -213,7 +213,7 @@ export default function UserProfileMenu({
                   setIsOpen(false);
                   if (onSignOut) onSignOut();
                 }}
-                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-extrabold text-sm transition-colors text-left group"
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 font-extrabold text-sm transition-colors text-left group cursor-pointer"
               >
                 <div className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,30 +230,30 @@ export default function UserProfileMenu({
       
       {isAccountModalOpen && (
         <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-200 text-neutral-900 relative animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-neutral-900 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 relative animate-in zoom-in-95 duration-200">
             
             <button
               type="button"
               onClick={() => setIsAccountModalOpen(false)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-colors"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition-colors cursor-pointer"
             >
               ✕
             </button>
 
             
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-black text-white font-black text-lg flex items-center justify-center shrink-0 shadow">
+              <div className="w-12 h-12 rounded-full bg-black dark:bg-neutral-800 text-white font-black text-lg flex items-center justify-center shrink-0 shadow border border-neutral-700/50">
                 {avatarInitial}
               </div>
               <div>
-                <h3 className="text-xl font-black text-black tracking-tight">Account Info</h3>
-                <p className="text-xs text-neutral-500">Your SafarX identity & active role</p>
+                <h3 className="text-xl font-black text-black dark:text-white tracking-tight">Account Info</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">Your SafarX identity & active role</p>
               </div>
             </div>
 
             
             {statusNotice && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center animate-in fade-in">
+              <div className="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center animate-in fade-in">
                 {statusNotice}
               </div>
             )}
@@ -262,7 +262,7 @@ export default function UserProfileMenu({
             {isEditing ? (
               <form onSubmit={handleSaveProfileDetails} className="space-y-4 mb-6 text-sm">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+                  <label className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block">
                     Full Name
                   </label>
                   <input
@@ -271,12 +271,12 @@ export default function UserProfileMenu({
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full bg-[#f6f6f6] focus:bg-white border-2 border-neutral-200 focus:border-black rounded-xl text-black text-sm font-semibold px-3 py-2.5 outline-none transition-all"
+                    className="w-full bg-[#f6f6f6] dark:bg-neutral-800 focus:bg-white dark:focus:bg-neutral-700 border-2 border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-sm font-semibold px-3 py-2.5 outline-none transition-all"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+                  <label className="text-[11px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block">
                     Phone Number
                   </label>
                   <input
@@ -284,51 +284,51 @@ export default function UserProfileMenu({
                     value={editPhone}
                     onChange={(e) => setEditPhone(e.target.value)}
                     placeholder="+91 98765 43210"
-                    className="w-full bg-[#f6f6f6] focus:bg-white border-2 border-neutral-200 focus:border-black rounded-xl text-black text-sm font-semibold px-3 py-2.5 outline-none transition-all"
+                    className="w-full bg-[#f6f6f6] dark:bg-neutral-800 focus:bg-white dark:focus:bg-neutral-700 border-2 border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-sm font-semibold px-3 py-2.5 outline-none transition-all"
                   />
                 </div>
 
                 <div className="flex gap-2 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 bg-black hover:bg-neutral-800 text-white font-extrabold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow"
+                    className="flex-1 bg-black dark:bg-[#d4af37] hover:bg-neutral-800 dark:hover:bg-amber-400 text-white dark:text-black font-extrabold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow cursor-pointer"
                   >
                     Save Changes
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl text-xs transition-colors"
+                    className="px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold rounded-xl text-xs transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200/80 space-y-3.5 mb-6 text-sm">
+              <div className="bg-neutral-50 dark:bg-neutral-800/60 rounded-2xl p-4 border border-neutral-200/80 dark:border-neutral-700 space-y-3.5 mb-6 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Full Name</span>
-                  <span className="font-extrabold text-neutral-900">{displayName}</span>
+                  <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Full Name</span>
+                  <span className="font-extrabold text-neutral-900 dark:text-white">{displayName}</span>
                 </div>
 
-                <div className="border-t border-neutral-200/60" />
+                <div className="border-t border-neutral-200/60 dark:border-neutral-700" />
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Email</span>
-                  <span className="font-medium text-neutral-800 text-xs sm:text-sm truncate max-w-[200px]">{userEmail || 'Not configured'}</span>
+                  <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Email</span>
+                  <span className="font-medium text-neutral-800 dark:text-neutral-200 text-xs sm:text-sm truncate max-w-[200px]">{userEmail || 'Not configured'}</span>
                 </div>
 
-                <div className="border-t border-neutral-200/60" />
+                <div className="border-t border-neutral-200/60 dark:border-neutral-700" />
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Phone</span>
-                  <span className="font-medium text-neutral-800">{userPhone || 'Not set'}</span>
+                  <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Phone</span>
+                  <span className="font-medium text-neutral-800 dark:text-neutral-200">{userPhone || 'Not set'}</span>
                 </div>
 
-                <div className="border-t border-neutral-200/60" />
+                <div className="border-t border-neutral-200/60 dark:border-neutral-700" />
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Active Role</span>
+                  <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Active Role</span>
                   <span className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${roleBadgeStyle}`}>
                     {userRole === 'ROLE_ADMIN' ? '🛡️ Admin' : userRole === 'ROLE_DRIVER' ? '🚗 Driver' : '👤 Rider'}
                   </span>
@@ -342,7 +342,7 @@ export default function UserProfileMenu({
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  className="w-full bg-black hover:bg-neutral-800 text-white font-black py-3 px-4 rounded-xl text-sm transition-all shadow-md active:scale-98 flex items-center justify-center gap-2"
+                  className="w-full bg-black dark:bg-[#d4af37] hover:bg-neutral-800 dark:hover:bg-amber-400 text-white dark:text-black font-black py-3 px-4 rounded-xl text-sm transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>✏️ Edit Profile Details</span>
                 </button>
@@ -350,7 +350,7 @@ export default function UserProfileMenu({
                 <button
                   type="button"
                   onClick={() => setIsAccountModalOpen(false)}
-                  className="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors"
+                  className="w-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer"
                 >
                   Close
                 </button>

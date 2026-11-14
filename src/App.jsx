@@ -8,6 +8,7 @@ import OAuth2RedirectHandler from './components/OAuth2RedirectHandler';
 import CompleteProfile from './components/CompleteProfile';
 import UserProfileMenu from './components/UserProfileMenu';
 import DriverOnboardingModal from './components/DriverOnboardingModal';
+import ThemeToggle from './components/ThemeToggle';
 import apiClient from './utils/apiClient';
 import { getAuthToken, setAuthToken, clearAuthToken, parseJwt, getUserRole, getStorageItem, setStorageItem, resolveUserName, AUTH_UNAUTHORIZED_EVENT } from './utils/auth';
 
@@ -297,7 +298,7 @@ function App() {
       <Route
         path="*"
         element={
-          <div className={`min-h-screen flex flex-col justify-between ${viewMode === 'admin' ? 'bg-[#0a0706]' : 'bg-[#faf8f5]'}`}>
+          <div className={`min-h-screen flex flex-col justify-between transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-100' : 'bg-[#faf8f5] dark:bg-[#0b0f19] text-neutral-900 dark:text-neutral-100'}`}>
       
       <header className="sticky top-0 z-40 bg-black text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-neutral-900 shadow-sm print:hidden">
         
@@ -354,7 +355,8 @@ function App() {
             </button>
           )}
 
-          
+          <ThemeToggle />
+
           {!token ? (
             <div className="flex items-center gap-2 sm:gap-3">
               
@@ -450,7 +452,7 @@ function App() {
         )}
       </main>
 
-      <footer className={`w-full py-4 text-center text-xs border-t font-medium print:hidden ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-500 border-neutral-900' : 'bg-white text-neutral-500 border-neutral-100'}`}>
+      <footer className={`w-full py-4 text-center text-xs border-t font-medium print:hidden transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-500 border-neutral-900' : 'bg-white dark:bg-[#0b0f19] text-neutral-500 dark:text-neutral-400 border-neutral-100 dark:border-neutral-800'}`}>
         © 2026 SafarX | By Himanshu Kumar
       </footer>
 

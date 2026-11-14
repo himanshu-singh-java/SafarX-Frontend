@@ -851,16 +851,16 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const avatarInitial = (driverProfile.name || 'D').charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-neutral-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-[#faf8f5] dark:bg-[#0b0f19] text-neutral-900 dark:text-neutral-100 p-4 sm:p-8 transition-colors">
       <div className="max-w-6xl mx-auto space-y-6">
 
         
-        <div className="bg-white/95 backdrop-blur border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+        <div className="bg-white/95 dark:bg-[#121620]/95 backdrop-blur border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
           
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-black text-neutral-950 tracking-tight">Safar</span>
+              <span className="text-2xl font-black text-neutral-950 dark:text-white tracking-tight">Safar</span>
               <span className="text-2xl font-black text-[#d4af37]">X</span>
               <span className="bg-gradient-to-r from-amber-50 to-amber-100 text-[#8c6200] px-3 py-1 rounded-full text-xs font-black border border-[#d4af37]/40 shadow-sm uppercase tracking-wide">
                 Driver Partner Console
