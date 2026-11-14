@@ -2,17 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import apiClient from '../utils/apiClient';
 import { resolveUserName, getStorageItem, setStorageItem } from '../utils/auth';
 
-/**
- * UserProfileMenu Component
- * Clean Uber-style profile dropdown and Account Info modal.
- * 
- * Features:
- * - Pill trigger showing avatar and user's name (or 'Profile' if name not set).
- * - Dropdown menu containing:
- *   1. Account Info (opens account detail modal with complete profile action)
- *   2. Sign out (clears credentials and redirects to login)
- * - Strict role preservation (no arbitrary switching in public view).
- */
 export default function UserProfileMenu({
   userEmail,
   userName,
@@ -29,7 +18,6 @@ export default function UserProfileMenu({
   const [statusNotice, setStatusNotice] = useState('');
   const containerRef = useRef(null);
 
-  // Reactive state for instantaneous UI updates without page refresh
   const [localName, setLocalName] = useState(() =>
     resolveUserName(userName || getStorageItem('userName'), userEmail)
   );
@@ -106,10 +94,8 @@ export default function UserProfileMenu({
     }
   };
 
-  // Compute avatar initial letter
   const avatarInitial = (displayName || 'P').charAt(0).toUpperCase();
 
-  // Role title helper
   const roleLabel =
     userRole === 'ROLE_ADMIN'
       ? 'Administrator'
@@ -124,7 +110,6 @@ export default function UserProfileMenu({
       ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30'
       : 'bg-blue-500/10 text-blue-500 border-blue-500/30';
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -143,24 +128,24 @@ export default function UserProfileMenu({
   return (
     <>
       <div ref={containerRef} className="relative select-none z-40">
-        {/* 1. White Pill Trigger Button */}
+        
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2.5 bg-white hover:bg-neutral-100 text-black px-3.5 py-1.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer border border-neutral-200"
           title="Open account menu"
         >
-          {/* User Circular Avatar */}
+          
           <div className="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[11px] font-black shrink-0 overflow-hidden ring-1 ring-neutral-300">
             <span>{avatarInitial}</span>
           </div>
 
-          {/* User Name (or 'Profile' fallback) */}
+          
           <span className="font-extrabold text-neutral-900 tracking-tight max-w-[120px] sm:max-w-[160px] truncate">
             {displayName}
           </span>
 
-          {/* Chevron Up / Down */}
+          
           <svg
             className={`w-3.5 h-3.5 text-neutral-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
@@ -171,10 +156,10 @@ export default function UserProfileMenu({
           </svg>
         </button>
 
-        {/* 2. Floating Dropdown Menu Card */}
+        
         {isOpen && (
           <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-neutral-200/80 py-2 text-neutral-900 z-50 animate-in fade-in zoom-in-95">
-            {/* Account Profile Header */}
+            
             <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-neutral-900 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm">
                 {avatarInitial}
@@ -194,9 +179,9 @@ export default function UserProfileMenu({
               </div>
             </div>
 
-            {/* Menu Items */}
+            
             <div className="py-1">
-              {/* Account Info Button */}
+              
               <button
                 type="button"
                 onClick={() => {
@@ -220,7 +205,7 @@ export default function UserProfileMenu({
 
             <div className="border-t border-neutral-100 my-1" />
 
-            {/* Sign out */}
+            
             <div className="px-2 pt-1 pb-1">
               <button
                 type="button"
@@ -242,11 +227,11 @@ export default function UserProfileMenu({
         )}
       </div>
 
-      {/* 3. Account Info Modal Dialog */}
+      
       {isAccountModalOpen && (
         <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-200 text-neutral-900 relative animate-in zoom-in-95 duration-200">
-            {/* Close Button */}
+            
             <button
               type="button"
               onClick={() => setIsAccountModalOpen(false)}
@@ -255,7 +240,7 @@ export default function UserProfileMenu({
               ✕
             </button>
 
-            {/* Header */}
+            
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full bg-black text-white font-black text-lg flex items-center justify-center shrink-0 shadow">
                 {avatarInitial}
@@ -266,14 +251,14 @@ export default function UserProfileMenu({
               </div>
             </div>
 
-            {/* Status Notice Toast */}
+            
             {statusNotice && (
               <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center animate-in fade-in">
                 {statusNotice}
               </div>
             )}
 
-            {/* Account Details Card or Edit Form */}
+            
             {isEditing ? (
               <form onSubmit={handleSaveProfileDetails} className="space-y-4 mb-6 text-sm">
                 <div className="space-y-1">
@@ -351,7 +336,7 @@ export default function UserProfileMenu({
               </div>
             )}
 
-            {/* Action Buttons */}
+            
             {!isEditing && (
               <div className="space-y-2.5">
                 <button

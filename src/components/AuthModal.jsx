@@ -12,20 +12,17 @@ export default function AuthModal({
   alertNotice = '',
   onSwitchToDriverOnboard,
 }) {
-  const [mode, setMode] = useState(initialMode); // 'login' | 'register'
+  const [mode, setMode] = useState(initialMode);
 
-  // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Status & Loading State
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Sync mode and alert notices when modal opens
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode || 'login');
@@ -42,7 +39,6 @@ export default function AuthModal({
 
   if (!isOpen) return null;
 
-  // Handle Login Submit
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
@@ -81,7 +77,6 @@ export default function AuthModal({
           }
           if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
 
-          // Eagerly initialize rider profile if role is rider and no riderId returned
           if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
             try {
               await apiClient.post(
@@ -143,7 +138,6 @@ export default function AuthModal({
     }
   };
 
-  // Handle Register Submit
   const handleRegister = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
@@ -175,7 +169,6 @@ export default function AuthModal({
 
       setSuccessMessage('Account registered! Signing you in automatically...');
       
-      // Auto-login upon successful registration
       setTimeout(async () => {
         try {
           const loginRes = await apiClient.post('/api/auth/login', {
@@ -200,7 +193,6 @@ export default function AuthModal({
             }
             if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
 
-            // Automatically initialize rider profile for new registration
             if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
               try {
                 await apiClient.post(
@@ -250,13 +242,13 @@ export default function AuthModal({
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in select-none">
       
-      {/* Click outside to close backdrop */}
+      
       <div className="fixed inset-0" onClick={onClose} />
 
       
       <div className="w-full max-w-md relative z-10 bg-white border border-neutral-200 rounded-3xl shadow-2xl p-6 sm:p-8 text-black space-y-5 animate-in zoom-in-95">
         
-        {/* Modal Top Bar */}
+        
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             
@@ -325,7 +317,7 @@ export default function AuthModal({
           </button>
         </div>
 
-        {/* Feedback Banners */}
+        
         {errorMessage && (
           <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in font-medium">
             <span className="text-sm shrink-0">⚠️</span>
@@ -340,10 +332,10 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Form Body */}
+        
         <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
           
-          {/* Email Field */}
+          
           <div className="space-y-1.5">
             <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
               Email Address
@@ -358,7 +350,7 @@ export default function AuthModal({
             />
           </div>
 
-          {/* Password Field */}
+          
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
@@ -382,7 +374,7 @@ export default function AuthModal({
             />
           </div>
 
-          {/* Register-only Fields */}
+          
           {mode === 'register' && (
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
@@ -417,7 +409,7 @@ export default function AuthModal({
             )}
           </button>
 
-          {/* Divider */}
+          
           <div className="relative my-3 pt-1">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-neutral-200" />
@@ -427,7 +419,7 @@ export default function AuthModal({
             </div>
           </div>
 
-          {/* Google OAuth2 Button */}
+          
           <a
             href={`${API_BASE_URL}/oauth2/authorization/google`}
             className="w-full py-3 px-4 bg-white hover:bg-neutral-50 active:bg-neutral-100 border border-neutral-300 rounded-xl text-xs font-bold text-neutral-800 flex items-center justify-center gap-2.5 transition-all shadow-sm"
@@ -453,7 +445,7 @@ export default function AuthModal({
             <span>Continue with Google</span>
           </a>
 
-          {/* Dedicated Driver Partner Link */}
+          
           {onSwitchToDriverOnboard && (
             <div className="pt-2 text-center border-t border-neutral-100">
               <p className="text-[11px] text-neutral-500 font-medium">
@@ -473,6 +465,9 @@ export default function AuthModal({
           )}
         </form>
 
+        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100">
+          © 2026 SafarX | By Himanshu Kumar
+        </div>
       </div>
 
     </div>

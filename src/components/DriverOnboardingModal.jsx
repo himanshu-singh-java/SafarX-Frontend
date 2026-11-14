@@ -3,41 +3,24 @@ import { setAuthToken, setStorageItem, getStorageItem } from '../utils/auth';
 import apiClient from '../utils/apiClient';
 import { registerDriverProfile } from '../utils/driverDirectory';
 
-/**
- * DriverOnboardingModal Component
- * Ultra-clean, premium Uber-grade partner onboarding modal.
- * 
- * Features:
- * - High-end modern light aesthetic matching SafarX branding.
- * - Real 3D vehicle model selectors (Car, Moto, Auto) with active states.
- * - Device GPS auto-detection with reliable fallback.
- * - Interactive feature chips (AC, Helmet, Luggage, Parcel, etc.).
- * - Atomic registration request to POST /api/driver/onboard.
- * - Duplicate email conflict detection (409) with 1-click Sign In CTA.
- * - Instant role assignment (ROLE_DRIVER) and driverId storage.
- */
 export default function DriverOnboardingModal({
   isOpen,
   onClose,
   onSuccess,
   onSwitchToLogin,
 }) {
-  // Form State: Personal Credentials
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
 
-  // Location State (auto-fetched via live device GPS)
   const [coords, setCoords] = useState(null);
   const [gpsStatus, setGpsStatus] = useState('Detecting live GPS...');
 
-  // Form State: Vehicle Selection
-  const [vehicleType, setVehicleType] = useState('CAR'); // 'CAR' | 'BIKE' | 'AUTO'
+  const [vehicleType, setVehicleType] = useState('CAR');
   const [plateNumber, setPlateNumber] = useState('');
 
-  // Car Specific State
   const [carModel, setCarModel] = useState('Maruti Suzuki Dzire');
   const [carCategory, setCarCategory] = useState('SEDAN');
   const [carCapacity, setCarCapacity] = useState(4);
@@ -45,25 +28,21 @@ export default function DriverOnboardingModal({
   const [hasLuggageCarrier, setHasLuggageCarrier] = useState(true);
   const [hasWifiOrScreen, setHasWifiOrScreen] = useState(false);
 
-  // Bike Specific State
   const [bikeModel, setBikeModel] = useState('Hero Splendor Plus');
   const [bikeType, setBikeType] = useState('COMMUTER');
   const [hasExtraHelmet, setHasExtraHelmet] = useState(true);
   const [isParcelDeliveryEnabled, setIsParcelDeliveryEnabled] = useState(true);
 
-  // Auto Specific State
   const [autoModel, setAutoModel] = useState('Bajaj RE Compact');
   const [permitType, setPermitType] = useState('CITY_PERMIT');
   const [autoCapacity, setAutoCapacity] = useState(3);
   const [isSharedAuto, setIsSharedAuto] = useState(false);
 
-  // Status & Feedback State
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isEmailRegistered, setIsEmailRegistered] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Auto-detect driver live GPS on modal open
   useEffect(() => {
     if (isOpen) {
       setErrorMessage('');
@@ -92,14 +71,12 @@ export default function DriverOnboardingModal({
 
   if (!isOpen) return null;
 
-  // Handle Form Submit
   const handleOnboardSubmit = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
     setIsEmailRegistered(false);
     setSuccessMessage('');
 
-    // Validations
     if (!fullName.trim() || !email.trim() || !password.trim() || !phone.trim()) {
       setErrorMessage('Please fill in all personal information fields.');
       return;
@@ -133,7 +110,6 @@ export default function DriverOnboardingModal({
       return;
     }
 
-    // Prepare Payload matching backend DriverOnboardingRequest.java
     const payload = {
       fullName: fullName.trim(),
       email: email.trim().toLowerCase(),
@@ -174,7 +150,6 @@ export default function DriverOnboardingModal({
       setSuccessMessage('🎉 Partner Account & Vehicle Registered! Welcome to SafarX Fleet.');
 
       try {
-        // Update local session with complete driver & vehicle profile
         const normalizedEmail = (data.email || email).trim().toLowerCase();
         const resolvedDriverId = data.driverId ? String(data.driverId) : '';
         const resolvedModel =
@@ -194,7 +169,6 @@ export default function DriverOnboardingModal({
         setStorageItem('driverVehicleModel', resolvedModel);
         setStorageItem('driverPlateNumber', resolvedPlate);
 
-        // Register profile into dynamic driver directory immediately
         const activeProfile = {
           driverId: resolvedDriverId ? Number(resolvedDriverId) : 1,
           id: resolvedDriverId ? Number(resolvedDriverId) : 1,
@@ -206,7 +180,6 @@ export default function DriverOnboardingModal({
           isCustomEdit: true,
         };
         registerDriverProfile(activeProfile);
-
 
       } catch (storageErr) {
         console.warn('[DriverOnboarding] Local profile storage warning:', storageErr);
@@ -245,13 +218,13 @@ export default function DriverOnboardingModal({
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in select-none">
       
-      {/* Click outside backdrop */}
+      
       <div className="fixed inset-0" onClick={onClose} />
 
-      {/* Modal Container: CLEAN, ULTRA-PREMIUM UBER FLEET WHITE THEME */}
+      
       <div className="relative z-10 bg-white border border-neutral-200 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-neutral-900 animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
         
-        {/* Close Button */}
+        
         <button
           type="button"
           onClick={onClose}
@@ -261,10 +234,10 @@ export default function DriverOnboardingModal({
           ✕
         </button>
 
-        {/* Modal Header */}
+        
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            {/* 3D Model Car Badge */}
+            
             <div className="w-12 h-10 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
@@ -291,7 +264,7 @@ export default function DriverOnboardingModal({
             Register your driver account and vehicle in one quick step. Start accepting passenger trips immediately.
           </p>
 
-          {/* GPS Location Pill */}
+          
           <div className="flex items-center justify-between bg-neutral-50 border border-neutral-200 px-3.5 py-2 rounded-2xl text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -303,7 +276,7 @@ export default function DriverOnboardingModal({
           </div>
         </div>
 
-        {/* Error Alert with 1-Click Sign-in Action */}
+        
         {errorMessage && !successMessage && (
           <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-2.5 animate-in fade-in font-medium">
             <div className="flex items-start gap-2">
@@ -328,7 +301,7 @@ export default function DriverOnboardingModal({
           </div>
         )}
 
-        {/* Success Alert */}
+        
         {successMessage && (
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
             <span className="text-sm">✓</span>
@@ -336,10 +309,10 @@ export default function DriverOnboardingModal({
           </div>
         )}
 
-        {/* Form Content */}
+        
         <form onSubmit={handleOnboardSubmit} className="space-y-6">
           
-          {/* SECTION 1: Personal Credentials */}
+          
           <div className="space-y-3">
             <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 pb-1.5 flex items-center gap-2">
               <span>1. Partner Account Information</span>
@@ -415,13 +388,13 @@ export default function DriverOnboardingModal({
             </div>
           </div>
 
-          {/* SECTION 2: Vehicle Selection & Specs */}
+          
           <div className="space-y-3.5 pt-1">
             <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 pb-1.5 flex items-center gap-2">
               <span>2. Vehicle Fleet Category</span>
             </div>
 
-            {/* Vehicle Type 3-Card Picker with 3D Models */}
+            
             <div>
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3 text-xs">
                 
@@ -518,7 +491,7 @@ export default function DriverOnboardingModal({
               </div>
             </div>
 
-            {/* License Plate Number */}
+            
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
@@ -536,7 +509,7 @@ export default function DriverOnboardingModal({
               />
             </div>
 
-            {/* CONDITIONAL: CAR SPECS CARD */}
+            
             {vehicleType === 'CAR' && (
               <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -583,7 +556,7 @@ export default function DriverOnboardingModal({
                   </div>
                 </div>
 
-                {/* Feature Toggle Chips */}
+                
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                   <button
                     type="button"
@@ -627,7 +600,7 @@ export default function DriverOnboardingModal({
               </div>
             )}
 
-            {/* CONDITIONAL: BIKE SPECS CARD */}
+            
             {vehicleType === 'BIKE' && (
               <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -661,7 +634,7 @@ export default function DriverOnboardingModal({
                   </div>
                 </div>
 
-                {/* Feature Toggle Chips */}
+                
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                   <button
                     type="button"
@@ -692,7 +665,7 @@ export default function DriverOnboardingModal({
               </div>
             )}
 
-            {/* CONDITIONAL: AUTO SPECS CARD */}
+            
             {vehicleType === 'AUTO' && (
               <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -739,7 +712,7 @@ export default function DriverOnboardingModal({
                   </div>
                 </div>
 
-                {/* Feature Toggle Chips */}
+                
                 <div className="flex items-center gap-2 pt-1 text-xs">
                   <button
                     type="button"
@@ -759,7 +732,7 @@ export default function DriverOnboardingModal({
 
           </div>
 
-          {/* Submit Button: Uber Solid Black Button */}
+          
           <div className="pt-2">
             <button
               type="submit"
@@ -780,7 +753,7 @@ export default function DriverOnboardingModal({
             </button>
           </div>
 
-          {/* Switch to Login link */}
+          
           <div className="text-center text-xs text-neutral-500 pt-1 border-t border-neutral-100">
             <span>Already a registered Driver Partner? </span>
             <button
@@ -797,6 +770,9 @@ export default function DriverOnboardingModal({
 
         </form>
 
+        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100">
+          © 2026 SafarX | By Himanshu Kumar
+        </div>
       </div>
     </div>
   );

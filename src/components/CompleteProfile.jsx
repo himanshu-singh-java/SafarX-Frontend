@@ -3,15 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
 import { getAuthToken, clearAuthToken, setAuthToken, parseJwt, getStorageItem, setStorageItem } from '../utils/auth';
 
-/**
- * CompleteProfile Component
- * Onboarding screen for users who signed in via Google OAuth2.
- * Allows entering Name, Phone Number, and selecting their account Role (RIDER or DRIVER).
- */
 export default function CompleteProfile({ onProfileCompleted }) {
   const navigate = useNavigate();
 
-  // State
   const [name, setName] = useState(() => getStorageItem('userName') || '');
   const [phone, setPhone] = useState(() => localStorage.getItem('userPhone') || '');
   const [role, setRole] = useState(() => localStorage.getItem('userRole') || 'ROLE_RIDER');
@@ -21,11 +15,9 @@ export default function CompleteProfile({ onProfileCompleted }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Pre-fill email and name from token / localStorage if available
   useEffect(() => {
     const token = getAuthToken();
     if (!token) {
-      // Not logged in -> redirect to login
       clearAuthToken();
       navigate('/login', { replace: true });
       return;
@@ -37,13 +29,11 @@ export default function CompleteProfile({ onProfileCompleted }) {
     }
   }, [navigate, userEmail]);
 
-  // Form submission handler
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
 
-    // Validation
     const cleanName = name.trim();
     const cleanPhone = phone.trim();
 
@@ -77,11 +67,9 @@ export default function CompleteProfile({ onProfileCompleted }) {
         }
       );
 
-      // On 200 OK success
       if (response.status === 200) {
         setSuccessMessage('Profile setup complete! Welcome to SafarX.');
 
-        // Update local session
         setStorageItem('userName', cleanName);
         setStorageItem('userPhone', cleanPhone);
         setStorageItem('userRole', role);
@@ -94,7 +82,6 @@ export default function CompleteProfile({ onProfileCompleted }) {
           })
         );
 
-        // Authoritatively sync newly generated riderId or driverId from /api/auth/me
         try {
           const meRes = await apiClient.get('/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
@@ -110,14 +97,12 @@ export default function CompleteProfile({ onProfileCompleted }) {
           onProfileCompleted(role);
         }
 
-        // Redirect to main map / dashboard screen after short toast
         setTimeout(() => {
           navigate('/dashboard', { replace: true });
         }, 800);
       }
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        // 401 Unauthorized: token expired or invalid credentials
         clearAuthToken();
         setErrorMessage('Session expired or unauthorized. Redirecting to login...');
         setTimeout(() => {
@@ -129,7 +114,6 @@ export default function CompleteProfile({ onProfileCompleted }) {
           (typeof err.response?.data === 'string' ? err.response.data : null) ||
           'Failed to complete profile. Please verify your details and try again.';
 
-        // If backend confirms profile is already completed in database:
         if (
           err.response?.status === 403 ||
           errorText.toLowerCase().includes('already completed')
@@ -154,10 +138,10 @@ export default function CompleteProfile({ onProfileCompleted }) {
   return (
     <div className="min-h-screen bg-[#f7f7f8] flex flex-col items-center justify-center p-4 sm:p-6 select-none font-sans text-neutral-900">
       
-      {/* Container Card */}
+      
       <div className="w-full max-w-lg bg-white border border-neutral-200/80 rounded-3xl shadow-xl p-6 sm:p-10 space-y-6 animate-in fade-in zoom-in-95">
         
-        {/* Header & Logo */}
+        
         <div className="flex items-center justify-between border-b border-neutral-100 pb-5">
           <div className="flex items-center gap-1.5">
             <span className="text-2xl font-black tracking-tight text-black">Safar</span>
@@ -168,7 +152,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
           </span>
         </div>
 
-        {/* Title */}
+        
         <div className="space-y-1">
           <h1 className="text-2xl font-black tracking-tight text-neutral-900">
             Complete your profile
@@ -182,7 +166,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
           </p>
         </div>
 
-        {/* Feedback Banners */}
+        
         {errorMessage && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in font-medium">
             <span className="text-base shrink-0">⚠️</span>
@@ -197,7 +181,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
           </div>
         )}
 
-        {/* Form */}
+        
         <form onSubmit={handleSubmit} className="space-y-5">
           
           
@@ -272,7 +256,7 @@ export default function CompleteProfile({ onProfileCompleted }) {
             </div>
           </div>
 
-          {/* Submit Button */}
+          
           <button
             type="submit"
             disabled={isLoading}
@@ -290,9 +274,11 @@ export default function CompleteProfile({ onProfileCompleted }) {
 
         </form>
 
+        <div className="mt-6 text-center text-xs text-neutral-500 font-medium">
+          © 2026 SafarX | By Himanshu Kumar
+        </div>
       </div>
 
     </div>
   );
 }
-

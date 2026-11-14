@@ -15,7 +15,6 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Authentication & Role State (Tab-isolated session storage)
   const [token, setToken] = useState(() => getAuthToken());
   const [userEmail, setUserEmail] = useState(() => getStorageItem('userEmail') || '');
   const [userName, setUserName] = useState(() => {
@@ -24,17 +23,13 @@ function App() {
   });
   const [userRole, setUserRole] = useState(() => getUserRole());
 
-  // Auth Modal State (Popup Dialog)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState('login'); // 'login' | 'register'
+  const [authModalMode, setAuthModalMode] = useState('login');
   const [authAlertNotice, setAuthAlertNotice] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Dedicated Driver Partner Onboarding State (Drive with SafarX)
   const [isDriverOnboardingOpen, setIsDriverOnboardingOpen] = useState(false);
 
-  // View Mode: 'rider' (SafarX Client) | 'admin' (Admin Console) | 'driver' (Driver Console)
-  // Strict role-based landing: ADMIN -> admin, DRIVER -> driver, RIDER -> rider
   const [viewMode, setViewMode] = useState(() => {
     const t = getAuthToken();
     const r = getUserRole();
@@ -47,12 +42,9 @@ function App() {
     return 'rider';
   });
 
-  // Trigger My Trips drawer from navbar
   const [openHistoryTrigger, setOpenHistoryTrigger] = useState(0);
-  // Trigger Return to Cinematic Animation Homepage
   const [resetHomeTrigger, setResetHomeTrigger] = useState(0);
 
-  // Clicking SafarX brand logo always returns directly to the cinematic animation homepage
   const handleBrandClick = () => {
     setIsAuthModalOpen(false);
     setIsDriverOnboardingOpen(false);
@@ -62,7 +54,6 @@ function App() {
     setResetHomeTrigger((prev) => prev + 1);
   };
 
-  // Listen for instant real-time profile name updates across the application
   useEffect(() => {
     const handleProfileUpdate = (e) => {
       if (e.detail?.name) {
@@ -77,7 +68,6 @@ function App() {
     };
   }, []);
 
-  // Verify token expiration on initial load & handle global 401/403 events
   useEffect(() => {
     if (token) {
       const decoded = parseJwt(token);
@@ -102,8 +92,6 @@ function App() {
           }
         }
 
-        // Live server-side validation against backend DB (/api/auth/me)
-        // Auto-syncs live profile and gracefully cleans up if DB was dropped or user removed
         apiClient
           .get('/api/auth/me', { silentAuth: true })
           .then((res) => {
@@ -147,8 +135,6 @@ function App() {
             }
           })
           .catch((err) => {
-            // Background sync failure (e.g. offline, endpoint pending, or minor network glitch)
-            // NEVER wipe the user's active session on page refresh!
             console.debug('[App] Background profile sync:', err?.response?.status || err?.message);
           });
       }
@@ -182,14 +168,12 @@ function App() {
     };
   }, [token]);
 
-  // Auto-redirect authenticated user away from /login to homepage
   useEffect(() => {
     if (location.pathname === '/login' && token) {
       navigate('/', { replace: true });
     }
   }, [location.pathname, token, navigate]);
 
-  // Auto-open login modal if route is /login or if OAuth returns with ?error=...
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const oauthError = params.get('error');
@@ -206,7 +190,6 @@ function App() {
     }
   }, [location.pathname, location.search, token]);
 
-  // Sync token state on route change (e.g. after OAuth2 redirect sets token in localStorage)
   useEffect(() => {
     const currentToken = getAuthToken();
     if (currentToken && currentToken !== token) {
@@ -228,7 +211,6 @@ function App() {
     }
   }, [location.pathname, token]);
 
-  // Open Auth Modal handler
   const openAuth = (mode = 'login', notice = '') => {
     setAuthModalMode(mode);
     setAuthAlertNotice(notice);
@@ -236,7 +218,6 @@ function App() {
     setIsAuthModalOpen(true);
   };
 
-  // Handle Login / Registration Success with Role Auto-Routing
   const handleLoginSuccess = (newToken, email, explicitRole) => {
     setToken(newToken);
     setUserEmail(email);
@@ -244,7 +225,6 @@ function App() {
     setUserName(resolvedName);
     setStorageItem('userName', resolvedName);
 
-    // Auto-detect role from token payload, explicit param, or email pattern
     const decoded = parseJwt(newToken);
     const detectedRole =
       explicitRole ||
@@ -254,7 +234,6 @@ function App() {
     setUserRole(detectedRole);
     setStorageItem('userRole', detectedRole);
 
-    // Dynamic routing: ROLE_ADMIN -> Admin, ROLE_DRIVER -> Driver, ROLE_RIDER -> Rider
     if (detectedRole === 'ROLE_ADMIN') {
       setViewMode('admin');
     } else if (detectedRole === 'ROLE_DRIVER') {
@@ -268,7 +247,6 @@ function App() {
     }
   };
 
-  // Handle Driver Onboarding Success (Drive with SafarX)
   const handleDriverOnboardingSuccess = (newToken, email, driverId) => {
     setToken(newToken);
     setUserEmail(email);
@@ -283,7 +261,6 @@ function App() {
     }
   };
 
-  // Handle Logout
   const handleLogout = () => {
     clearAuthToken();
     setToken(null);
@@ -297,10 +274,10 @@ function App() {
 
   return (
     <Routes>
-      {/* 1. DEDICATED OAUTH2 REDIRECT ROUTE */}
+      
       <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
 
-      {/* 2. ONBOARDING: COMPLETE PROFILE ROUTE */}
+      
       <Route
         path="/complete-profile"
         element={
@@ -316,16 +293,15 @@ function App() {
         }
       />
 
-      {/* 3. MAIN APPLICATION ROUTE (matches /, /dashboard, /login, etc.) */}
+      
       <Route
         path="*"
         element={
-          <div className={`min-h-screen ${viewMode === 'admin' ? 'bg-[#0a0706]' : 'bg-[#faf8f5]'}`}>
+          <div className={`min-h-screen flex flex-col justify-between ${viewMode === 'admin' ? 'bg-[#0a0706]' : 'bg-[#faf8f5]'}`}>
       
-      {/* 1. TOP NAVBAR (MATCHING OFFICIAL UBER SCREENSHOT - ZERO ADMIN CONTROLS FOR PUBLIC) */}
       <header className="sticky top-0 z-40 bg-black text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-neutral-900 shadow-sm print:hidden">
         
-        {/* Left: Brand */}
+        
         <div className="flex items-center gap-6 md:gap-8">
           <div
             onClick={handleBrandClick}
@@ -336,7 +312,7 @@ function App() {
             <span className="text-2xl font-black tracking-tight text-[#d4af37] group-hover:brightness-125 transition-all">X</span>
           </div>
 
-          {/* Admin Switcher: ONLY VISIBLE IF LOGGED IN AS ROLE_ADMIN */}
+          
           {token && userRole === 'ROLE_ADMIN' && (
             <div className="flex items-center p-0.5 bg-neutral-900 rounded-full border border-[#d4af37]/40 text-xs">
               <button
@@ -365,10 +341,10 @@ function App() {
           )}
         </div>
 
-        {/* Right: Consumer Trips, Drive with SafarX, Log in & Sign up */}
+        
         <div className="flex items-center gap-2 sm:gap-4 text-xs font-semibold">
           
-          {/* My Trips (consumer trip drawer for riders) */}
+          
           {token && viewMode === 'rider' && (
             <button
               onClick={() => setOpenHistoryTrigger((prev) => prev + 1)}
@@ -378,10 +354,10 @@ function App() {
             </button>
           )}
 
-          {/* Authentication State Controls: 3 Distinct Options */}
+          
           {!token ? (
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Option 1: Drive with SafarX (Dedicated Driver Partner Registration with 3D Car Thumbnail) */}
+              
               <button
                 type="button"
                 onClick={() => setIsDriverOnboardingOpen(true)}
@@ -400,7 +376,7 @@ function App() {
                 </span>
               </button>
 
-              {/* Option 2: Unified Log in (Routes automatically based on role: Rider or Driver) */}
+              
               <button
                 type="button"
                 onClick={() => openAuth('login')}
@@ -409,7 +385,7 @@ function App() {
                 Log in
               </button>
 
-              {/* Option 3: Rider Sign up (Automatic ROLE_RIDER) */}
+              
               <button
                 type="button"
                 onClick={() => openAuth('register')}
@@ -433,7 +409,7 @@ function App() {
 
       </header>
 
-      {/* Admin Preview Mode Banner (Only when Admin is previewing Rider Dashboard) */}
+      
       {token && userRole === 'ROLE_ADMIN' && viewMode === 'rider' && (
         <div className="bg-[#d4af37] text-black text-xs font-bold px-4 sm:px-8 py-2 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-2">
@@ -449,8 +425,8 @@ function App() {
         </div>
       )}
 
-      {/* Main Content View (Strictly role-dependent) */}
-      <main>
+      
+      <main className="flex-1">
         {viewMode === 'driver' ? (
           <DriverDashboard
             token={token}
@@ -474,7 +450,10 @@ function App() {
         )}
       </main>
 
-      {/* Universal Auth Modal Dialog (Appears only on Log in / Sign up click) */}
+      <footer className={`w-full py-4 text-center text-xs border-t font-medium print:hidden ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-500 border-neutral-900' : 'bg-white text-neutral-500 border-neutral-100'}`}>
+        © 2026 SafarX | By Himanshu Kumar
+      </footer>
+
       <AuthModal
         isOpen={isAuthModalOpen}
         initialMode={authModalMode}
@@ -488,7 +467,7 @@ function App() {
         }}
       />
 
-      {/* Dedicated Driver Partner Onboarding Modal Dialog (Drive with SafarX) */}
+      
       <DriverOnboardingModal
         isOpen={isDriverOnboardingOpen}
         onClose={() => setIsDriverOnboardingOpen(false)}

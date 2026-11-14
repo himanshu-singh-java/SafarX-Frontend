@@ -7,10 +7,6 @@ import FullPageCarMotionScene from './CarMotionScene';
 import { getDriverDetails } from '../utils/driverDirectory';
 import { initiateRazorpayPayment } from '../utils/razorpay';
 
-/**
- * EXACT 1:1 Implementation of Backend `LocationUtils.java`:
- * public static Double calculateDistance(Double startLat, Double startLng, Double endLat, Double endLng)
- */
 function calculateDistanceKm(startLat, startLng, endLat, endLng) {
   if (!startLat || !startLng || !endLat || !endLng) return 0;
   const EARTH_RADIUS_KM = 6371;
@@ -32,14 +28,6 @@ function calculateDistanceKm(startLat, startLng, endLat, endLng) {
 
 const DEFAULT_RECENT_LOCATIONS = [];
 
-/**
- * EXACT 1:1 Rates matching Backend Models & Official Uber Screenshot:
- * - Bike: ₹31.00 base/short trip (Backend: BIKE)
- * - Bike Saver: ₹30.00 (Backend: BIKE)
- * - Auto: ₹53.64 (Backend: AUTO)
- * - SafarX AC: ₹124.90 (Backend: CAR)
- * - Sedan Premier: ₹145.00 (Backend: CAR)
- */
 const VEHICLE_TIERS = [
   {
     type: 'BIKE',
@@ -119,16 +107,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       window.removeEventListener('auth:user_updated', handleProfileUpdate);
     };
   }, []);
-  // Screen mode: 'home' (City Hub Homepage) | 'product-selection' (Uber Product Selection)
   const [currentScreen, setCurrentScreen] = useState('home');
-  // Home view mode: 'motion' (Cinematic Vector Car Scene) | 'map' (Standard 2-Column Live Route Map)
   const [homeViewMode, setHomeViewMode] = useState('motion');
-  const [selectedProductTab, setSelectedProductTab] = useState('ride'); // 'ride' | 'parcel' | 'rentals'
+  const [selectedProductTab, setSelectedProductTab] = useState('ride');
   const bookingSectionRef = useRef(null);
   const pickupContainerRef = useRef(null);
   const isLoggedIn = Boolean(token || getAuthToken());
 
-  // Recent Locations State (Saved to localStorage)
   const [recentLocations, setRecentLocations] = useState(() => {
     try {
       const saved = localStorage.getItem('safarx_recent_locations');
@@ -149,19 +134,16 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     });
   };
 
-  // Helper for dynamic arrival drop time (e.g. 20:58)
   const getEtaDropTime = (minsAhead = 2) => {
     const d = new Date(Date.now() + minsAhead * 60 * 1000);
     return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  // Rider Identification: strictly loaded from /api/auth/me (no hardcoded default)
   const [riderId, setRiderId] = useState(() => {
     const saved = getStorageItem('riderId');
     return saved ? Number(saved) : null;
   });
 
-  // Sync verified riderId from /api/auth/me
   useEffect(() => {
     let isMounted = true;
     const fetchMe = async () => {
@@ -201,7 +183,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     };
   }, [token]);
 
-  // Trigger My Trips drawer from navbar
   useEffect(() => {
     if (openHistoryTrigger > 0) {
       setShowHistory(true);
@@ -209,7 +190,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     }
   }, [openHistoryTrigger]);
 
-  // Return to home screen & cinematic animation whenever SafarX logo is clicked
   useEffect(() => {
     if (resetHomeTrigger > 0) {
       setCurrentScreen('home');
@@ -227,7 +207,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       setStatusMessage({ text: 'Please enter a destination', isError: true });
       return;
     }
-    // Push history state so browser Back button cleanly returns to home view without logging out
     try {
       window.history.pushState({ screen: 'product-selection' }, '');
     } catch (e) {}
@@ -243,7 +222,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     }
   };
 
-  // Intercept browser Back button (popstate) to return to home view smoothly without route change / logout
   useEffect(() => {
     const handlePopState = () => {
       if (currentScreen === 'product-selection') {
@@ -254,28 +232,25 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentScreen]);
 
-  // Active input tracking: 'pickup' | 'drop' (defaults to 'drop')
   const [activeField, setActiveField] = useState('drop');
   const dropInputRef = useRef(null);
   const pickupInputRef = useRef(null);
 
-  // Locations state
   const [pickupText, setPickupText] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
 
   const [dropText, setDropText] = useState('');
   const [dropCoords, setDropCoords] = useState(null);
 
-  // Autocomplete Geocoding Suggestions
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropSuggestions, setDropSuggestions] = useState([]);
   const [isSearchingPickup, setIsSearchingPickup] = useState(false);
   const [isSearchingDrop, setIsSearchingDrop] = useState(false);
-  const [focusedInput, setFocusedInput] = useState(null); // 'pickup' | 'drop' | null
+  const [focusedInput, setFocusedInput] = useState(null);
   const [showCoordsModal, setShowCoordsModal] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const [locationFetched, setLocationFetched] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState('CAR'); // Default to SafarX AC (CAR) to match driver fleet
+  const [selectedVehicle, setSelectedVehicle] = useState('CAR');
   const [pickupTime, setPickupTime] = useState('Pickup now');
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [passengerMode, setPassengerMode] = useState('For me');
@@ -283,7 +258,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   const [paymentMethod, setPaymentMethod] = useState('UPI Scan and Pay');
   const [showPaymentDropdown, setShowPaymentDropdown] = useState(false);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (pickupContainerRef.current && !pickupContainerRef.current.contains(e.target)) {
@@ -296,7 +270,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [focusedInput]);
 
-  // Booking Execution State
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
   const [activeRide, setActiveRide] = useState(null);
@@ -304,7 +277,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   const [isPayingRazorpay, setIsPayingRazorpay] = useState(false);
   const [razorpaySuccessData, setRazorpaySuccessData] = useState(null);
 
-  // Subscribe to real-time ride updates over STOMP WebSocket
   useEffect(() => {
     if (!activeRide?.rideId) return;
 
@@ -394,7 +366,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     };
   }, [activeRide?.rideId]);
 
-  // Fail-safe Polling to guarantee Rider screen updates via /api/rides/history/{riderId} (Strictly RBAC-compliant)
   useEffect(() => {
     if (!activeRide?.rideId || activeRide.status === 'COMPLETED') return;
 
@@ -434,24 +405,20 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           }
         }
       } catch (e) {
-        // silent
       }
     }, 2500);
 
     return () => clearInterval(pollInterval);
   }, [activeRide?.rideId, activeRide?.status, riderId]);
 
-  // Trip history drawer
   const [showHistory, setShowHistory] = useState(false);
   const [rideHistory, setRideHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // Selected ride for detailed receipt modal
   const [selectedRideReceipt, setSelectedRideReceipt] = useState(null);
   const [receiptPickupName, setReceiptPickupName] = useState('');
   const [receiptDropName, setReceiptDropName] = useState('');
 
-  // Reverse geocoding for selected receipt modal
   useEffect(() => {
     if (!selectedRideReceipt) {
       setReceiptPickupName('');
@@ -527,7 +494,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return vehicle.carModel || vehicle.autoModel || vehicle.bikeModel || (vehicle.vehicleType ? `SafarX ${vehicle.vehicleType}` : 'Comfort Sedan');
   };
 
-  // Real-time distance using backend formula
   const rawDistance = calculateDistanceKm(
     pickupCoords?.lat,
     pickupCoords?.lng,
@@ -536,7 +502,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   );
   const displayDistance = rawDistance >= 0.5 ? rawDistance.toFixed(1) : '5.5';
 
-  // Reverse Geocoding helper using OpenStreetMap Nominatim
   const reverseGeocode = async (lat, lng) => {
     try {
       const response = await fetch(
@@ -555,7 +520,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     return `Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
   };
 
-  // Auto-fetch rider live location on mount, on login, or when user clicks GPS icon
   const fetchCurrentLocation = (isAuto = false) => {
     if (!navigator.geolocation) {
       if (!isAuto) {
@@ -576,7 +540,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       setIsFetchingLocation(false);
       setLocationFetched(true);
 
-      // Auto-transition activeField to 'drop' and shift focus to Destination input
       setActiveField('drop');
       setFocusedInput('drop');
       setTimeout(() => {
@@ -617,12 +580,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     );
   };
 
-  // Auto-fetch rider location when component loads and on login
   useEffect(() => {
     fetchCurrentLocation(true);
   }, [token]);
 
-  // Debounced search using OpenStreetMap Nominatim Geocoding API
   const pickupSearchTimeout = useRef(null);
   const dropSearchTimeout = useRef(null);
 
@@ -700,7 +661,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     }
   };
 
-  // Generate dynamic OpenStreetMap embed URL centered on both points
   const pLng = pickupCoords?.lng ?? 78.4867;
   const pLat = pickupCoords?.lat ?? 17.3850;
   const dLng = dropCoords?.lng ?? pLng;
@@ -711,9 +671,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   const maxLat = Math.max(pLat, dLat) + 0.05;
   const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLng}%2C${minLat}%2C${maxLng}%2C${maxLat}&layer=mapnik&marker=${pLat}%2C${pLng}`;
 
-  // ================= API: BOOK RIDE =================
   const handleBookRide = async () => {
-    // 1. First ensure user is logged in
     const activeToken = token || getAuthToken();
     if (!activeToken) {
       if (onOpenAuth) {
@@ -722,7 +680,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       return;
     }
 
-    // 2. Prevent booking if there is already an active ride
     if (activeRide && (activeRide.status === 'REQUESTED' || activeRide.status === 'ACCEPTED' || activeRide.status === 'IN_PROGRESS')) {
       setStatusMessage({
         text: `You already have an active trip (#${activeRide.rideId}) in progress! Please complete or cancel it first before booking a new vehicle.`,
@@ -732,7 +689,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       return;
     }
 
-    // 3. Location validation
     if (pickupCoords.lat === dropCoords.lat && pickupCoords.lng === dropCoords.lng) {
       setStatusMessage({ text: 'Pickup and Drop locations cannot be identical.', isError: true });
       return;
@@ -753,7 +709,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     setIsLoading(true);
     setStatusMessage({ text: '', isError: false });
 
-    // 4. Resolve valid riderId from state, storage, or live API
     let activeRiderId = riderId;
     if (!activeRiderId) {
       const stored = getStorageItem('riderId');
@@ -799,7 +754,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
     const requestPayload = {
       riderId: parseInt(activeRiderId, 10),
-      vehicleType: selectedTier.backendType, // 'BIKE' | 'AUTO' | 'CAR'
+      vehicleType: selectedTier.backendType,
       pickupLat: parseFloat(pickupCoords.lat),
       pickupLng: parseFloat(pickupCoords.lng),
       dropLat: finalDropLat,
@@ -845,9 +800,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     }
   };
 
-  // ================= API: CANCEL RIDE (ROLE_RIDER) =================
   const handleCancelRide = async (overrideRideId = null) => {
-    // Strictly guard against React SyntheticEvent objects being passed as overrideRideId
     const validId = (typeof overrideRideId === 'number' || (typeof overrideRideId === 'string' && /^\d+$/.test(overrideRideId)))
       ? Number(overrideRideId)
       : activeRide?.rideId;
@@ -872,7 +825,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     }
   };
 
-  // ================= RAZORPAY ONLINE CHECKOUT =================
   const handlePayOnlineWithRazorpay = async () => {
     if (!activeRide) return;
     setIsPayingRazorpay(true);
@@ -910,7 +862,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
     });
   };
 
-  // ================= API: FETCH HISTORY =================
   const fetchHistory = async (silent = false) => {
     if (!silent) setLoadingHistory(true);
     try {
@@ -931,11 +882,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       const response = await apiClient.get(`/api/rides/history/${targetId}`);
       let data = Array.isArray(response.data) ? response.data : [];
 
-      // Sort newest trip first
       data.sort((a, b) => (b.rideId || b.id || 0) - (a.rideId || a.id || 0));
       setRideHistory(data);
 
-      // Auto-restore any currently active ride so rider can see/manage/cancel it
       const currentActive = data.find(
         (r) => r.rideStatus === 'REQUESTED' || r.rideStatus === 'ACCEPTED' || r.rideStatus === 'IN_PROGRESS'
       );
@@ -959,7 +908,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   const currentTier = VEHICLE_TIERS.find((v) => v.type === selectedVehicle) || VEHICLE_TIERS[0];
   const currentFare = currentTier.calculateFare(rawDistance);
 
-  // Reusable Request-a-Ride card (used in 2-column logged-in view & floating on full-page guest view)
   const renderRequestCard = (isFloating = false) => (
     <div
       className={
@@ -969,7 +917,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       }
     >
       <div className="space-y-5">
-        {/* Title: Welcome to SafarX */}
+        
         <h2
           className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight ${
             isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-black'
@@ -978,7 +926,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           Welcome to SafarX
         </h2>
 
-        {/* Pickup now dropdown */}
+        
         <div className="relative inline-block">
           <button
             type="button"
@@ -1024,7 +972,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           )}
         </div>
 
-        {/* Connecting Line Inputs */}
+        
         <div className="relative space-y-2 pt-1">
           <div className="absolute left-[18px] top-5 bottom-5 flex flex-col items-center pointer-events-none z-10">
             <div
@@ -1044,7 +992,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             />
           </div>
 
-          {/* Pickup Input Container with Interactive Dropdown */}
+          
           <div ref={pickupContainerRef} className="relative">
             <input
               ref={pickupInputRef}
@@ -1114,7 +1062,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               )}
             </div>
 
-            {/* INTERACTIVE POPUP DROPDOWN (Current location option + Recent locations) */}
+            
             {focusedInput === 'pickup' && (
               <div
                 className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
@@ -1123,7 +1071,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     : 'bg-white border-neutral-200 text-black'
                 }`}
               >
-                {/* 1. Use Current Location option */}
+                
                 <button
                   type="button"
                   onClick={() => {
@@ -1166,7 +1114,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   )}
                 </button>
 
-                {/* Autocomplete Suggestions if query typed */}
+                
                 {pickupSuggestions.length > 0 ? (
                   <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
                     <div className="text-[10px] font-bold text-neutral-400 uppercase px-2 py-0.5">
@@ -1187,7 +1135,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     ))}
                   </div>
                 ) : (
-                  /* 2. Recent Locations List */
+                  
                   recentLocations.length > 0 && (
                     <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
                       <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
@@ -1228,7 +1176,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             )}
           </div>
 
-          {/* Dropoff Input Container */}
+          
           <div className="relative">
             <input
               ref={dropInputRef}
@@ -1272,7 +1220,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </button>
             )}
 
-            {/* Drop Suggestions */}
+            
             {dropSuggestions.length > 0 && focusedInput === 'drop' && (
               <div
                 className={`absolute top-14 left-0 right-0 rounded-xl shadow-2xl p-1.5 z-40 space-y-1 border ${
@@ -1305,7 +1253,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           </div>
         </div>
 
-        {/* RECENT DESTINATIONS LIST ON CARD */}
+        
         {recentLocations.length > 0 && (
           <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100'}`}>
             <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>
@@ -1359,7 +1307,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
       </div>
 
-      {/* See prices CTA button (Transitions to Product Selection screen) */}
+      
       <div className="pt-2">
         <button
           type="button"
@@ -1381,7 +1329,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   return (
     <div className="min-h-screen bg-white text-[#000000] font-sans antialiased">
       
-      {/* GLOBAL ALERT NOTIFICATION */}
+      
       {statusMessage.text && (
         <div
           className={`px-6 py-3 text-xs md:text-sm font-semibold flex items-center justify-between border-b ${
@@ -1428,25 +1376,23 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         </div>
       )}
 
-      {/* MAIN HOMEPAGE & PRODUCT SELECTION ROUTER */}
+      
       <main className={`${currentScreen === 'home' && (!isLoggedIn || homeViewMode === 'motion') ? "w-full px-2 sm:px-4 py-2" : "max-w-[1440px] mx-auto px-4 sm:px-8 py-6 space-y-6"} ${selectedRideReceipt ? 'print:hidden' : ''}`}>
 
         {currentScreen === 'home' && (!isLoggedIn || homeViewMode === 'motion') ? (
-          /* ========================================================
-             1. CINEMATIC FULL-PAGE MOTION HERO (ANIMATION SCENE)
-             ======================================================== */
+          
           <div className="relative w-full min-h-[calc(100vh-100px)] rounded-3xl overflow-hidden border border-neutral-900 shadow-2xl isolate flex items-center bg-[#07090e]">
-            {/* Full-Page Night Highway Vector Car Motion Scene */}
+            
             <FullPageCarMotionScene />
 
-            {/* Floating Request Card - Shifted further left with transparent glassmorphism */}
+            
             <div className="relative z-20 w-full px-4 sm:px-6 lg:px-10 py-6 pointer-events-none flex items-center">
               <div className="w-full max-w-md lg:max-w-[450px] pointer-events-auto">
                 {renderRequestCard(true)}
               </div>
             </div>
 
-            {/* Optional switch to Live Map for logged-in riders */}
+            
             {isLoggedIn && (
               <div className="absolute top-5 right-6 z-30 pointer-events-auto">
                 <button
@@ -1461,12 +1407,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             )}
           </div>
         ) : currentScreen === 'home' ? (
-          /* ========================================================
-             1. LOGGED-IN CITY HUB HOMEPAGE (MATCHING SCREENSHOT 1: uber.com/in/en/city-hub/)
-             ======================================================== */
+          
           <div className="space-y-6">
             
-            {/* Page Heading & Cinematic Mode Switch */}
+            
             <div className="flex items-center justify-between">
               <h1 className="text-3xl sm:text-4xl font-black text-black tracking-tight">
                 Ride
@@ -1481,13 +1425,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </button>
             </div>
 
-            {/* 2-COLUMN HERO: REQUEST CARD (LEFT) + LIVE INTERACTIVE MAP (RIGHT) */}
+            
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
               
-              {/* LEFT: Request a ride Card */}
+              
               {renderRequestCard(false)}
 
-              {/* RIGHT: LIVE INTERACTIVE MAP */}
+              
               <div className="lg:col-span-6 min-h-[460px] lg:min-h-[580px] h-full rounded-3xl overflow-hidden border border-neutral-200 shadow-sm relative isolate z-0 bg-neutral-100">
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
@@ -1504,12 +1448,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
           </div>
         ) : (
-          /* ========================================================
-             2. DEDICATED PRODUCT SELECTION SCREEN (MATCHING SCREENSHOT 2: m.uber.com/go/product-selection)
-             ======================================================== */
+          
           <div className="space-y-6 animate-in fade-in">
             
-            {/* Top Sub-Navigation Bar matching Screenshot 2 */}
+            
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-3">
               <div className="flex items-center gap-4">
                 <button
@@ -1523,13 +1465,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 </button>
               </div>
 
-              {/* Center Product Tab: Ride Only */}
+              
               <div className="flex items-center gap-2 text-sm font-extrabold text-black border-b-2 border-black pb-2.5">
                 <span>🚗</span>
                 <span>Ride</span>
               </div>
 
-              {/* Right Activity Trigger */}
+              
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
@@ -1544,15 +1486,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </div>
             </div>
 
-            {/* SPLIT LAYOUT: 3-COLUMNS BEFORE BOOKING, 2-COLUMNS (DETAILS + EXPANDED MAP) WHEN RIDE ACTIVE */}
+            
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-20">
               
-              {/* COLUMN 1 (3 Cols): "Get a ride" Summary Card - Only visible when selecting ride */}
+              
               {!activeRide && (
                 <div className="lg:col-span-3 bg-white rounded-2xl border border-neutral-200 p-4 space-y-4 shadow-sm">
                   <h3 className="text-lg font-black text-black">Get a ride</h3>
 
-                  {/* Route Points */}
+                  
                   <div className="space-y-2">
                     <div className="flex items-center gap-2.5 bg-[#f3f3f3] p-3 rounded-xl">
                       <span className="w-2.5 h-2.5 rounded-full bg-black shrink-0" />
@@ -1574,7 +1516,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </div>
 
-                  {/* Time & Passenger Pills */}
+                  
                   <div className="space-y-2">
                     <div className="bg-[#f3f3f3] p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-black">
                       <div className="flex items-center gap-2">
@@ -1592,7 +1534,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </div>
 
-                  {/* Edit route link */}
+                  
                   <button
                     type="button"
                     onClick={handleBackToHome}
@@ -1603,12 +1545,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 </div>
               )}
 
-              {/* COLUMN 2: Vehicle Selection (5 cols) OR Active Trip Details (4 cols = ~33% when active) */}
+              
               <div className={activeRide ? "lg:col-span-4 space-y-4" : "lg:col-span-5 space-y-4"}>
                 
                 {!activeRide ? (
                   <>
-                    {/* Header */}
+                    
                     <div className="space-y-1">
                       <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
                         Choose a ride
@@ -1618,7 +1560,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </p>
                     </div>
 
-                    {/* Vehicle Selection Cards (Matching Screenshot 2) */}
+                    
                     <div className="space-y-3">
                       {VEHICLE_TIERS.map((tier) => {
                         const isSelected = selectedVehicle === tier.type;
@@ -1679,9 +1621,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       })}
                     </div>
 
-                    {/* FLOATING ACTION BAR MATCHING SCREENSHOT 2 */}
+                    
                     <div className="sticky bottom-4 mt-6 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-neutral-200 shadow-2xl flex items-center gap-3 z-30">
-                      {/* Payment Method Selector */}
+                      
                       <div className="relative">
                         <button
                           type="button"
@@ -1712,7 +1654,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         )}
                       </div>
 
-                      {/* Primary CTA: Request Vehicle */}
+                      
                       <button
                         type="button"
                         onClick={handleBookRide}
@@ -1731,9 +1673,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </>
                 ) : activeRide.status === 'REQUESTED' ? (
-                  /* UBER-STYLE SEARCHING FOR DRIVERS / CAPTAINS (Right at top, zero scroll) */
+                  
                   <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-7 shadow-lg space-y-6 animate-in zoom-in-95">
-                    {/* Animated Pulsing Radar Waves */}
+                    
                     <div className="flex flex-col items-center justify-center py-6 space-y-4 text-center">
                       <div className="relative flex items-center justify-center w-24 h-24">
                         <div className="w-24 h-24 rounded-full bg-black/5 animate-ping absolute" />
@@ -1752,13 +1694,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         </p>
                       </div>
 
-                      {/* Animated Progress Bar */}
+                      
                       <div className="w-full max-w-xs bg-neutral-100 rounded-full h-1.5 overflow-hidden">
                         <div className="bg-black h-full rounded-full animate-pulse" style={{ width: '70%' }} />
                       </div>
                     </div>
 
-                    {/* Ride Details Summary */}
+                    
                     <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
@@ -1782,7 +1724,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </div>
                     </div>
 
-                    {/* Cancel Request Button */}
+                    
                     <button
                       type="button"
                       onClick={handleCancelRide}
@@ -1793,7 +1735,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </button>
                   </div>
                 ) : (
-                  /* ACTIVE RIDE CARD: ACCEPTED, IN_PROGRESS OR COMPLETED */
+                  
                   <div className="bg-white text-black rounded-3xl p-6 shadow-xl space-y-5 animate-in fade-in border border-neutral-200">
                     <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
                       <div className="flex items-center gap-2.5">
@@ -1984,7 +1926,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                         return (
                           <div className="space-y-4">
-                            {/* Driver & Vehicle Box */}
+                            
                             <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full bg-black text-white font-black text-lg flex items-center justify-center shadow">
@@ -2015,7 +1957,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </div>
                             </div>
 
-                            {/* Estimated Arrival / Route Status */}
+                            
                             <div className="flex items-center justify-between py-2 border-b border-neutral-100 text-xs">
                               <span className="font-bold text-neutral-600">
                                 {activeRide.status === 'IN_PROGRESS' ? 'Route status' : 'Estimated arrival'}
@@ -2025,7 +1967,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </span>
                             </div>
 
-                            {/* Trip Route Points */}
+                            
                             <div className="space-y-2 text-xs border-b border-neutral-100 pb-3">
                               <div className="flex items-center gap-2 text-neutral-800 truncate">
                                 <span className="w-2 h-2 rounded-full bg-black shrink-0" />
@@ -2037,7 +1979,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </div>
                             </div>
 
-                            {/* Share Trip Details with Family */}
+                            
                             <div>
                               <button
                                 type="button"
@@ -2091,7 +2033,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
               </div>
 
-              {/* COLUMN 3: Full Height Route Map (Takes 4 cols during selection, expands to 8 cols ~67% when ride active) */}
+              
               <div className={`${activeRide ? "lg:col-span-8" : "lg:col-span-4"} h-[600px] lg:h-[calc(100vh-140px)] sticky top-20 rounded-3xl overflow-hidden border border-neutral-200 shadow-sm relative isolate z-0 bg-neutral-100 transition-all duration-300`}>
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
@@ -2111,7 +2053,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
       </main>
 
-      {/* 3. TRIP HISTORY DRAWER */}
+      
       {showHistory && (
         <div className="print:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
           <div className="w-full max-w-md bg-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
@@ -2196,12 +2138,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         </div>
       )}
 
-      {/* 4. UBER-STYLE TRIP RECEIPT & DETAILS MODAL */}
+      
       {selectedRideReceipt && (
         <div className="receipt-modal-backdrop fixed inset-0 z-[70] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in print:p-0 print:m-0 print:bg-transparent print:static print:block print:overflow-visible">
           <div className="receipt-print-card bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 my-8 print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
             
-            {/* Modal Header */}
+            
             <div className="receipt-header bg-neutral-900 text-white p-6 flex items-start justify-between print:p-4 print:rounded-t-2xl">
               <div>
                 <div className="flex items-center gap-2">
@@ -2236,7 +2178,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
             <div className="receipt-scroll-body p-6 space-y-6 max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-4 print:space-y-3.5">
               
-              {/* Vehicle & Driver Profile */}
+              
               {(() => {
                 const rDriver = getDriverDetails(selectedRideReceipt, rideHistory);
                 const rDriverName = selectedRideReceipt?.driverName || rDriver.name;
@@ -2281,7 +2223,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 );
               })()}
 
-              {/* Journey Route & Location Breakdown */}
+              
               <div className="receipt-avoid-break space-y-4 print:space-y-2.5">
                 <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">
                   Route Details & GPS Telemetry
@@ -2289,7 +2231,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                 <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-neutral-200 ml-2">
                   
-                  {/* Pickup Point */}
+                  
                   <div className="relative">
                     <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow" />
                     <div>
@@ -2312,7 +2254,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </div>
 
-                  {/* Route Distance Banner */}
+                  
                   <div className="py-1">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200">
                       <span>🛣️ Distance Traveled:</span>
@@ -2322,7 +2264,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </span>
                   </div>
 
-                  {/* Dropoff Point */}
+                  
                   <div className="relative">
                     <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-black border-2 border-white shadow" />
                     <div>
@@ -2347,7 +2289,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                 </div>
 
-                {/* Real-time Map Preview Embed */}
+                
                 {selectedRideReceipt.dropLat && selectedRideReceipt.dropLng && (
                   <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-neutral-200 h-36 bg-neutral-100 shadow-inner print:h-24 print:rounded-xl">
                     <iframe
@@ -2367,7 +2309,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 )}
               </div>
 
-              {/* Itemized Fare Receipt */}
+              
               <div className="receipt-avoid-break p-4 rounded-2xl bg-[#f8f9fa] border border-neutral-200 space-y-2.5 print:p-3 print:space-y-1.5">
                 <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 pb-1 border-b border-neutral-200">
                   Itemized Fare Receipt
@@ -2413,7 +2355,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 </div>
               </div>
 
-              {/* Rider Identity Footer */}
+              
               <div className="receipt-avoid-break flex items-center justify-between text-xs text-neutral-500 px-1 print:pt-1">
                 <div>
                   Rider: <strong className="text-neutral-800">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
@@ -2425,7 +2367,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
             </div>
 
-            {/* Modal Actions */}
+            
             <div className="print:hidden p-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-end gap-3">
               <button
                 onClick={() => window.print()}

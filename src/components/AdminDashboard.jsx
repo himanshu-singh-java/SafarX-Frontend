@@ -2,25 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import apiClient from '../utils/apiClient';
 
 export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
-  const [activeTab, setActiveTab] = useState('rides'); // 'rides' | 'vehicles'
+  const [activeTab, setActiveTab] = useState('rides');
   const [userId, setUserId] = useState('');
   const [rides, setRides] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleType, setSelectedVehicleType] = useState('CAR');
-  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'COMPLETED'
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [statusMessage, setStatusMessage] = useState({ text: '', isError: false });
   const [isLoading, setIsLoading] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState(true);
 
-  // Selected ride for admin audit modal
   const [selectedAuditRide, setSelectedAuditRide] = useState(null);
   const [auditPickupName, setAuditPickupName] = useState('');
   const [auditDropName, setAuditDropName] = useState('');
   const [showRawJson, setShowRawJson] = useState(false);
 
-  // Reverse geocoding for admin audit modal
   useEffect(() => {
     if (!selectedAuditRide) {
       setAuditPickupName('');
@@ -83,7 +81,6 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     });
   };
 
-  // === RIDE APIs ===
   const fetchAllGlobalRides = async (silent = false) => {
     setIsLoading(true);
     setUserId('');
@@ -141,7 +138,6 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     }
   };
 
-  // === VEHICLE APIs ===
   const fetchVehicles = async (type) => {
     setIsLoading(true);
     setSelectedVehicleType(type);
@@ -171,12 +167,10 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     }
   };
 
-  // Auto-load all rides on mount & periodic 3-second live background sync
   useEffect(() => {
     fetchAllGlobalRides(true);
 
     const autoSyncInterval = setInterval(() => {
-      // Auto-sync global rides in background if not viewing a single rider's history
       if (!userId && activeTab === 'rides') {
         fetchAllGlobalRides(true);
       }
@@ -185,7 +179,6 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     return () => clearInterval(autoSyncInterval);
   }, [userId, activeTab]);
 
-  // Filter rides based on search and status tabs
   const filteredRides = useMemo(() => {
     return rides.filter((ride) => {
       const status = (ride.rideStatus || ride.status || '').toUpperCase();
@@ -215,7 +208,6 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
     });
   }, [rides, statusFilter, searchQuery]);
 
-  // KPI Stats
   const stats = useMemo(() => {
     const total = rides.length;
     const active = rides.filter((r) => {
@@ -231,12 +223,12 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
   return (
     <div className="min-h-screen bg-[#090b0e] text-[#e6edf3] font-sans antialiased selection:bg-[#38bdf8]/30 relative">
       
-      {/* Background Tech Grid & Ambient Glows */}
+      
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(56,189,248,0.1),rgba(255,255,255,0))] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-8">
         
-        {/* Top Header */}
+        
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-[#21262d]">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -253,9 +245,9 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
             </p>
           </div>
 
-          {/* Top Right Controls & Tabs */}
+          
           <div className="flex flex-wrap items-center gap-3">
-            {/* Backend Status Indicator */}
+            
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#161b22] border border-[#30363d] text-xs">
               <span
                 className={`w-2 h-2 rounded-full ${
@@ -267,7 +259,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
               </span>
             </div>
 
-            {/* Clean Section Switcher Tabs */}
+            
             <div className="flex items-center p-1 bg-[#161b22] rounded-xl border border-[#30363d] shadow-sm">
               <button
                 onClick={() => {
@@ -302,7 +294,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
           </div>
         </div>
 
-        {/* Global Toast Alert */}
+        
         {statusMessage.text && (
           <div
             className={`p-4 rounded-xl text-xs md:text-sm font-semibold border backdrop-blur-md shadow-2xl flex items-center justify-between transition-all animate-in fade-in slide-in-from-top-2 ${
@@ -328,7 +320,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
           </div>
         )}
 
-        {/* TOP KPI SUMMARY CARDS (CLEAN & SIMPLE NAMES) */}
+        
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           
           <div className="bg-[#161b22]/80 backdrop-blur-xl border border-[#30363d] p-5 rounded-2xl space-y-1.5 hover:border-[#38bdf8]/40 transition-colors shadow-lg">
@@ -369,14 +361,14 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
 
         </div>
 
-        {/* ===================== VIEW 1: ALL RIDES TABLE ===================== */}
+        
         {activeTab === 'rides' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             
-            {/* Filter and Search Bar */}
+            
             <div className="bg-[#161b22]/80 backdrop-blur-xl border border-[#30363d] p-4 sm:p-5 rounded-3xl shadow-xl flex flex-col md:flex-row gap-4 items-center justify-between">
               
-              {/* Left: Filter by Rider ID */}
+              
               <div className="flex flex-1 flex-col sm:flex-row gap-3 w-full">
                 <div className="relative flex-1">
                   <input
@@ -403,7 +395,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                 </button>
               </div>
 
-              {/* Status Filter Tabs */}
+              
               <div className="flex items-center p-1 bg-[#0d1117] rounded-xl border border-[#30363d] w-full md:w-auto overflow-x-auto">
                 {[
                   { id: 'ALL', label: 'All Rides' },
@@ -428,7 +420,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
               </div>
             </div>
 
-            {/* Rides Data Table */}
+            
             <div className="bg-[#161b22]/80 backdrop-blur-xl border border-[#30363d] rounded-3xl overflow-hidden shadow-2xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -450,7 +442,6 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                         const status = (ride.rideStatus || ride.status || 'UNKNOWN').toUpperCase();
                         const isCompletable = status === 'ON_RIDE' || status === 'ACCEPTED';
 
-                        // Pickup and Drop display text
                         const pickupDisplay =
                           ride.pickupLocation ||
                           (ride.pickupLat ? `${ride.pickupLat}, ${ride.pickupLng}` : '') ||
@@ -464,7 +455,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                         return (
                           <tr key={idx} className="hover:bg-[#1f242c] transition-colors group">
                             
-                            {/* Ride ID */}
+                            
                             <td
                               onClick={() => setSelectedAuditRide(ride)}
                               className="px-6 py-4 font-mono font-bold text-white whitespace-nowrap cursor-pointer hover:text-blue-400 transition-colors"
@@ -473,14 +464,14 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               #{rideId} <span className="text-[10px] text-[#8b949e]">↗</span>
                             </td>
 
-                            {/* Rider ID */}
+                            
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="font-semibold text-white">
                                 Rider #{ride.rider?.riderID || ride.riderId || '1'}
                               </span>
                             </td>
 
-                            {/* PICKUP & DROP LOCATION (CLEARLY VISIBLE WITH BADGES) */}
+                            
                             <td className="px-6 py-4 min-w-[260px] max-w-md">
                               <div className="space-y-2">
                                 <div className="flex items-start gap-2">
@@ -507,7 +498,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               </div>
                             </td>
 
-                            {/* Vehicle & Driver */}
+                            
                             <td className="px-6 py-4 whitespace-nowrap">
                               {ride.vehicle ? (
                                 <div className="space-y-0.5">
@@ -523,12 +514,12 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               )}
                             </td>
 
-                            {/* Fare */}
+                            
                             <td className="px-6 py-4 font-bold text-white whitespace-nowrap text-sm">
                               ₹{ride.fare ? Number(ride.fare).toFixed(2) : '0.00'}
                             </td>
 
-                            {/* Status */}
+                            
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span
                                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${
@@ -552,7 +543,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                               </span>
                             </td>
 
-                            {/* ACTIONS (VIEW DETAILS, COMPLETE RIDE & DELETE RIDE) */}
+                            
                             <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
                               <button
                                 onClick={() => setSelectedAuditRide(ride)}
@@ -596,11 +587,11 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
           </div>
         )}
 
-        {/* ===================== VIEW 2: VEHICLES & DRIVERS (WITH 3D LOGOS) ===================== */}
+        
         {activeTab === 'vehicles' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             
-            {/* Division Selector Cards With Photorealistic 3D Renders */}
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
                 {
@@ -634,7 +625,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                         : 'bg-[#161b22]/70 border-[#30363d] hover:border-[#8b949e]'
                     }`}
                   >
-                    {/* 3D Photorealistic Vehicle Logo */}
+                    
                     <div className="w-20 h-14 rounded-2xl bg-white flex items-center justify-center p-1 shadow-md border border-white/20 mb-4 overflow-hidden group-hover:scale-105 transition-transform">
                       <img
                         src={division.image}
@@ -656,7 +647,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
               })}
             </div>
 
-            {/* Fleet Status Table */}
+            
             <div className="bg-[#161b22]/80 backdrop-blur-xl border border-[#30363d] rounded-3xl overflow-hidden shadow-2xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -759,12 +750,12 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
           </div>
         )}
 
-      {/* RIDE AUDIT & DETAILS MODAL */}
+      
       {selectedAuditRide && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in">
           <div className="bg-[#161b22] border border-[#30363d] w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-8 text-white">
             
-            {/* Modal Header */}
+            
             <div className="bg-[#0d1117] px-6 py-5 border-b border-[#30363d] flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-emerald-400 shadow-sm shadow-emerald-500/50" />
@@ -810,7 +801,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
               </div>
             </div>
 
-            {/* Modal Body */}
+            
             <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
               
               {showRawJson ? (
@@ -830,10 +821,10 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                 </div>
               ) : (
                 <>
-                  {/* Driver & Vehicle + Rider Specs */}
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
-                    {/* Vehicle & Driver Card */}
+                    
                     <div className="bg-[#0d1117] p-4 rounded-2xl border border-[#30363d] space-y-2">
                       <div className="text-[10px] uppercase font-bold tracking-wider text-[#8b949e]">
                         Driver & Vehicle Assigned
@@ -865,7 +856,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                       )}
                     </div>
 
-                    {/* Rider Card */}
+                    
                     <div className="bg-[#0d1117] p-4 rounded-2xl border border-[#30363d] space-y-2">
                       <div className="text-[10px] uppercase font-bold tracking-wider text-[#8b949e]">
                         Customer / Rider Info
@@ -885,14 +876,14 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
 
                   </div>
 
-                  {/* Route & GPS Telemetry */}
+                  
                   <div className="space-y-4">
                     <div className="text-[10px] uppercase font-bold tracking-wider text-[#8b949e]">
                       Route Breakdown & GPS Coordinates
                     </div>
 
                     <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-[#30363d] ml-2">
-                      {/* Pickup */}
+                      
                       <div className="relative">
                         <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#161b22]" />
                         <div>
@@ -910,7 +901,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                         </div>
                       </div>
 
-                      {/* Distance */}
+                      
                       <div>
                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0d1117] text-[#c9d1d9] text-xs font-bold border border-[#30363d]">
                           <span>🛣️ Transit Distance:</span>
@@ -920,7 +911,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                         </span>
                       </div>
 
-                      {/* Dropoff */}
+                      
                       <div className="relative">
                         <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-rose-400 border-2 border-[#161b22]" />
                         <div>
@@ -939,7 +930,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                       </div>
                     </div>
 
-                    {/* OpenStreetMap embed */}
+                    
                     {(selectedAuditRide.dropLat || selectedAuditRide.dropLatitude) && (
                       <div className="relative rounded-2xl overflow-hidden border border-[#30363d] h-40 bg-[#0d1117]">
                         <iframe
@@ -959,7 +950,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
                     )}
                   </div>
 
-                  {/* Financial Settlement */}
+                  
                   <div className="bg-[#0d1117] p-4 rounded-2xl border border-[#30363d] space-y-2">
                     <div className="text-[10px] uppercase font-bold tracking-wider text-[#8b949e]">
                       Financial Ledger & Settlement
@@ -986,7 +977,7 @@ export default function AdminDashboard({ token, userEmail, onOpenAuth }) {
 
             </div>
 
-            {/* Modal Actions */}
+            
             <div className="bg-[#0d1117] px-6 py-4 border-t border-[#30363d] flex items-center justify-between">
               <div className="space-x-2">
                 {((selectedAuditRide.rideStatus || selectedAuditRide.status || '').toUpperCase() === 'ON_RIDE' ||

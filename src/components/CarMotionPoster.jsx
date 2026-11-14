@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-/**
- * CarMotionPoster Component
- * Luxury Automotive Motion Poster & Driving Showcase (Pinterest / Porsche 718 Cayman Aesthetic)
- * 
- * Features:
- * - Rendered exclusively for logged-out / guest users in place of the map.
- * - Cinematic dark luxury studio backdrop with diagonal light cuts and metallic watermark typography.
- * - Left-to-right animated luxury car driving across an asphalt highway with speed dashes and glowing headlight beams.
- * - Dynamic vehicle showcase switcher (Premier GT, Prime Cab, SafarX Stealth).
- * - High-end performance chips (0-100 km/h, Top Speed, Safety Rating) matching the 2026 automotive UI mockup.
- * - Interactive 1-click Sign In CTA that triggers the AuthModal.
- */
-
 const SHOWCASE_VEHICLES = [
   {
     id: 'gt',
@@ -24,7 +11,7 @@ const SHOWCASE_VEHICLES = [
     accel: '3.8s',
     topSpeed: '275 km/h',
     fareEstimate: '₹145.00',
-    color: '#d4af37', // Gold accent
+    color: '#d4af37',
   },
   {
     id: 'prime',
@@ -36,7 +23,7 @@ const SHOWCASE_VEHICLES = [
     accel: '5.2s',
     topSpeed: '220 km/h',
     fareEstimate: '₹124.90',
-    color: '#38bdf8', // Cyan accent
+    color: '#38bdf8',
   },
   {
     id: 'moto',
@@ -48,16 +35,15 @@ const SHOWCASE_VEHICLES = [
     accel: '4.1s',
     topSpeed: '160 km/h',
     fareEstimate: '₹50.00',
-    color: '#eab308', // Amber accent
+    color: '#eab308',
   },
 ];
 
 export default function CarMotionPoster({ onOpenAuth }) {
   const [activeCarIdx, setActiveCarIdx] = useState(0);
-  const [animationMode, setAnimationMode] = useState('cruise'); // 'cruise' | 'drive-across'
+  const [animationMode, setAnimationMode] = useState('cruise');
   const activeCar = SHOWCASE_VEHICLES[activeCarIdx];
 
-  // Auto-cycle through vehicles every 12 seconds if idle
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveCarIdx((prev) => (prev + 1) % SHOWCASE_VEHICLES.length);
@@ -70,7 +56,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
       
       
       <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
-        {/* Subtle diagonal studio spotlight beam */}
+        
         <div className="absolute -top-32 right-1/4 w-[350px] h-[750px] bg-gradient-to-b from-white/10 via-[#d4af37]/5 to-transparent rotate-[28deg] blur-2xl" />
         
         
@@ -81,7 +67,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
           </span>
         </div>
 
-        {/* Ambient radial glow under vehicle */}
+        
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#d4af37]/10 rounded-full blur-3xl" />
       </div>
 
@@ -97,7 +83,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
           </span>
         </div>
 
-        {/* Vehicle Switcher Pills */}
+        
         <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md p-1 rounded-2xl border border-white/10">
           {SHOWCASE_VEHICLES.map((car, idx) => (
             <button
@@ -118,7 +104,7 @@ export default function CarMotionPoster({ onOpenAuth }) {
       
       <div className="relative my-auto py-8 sm:py-12 overflow-hidden flex flex-col justify-end min-h-[260px] sm:min-h-[300px]">
         
-        {/* Floating Vehicle Title */}
+        
         <div className="text-center sm:text-left mb-2 z-10 px-2">
           <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
             {activeCar.name}
@@ -131,18 +117,18 @@ export default function CarMotionPoster({ onOpenAuth }) {
         
         <div className="relative w-full h-20 bg-gradient-to-b from-[#11141b] to-[#090b0e] border-y border-neutral-800 flex items-center overflow-hidden shadow-inner">
           
-          {/* Moving Asphalt Dashes (Road moving underneath) */}
+          
           <div className="absolute inset-0 flex items-center justify-around animate-road-travel opacity-75">
             {[...Array(16)].map((_, i) => (
               <span key={i} className="inline-block w-8 sm:w-12 h-1 bg-amber-400/80 rounded-full mx-3 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
             ))}
           </div>
 
-          {/* Perspective Lane Boundary Lights */}
+          
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#d4af37]/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           
-          {/* Fast Motion Light Streaks */}
+          
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/5 to-transparent animate-speed-streaks pointer-events-none" />
         </div>
 
@@ -151,27 +137,27 @@ export default function CarMotionPoster({ onOpenAuth }) {
           
           <div className="relative w-full flex items-end animate-car-drive-across">
             
-            {/* The Car Container */}
+            
             <div className="relative w-[310px] sm:w-[390px] lg:w-[430px] shrink-0 drop-shadow-[0_20px_25px_rgba(0,0,0,0.9)] animate-suspension-bob">
               
-              {/* Headlight Forward Illumination Beam */}
+              
               <div className="absolute right-[-140px] top-[30%] w-[180px] h-[90px] bg-gradient-to-r from-amber-200/40 via-amber-300/15 to-transparent rotate-[-6deg] blur-md pointer-events-none -z-10" />
               
-              {/* Taillight Red Glow Behind */}
+              
               <div className="absolute left-[-25px] top-[40%] w-[50px] h-[35px] bg-red-600/50 rounded-full blur-lg pointer-events-none -z-10" />
 
-              {/* Main Vehicle Image */}
+              
               <img
                 src={activeCar.image}
                 alt={activeCar.name}
                 className="w-full h-auto object-contain max-h-[170px] sm:max-h-[200px] drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] filter brightness-105 contrast-105"
               />
 
-              {/* Wheels Speed Blur Reflections */}
+              
               <div className="absolute bottom-1.5 left-[14%] w-10 h-10 rounded-full border border-amber-300/30 animate-spin-fast pointer-events-none opacity-60" />
               <div className="absolute bottom-1.5 right-[18%] w-10 h-10 rounded-full border border-amber-300/30 animate-spin-fast pointer-events-none opacity-60" />
 
-              {/* Underglow Neon Shadow */}
+              
               <div className="absolute bottom-0 left-10 right-10 h-3 bg-gradient-to-r from-red-600/30 via-[#d4af37]/40 to-amber-300/50 blur-md rounded-full" />
             </div>
 

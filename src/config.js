@@ -1,7 +1,4 @@
-/**
- * SafarX Application Configuration
- * Centralizes environment variables, API endpoints, and WebSocket URL derivation.
- */
+
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 

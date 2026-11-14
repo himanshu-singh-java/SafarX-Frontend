@@ -4,21 +4,18 @@ import apiClient from '../utils/apiClient';
 import { API_BASE_URL } from '../config';
 
 export default function AuthPage({ onLoginSuccess, sessionExpired }) {
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [mode, setMode] = useState('login');
 
-  // Form State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('ROLE_RIDER'); // 'ROLE_RIDER' | 'ROLE_ADMIN'
+  const [role, setRole] = useState('ROLE_RIDER');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Status & Loading State
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(sessionExpired ? 'Session expired or unauthorized. Please sign in again.' : '');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Handle Login Submit
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
@@ -55,7 +52,6 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
           }
           if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
 
-          // Eagerly initialize rider profile if role is rider and no riderId returned
           if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
             try {
               await apiClient.post(
@@ -106,7 +102,6 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
     }
   };
 
-  // Handle Register Submit
   const handleRegister = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
@@ -138,7 +133,6 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
 
       setSuccessMessage('Account registered successfully! Signing you in automatically...');
       
-      // Auto-login upon successful registration
       setTimeout(async () => {
         try {
           const loginRes = await apiClient.post('/api/auth/login', {
@@ -163,7 +157,6 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             }
             if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
 
-            // Automatically initialize rider profile for new registration
             if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
               try {
                 await apiClient.post(
@@ -207,7 +200,6 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
     }
   };
 
-  // Quick fill helper for testing
   const fillDemo = (demoEmail, demoPass, demoRole = 'ROLE_RIDER') => {
     setEmail(demoEmail);
     setPassword(demoPass);
@@ -219,14 +211,14 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
   return (
     <div className="min-h-screen bg-[#0a0706] text-[#f4efe6] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden select-none">
       
-      {/* Background Ambient Glows */}
+      
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#8a5a44]/15 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Container */}
+      
       <div className="w-full max-w-md relative z-10 space-y-6">
         
-        {/* Brand Emblem & Header */}
+        
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#1e1915] via-[#2d251e] to-[#45372b] border border-[#d4af37]/40 shadow-xl shadow-black/50 mb-2">
             <span className="text-2xl">🚗</span>
@@ -242,10 +234,10 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
           </p>
         </div>
 
-        {/* Auth Card */}
+        
         <div className="bg-[#120f0d]/90 backdrop-blur-xl border border-[#2d251e] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           
-          {/* Mode Switcher Tabs */}
+          
           <div className="flex p-1 bg-[#1e1915] rounded-2xl border border-[#3d3227]">
             <button
               type="button"
@@ -279,7 +271,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             </button>
           </div>
 
-          {/* Feedback Banners */}
+          
           {errorMessage && (
             <div className="p-3.5 rounded-2xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs flex items-start gap-2.5 animate-in fade-in">
               <span className="text-base shrink-0">⚠️</span>
@@ -294,10 +286,10 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             </div>
           )}
 
-          {/* Form */}
+          
           <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
             
-            {/* Email Field */}
+            
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
                 Email Address
@@ -314,7 +306,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               </div>
             </div>
 
-            {/* Password Field */}
+            
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
@@ -340,10 +332,10 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               </div>
             </div>
 
-            {/* Register Extra Fields */}
+            
             {mode === 'register' && (
               <>
-                {/* Confirm Password */}
+                
                 <div className="space-y-1.5">
                   <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
                     Confirm Password
@@ -358,7 +350,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                   />
                 </div>
 
-                {/* Role Selector */}
+                
                 <div className="space-y-2 pt-1">
                   <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
                     Select Account Role
@@ -396,7 +388,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               </>
             )}
 
-            {/* Submit Button */}
+            
             <button
               type="submit"
               disabled={isLoading}
@@ -415,7 +407,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             </button>
           </form>
 
-          {/* Quick Demo Fill Buttons */}
+          
           <div className="pt-2 border-t border-[#2d251e] space-y-2">
             <div className="text-[10px] uppercase font-bold tracking-wider text-[#736353] text-center">
               Quick Test Autofill
@@ -440,7 +432,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
 
         </div>
 
-        {/* Security Footer */}
+        
         <div className="text-center text-[11px] text-[#736353] flex items-center justify-center gap-3">
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -450,9 +442,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
           <span>JWT Filter Enabled</span>
         </div>
 
+        <div className="mt-4 text-center text-xs text-neutral-500 font-medium">
+          © 2026 SafarX | By Himanshu Kumar
+        </div>
+
       </div>
 
     </div>
   );
 }
-

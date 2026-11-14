@@ -15,9 +15,6 @@ const TAB_SCOPED_KEYS = new Set([
   'driverPlateNumber',
 ]);
 
-/**
- * Resolves user display name from name or email.
- */
 export const resolveUserName = (rawName, email) => {
   const cleanName = (rawName || '').trim();
   if (cleanName && cleanName !== 'null' && cleanName !== 'undefined') {

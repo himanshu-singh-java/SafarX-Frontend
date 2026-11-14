@@ -2,18 +2,8 @@ import apiClient from './apiClient';
 import { RAZORPAY_KEY_ID } from '../config';
 import { getAuthToken } from './auth';
 
-/**
- * SafarX Razorpay Payment Gateway Client
- * Integrates Razorpay Standard Checkout with Spring Boot backend APIs:
- * - POST /api/payment/create-order (Protected with JWT)
- * - POST /api/payment/verify (Protected with JWT)
- */
-
 export { RAZORPAY_KEY_ID };
 
-/**
- * Ensures the Razorpay checkout.js script is loaded on the page
- */
 export function loadRazorpayScript() {
   return new Promise((resolve) => {
     if (typeof window !== 'undefined' && window.Razorpay) {
@@ -32,19 +22,6 @@ export function loadRazorpayScript() {
   });
 }
 
-/**
- * Initiate Razorpay Checkout Flow
- *
- * @param {Object} params
- * @param {number} params.amount - Total fare amount in INR (e.g. 206.60)
- * @param {number|string} params.rideId - Trip identifier
- * @param {string} [params.userEmail] - Rider email for prefill
- * @param {string} [params.userName] - Rider name for prefill
- * @param {string} [params.userPhone] - Rider phone for prefill
- * @param {function} params.onSuccess - Callback on verified payment
- * @param {function} params.onError - Callback on payment error
- * @param {function} [params.onDismiss] - Callback when user closes Razorpay modal
- */
 export async function initiateRazorpayPayment({
   amount,
   rideId,

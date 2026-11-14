@@ -5,18 +5,6 @@ import { registerDriverProfile } from '../utils/driverDirectory';
 import apiClient from '../utils/apiClient';
 import { IS_DEMO_MODE } from '../config';
 
-/**
- * DriverDashboard Component
- * Dedicated console for authenticated Driver Partners (ROLE_DRIVER).
- * 
- * Features:
- * - Displays the authenticated driver's personal profile (Name, Rating, Vehicle, Location).
- * - Real-time WebSocket connection to /topic/driver/{driverId}.
- * - Live incoming ride request modal with sound/visual alert.
- * - Accept ride & complete trip flow.
- * - Real-time GPS tracking sent to rider over STOMP (watchPosition in prod, demo hub in IS_DEMO_MODE).
- */
-// Database known driver profiles for seamless testing and role linking
 const KNOWN_DRIVERS = {
   'harsh@gmail.com': {
     id: 9,
@@ -123,7 +111,6 @@ function getInitialDriverProfile(userEmail) {
   const savedId = getStorageItem('driverId');
   const normalizedEmail = (userEmail || getStorageItem('userEmail') || '').toLowerCase().trim();
 
-  // 1. Check persistent tab storage first (if vehicle model is explicitly saved)
   const storedVehicleType = getStorageItem('driverVehicleType');
   const storedVehicleModel = getStorageItem('driverVehicleModel');
   const storedPlate = getStorageItem('driverPlateNumber');
@@ -145,9 +132,6 @@ function getInitialDriverProfile(userEmail) {
     };
   }
 
-
-
-  // 3. Check verified KNOWN_DRIVERS
   if (normalizedEmail && KNOWN_DRIVERS[normalizedEmail]) {
     const base = { ...KNOWN_DRIVERS[normalizedEmail] };
     if (savedId) base.id = Number(savedId);
@@ -155,7 +139,6 @@ function getInitialDriverProfile(userEmail) {
     return base;
   }
 
-  // 4. Dynamic fallback matching email or ID
   const fallbackId = savedId
     ? Number(savedId)
     : 1;
@@ -179,7 +162,6 @@ function getInitialDriverProfile(userEmail) {
 
 export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const userEmail = (rawUserEmail || '').trim().toLowerCase();
-  // Driver Personal Profile State initialized dynamically
   const [driverProfile, setDriverProfile] = useState(() => getInitialDriverProfile(userEmail));
   const [currentCoords, setCurrentCoords] = useState(() => {
     const prof = getInitialDriverProfile(userEmail);
@@ -189,7 +171,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   });
 
-  // Initial mount: Query real device GPS and synchronize with backend DB
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -216,7 +197,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const cancelTimerRef = useRef(null);
   const lastLocationSyncRef = useRef(0);
 
-  // Auto-dismiss cancellation alert after 5 seconds
   const showCancellationAlert = (msg) => {
     setStatusMessage({ text: msg, isError: true });
     if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
@@ -231,7 +211,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   }, []);
 
-  // Cleanup any stale ride state & ride subscriptions on driver mount/login
   useEffect(() => {
     try {
       localStorage.removeItem('activeRide');
@@ -242,15 +221,12 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
       sessionStorage.removeItem('driverActiveTrip');
     } catch (e) {}
 
-    // Ensure no unauthorized /topic/ride/* subscriptions linger in STOMP client
     wsService.clearRideSubscriptions();
   }, []);
 
-  // Human-readable address names for incoming requests
   const [pickupAddressName, setPickupAddressName] = useState('');
   const [dropAddressName, setDropAddressName] = useState('');
 
-  // Reverse geocode incoming request locations for a realistic Uber driver experience
   useEffect(() => {
     if (!incomingRequest) {
       setPickupAddressName('');
@@ -287,9 +263,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   }, [incomingRequest]);
 
-  // Geolocation auto-detection: keeps driver location synchronized with device GPS or Hyderabad hub
-
-  // Handler to manually update GPS location via live device browser coordinates
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false);
 
   const handleUpdateCurrentLocation = () => {
@@ -304,14 +277,12 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         const lng = parseFloat(pos.coords.longitude.toFixed(6));
         setCurrentCoords({ lat, lng });
 
-        // 1. Persist to Backend DB via PUT /api/driver/location
         try {
           await apiClient.put('/api/driver/location', { latitude: lat, longitude: lng });
         } catch (err) {
           console.warn('[DriverDashboard] Failed to persist location to backend DB:', err);
         }
 
-        // 2. Broadcast via WebSocket STOMP
         wsService.ensureConnected().then(() => {
           wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, lat, lng);
         }).catch(() => {});
@@ -334,13 +305,11 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     );
   };
 
-  // Edit Vehicle Modal State
   const [showEditVehicleModal, setShowEditVehicleModal] = useState(false);
   const [editVehicleType, setEditVehicleType] = useState('CAR');
   const [editVehicleModel, setEditVehicleModel] = useState('');
   const [editPlateNumber, setEditPlateNumber] = useState('');
 
-  // Sync profile when userEmail changes
   useEffect(() => {
     const resolved = getInitialDriverProfile(userEmail);
     setDriverProfile(resolved);
@@ -349,13 +318,11 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   }, [userEmail]);
 
-  // Verified Driver ID state (Ensures WebSocket NEVER subscribes to unverified guessed IDs)
   const [isDriverVerified, setIsDriverVerified] = useState(() => {
     const saved = getStorageItem('driverId');
     return Boolean(saved);
   });
 
-  // Dynamic Backend Profile Sync (fetches real Driver ID, Role & Status from DB)
   useEffect(() => {
     let isMounted = true;
     const fetchBackendProfile = async () => {
@@ -404,7 +371,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             return activeProfile;
           });
 
-          // Initial location update
           if (realId) {
             wsService.ensureConnected().then(() => {
               wsService.sendLocationUpdate(0, realId, currentCoords.lat, currentCoords.lng);
@@ -422,7 +388,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     return () => { isMounted = false; };
   }, [token, userEmail]);
 
-  // Live GPS background tracking: throttled 15s updates synchronizing coordinates with DB & STOMP
   useEffect(() => {
     if (!isOnline || !driverProfile.id) return;
 
@@ -461,7 +426,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   }, [isOnline, driverProfile.id, activeTrip?.rideId]);
 
-  // Online / Offline toggle with backend DB synchronization
   const handleToggleOnline = async () => {
     const nextOnline = !isOnline;
     setIsOnline(nextOnline);
@@ -488,11 +452,9 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   };
 
-  // Heartbeat & GPS Keep-Alive: keeps WebSocket connection warm & keeps MySQL coordinates fresh
   useEffect(() => {
     if (!isOnline || !isDriverVerified || !driverProfile.id) return;
 
-    // Send immediately upon verification & going online
     wsService.ensureConnected().then(() => {
       wsService.sendLocationUpdate(activeTrip?.rideId || 0, driverProfile.id, currentCoords.lat, currentCoords.lng);
     }).catch(() => {});
@@ -508,10 +470,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     return () => clearInterval(heartbeat);
   }, [isOnline, isDriverVerified, driverProfile.id, activeTrip?.rideId, currentCoords.lat, currentCoords.lng]);
 
-  // Connect to WebSocket and subscribe ONLY to driver's VERIFIED personal topic
   useEffect(() => {
-    // CRITICAL: Do NOT subscribe until driver ID is confirmed from backend (/api/auth/me)
-    // Subscribing to an unverified/wrong ID causes Spring Boot to throw ForbiddenException and terminate WebSocket!
     if (!isDriverVerified || !driverProfile.id || !isOnline) {
       return;
     }
@@ -530,12 +489,10 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           const rideStatus = data.status || data.rideStatus;
           const targetRideId = data.rideId || (data.ride ? data.ride.rideId : null);
 
-          // Case B: CANCELLED (Pre-acceptance passenger cancel or during broadcast or after acceptance)
           if (
             data.type === 'RIDE_CANCELLED' ||
             rideStatus === 'CANCELLED'
           ) {
-            // Unconditionally clear BOTH incomingRequest AND activeTrip
             setIncomingRequest(null);
             setActiveTrip(null);
             wsService.clearRideSubscriptions();
@@ -556,7 +513,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             return;
           }
 
-          // Case C: ACCEPTED (by another driver) or IN_PROGRESS or COMPLETED
           if (
             data.type === 'RIDE_TAKEN' ||
             rideStatus === 'ACCEPTED' ||
@@ -576,7 +532,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             return;
           }
 
-          // Case D: TIMEOUT / RIDE_TIMEOUT
           if (data.type === 'TIMEOUT' || data.type === 'RIDE_TIMEOUT') {
             setIncomingRequest((prev) => {
               if (prev && (!targetRideId || Number(prev.rideId) === Number(targetRideId))) {
@@ -587,9 +542,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             return;
           }
 
-          // Case A: REQUESTED (New Ride Broadcast)
           if (rideStatus === 'REQUESTED' || (targetRideId && !data.type)) {
-            // If activeTrip somehow has status === 'CANCELLED' or 'COMPLETED', ignore and clear it!
             setActiveTrip((current) => {
               const s = (current?.status || current?.rideStatus || '').toUpperCase();
               if (s === 'CANCELLED' || s === 'COMPLETED') {
@@ -598,7 +551,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               return current;
             });
 
-            // Clear any lingering cancellation alert timer & text
             if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
 
             setIncomingRequest(data);
@@ -619,7 +571,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   }, [isDriverVerified, driverProfile.id, isOnline]);
 
-  // Accept Ride API handler
   const handleAcceptRide = async (rideToAccept) => {
     const targetRide = rideToAccept || incomingRequest;
     if (!targetRide) return;
@@ -673,7 +624,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   };
 
-  // Decline Ride handler
   const handleDeclineRide = () => {
     setIncomingRequest(null);
     setStatusMessage({
@@ -683,7 +633,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     apiClient.patch('/api/driver/status?status=AVAILABLE').catch(() => {});
   };
 
-  // Sync ride updates: listens to /topic/ride/{rideId} ONLY for the ASSIGNED driver when activeTrip exists
   useEffect(() => {
     if (!activeTrip?.rideId) return;
 
@@ -695,10 +644,8 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
       const currentStatus = (data?.status || data?.rideStatus || '').toUpperCase();
 
-      // Check cancellation FIRST
       if (currentStatus === 'CANCELLED' || data?.type === 'RIDE_CANCELLED') {
         console.log('[Driver WS] Ride cancelled on ride topic:', currentRideId);
-        // Unconditionally clear activeTrip and incomingRequest
         setActiveTrip(null);
         setIncomingRequest(null);
         wsService.clearRideSubscriptions();
@@ -749,7 +696,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   }, [activeTrip?.rideId]);
 
-  // Automatic Live GPS streaming to rider as soon as ride is accepted
   useEffect(() => {
     if (!activeTrip?.rideId) {
       if (gpsIntervalRef.current) {
@@ -759,10 +705,8 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
       return;
     }
 
-    // Immediately transmit current coordinates over WebSocket
     wsService.sendLocationUpdate(activeTrip.rideId, driverProfile.id, currentCoords.lat, currentCoords.lng);
 
-    // Auto-advance driver coordinates towards drop location every 2.5s
     let step = 0;
     const totalSteps = 15;
     const startLat = currentCoords.lat;
@@ -793,7 +737,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     };
   }, [activeTrip?.rideId, driverProfile.id]);
 
-  // Start Ride API handler (transitions ACCEPTED -> IN_PROGRESS)
   const handleStartTrip = async () => {
     if (!activeTrip) return;
     try {
@@ -810,7 +753,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   };
 
-  // Complete Ride API handler (from Driver side)
   const handleCompleteRide = async () => {
     if (!activeTrip) return;
     try {
@@ -835,7 +777,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     }
   };
 
-  // Handler when driver acknowledges completed trip payment
   const handleDismissReceipt = () => {
     setCompletedTripReceipt(null);
     wsService.clearRideSubscriptions();
@@ -849,7 +790,6 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     });
   };
 
-  // Open & Save handlers for vehicle details
   const handleOpenEditVehicle = () => {
     setEditVehicleType(driverProfile.vehicleType || 'CAR');
     setEditVehicleModel(driverProfile.model || '');
@@ -914,7 +854,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
     <div className="min-h-screen bg-[#faf8f5] text-neutral-900 p-4 sm:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* Top Header Card: White & Golden Luxury */}
+        
         <div className="bg-white/95 backdrop-blur border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
           
@@ -932,7 +872,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* GPS Live Sync Pill */}
+            
             <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-full text-[11px] font-mono font-bold text-neutral-700 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>
@@ -954,7 +894,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </button>
             </div>
 
-            {/* Online / Offline Status Toggle */}
+            
             <button
               type="button"
               onClick={handleToggleOnline}
@@ -973,9 +913,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         </div>
 
-
-
-        {/* Status Message Banner */}
+        
         {statusMessage.text && (
           <div
             className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between shadow-md animate-in fade-in ${
@@ -994,7 +932,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        {/* Completed Trip Fare Collection Card: White & Golden */}
+        
         {completedTripReceipt && (
           <div className="bg-gradient-to-br from-white via-amber-50/40 to-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/15 space-y-5 animate-in zoom-in-95 relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#d4af37] via-amber-300 to-[#d4af37]" />
@@ -1031,11 +969,11 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        {/* Driver Personal Profile Card: White & Golden */}
+        
         <div className="bg-white border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             
-            {/* Left: Driver Identity & Avatar */}
+            
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#d4af37] via-amber-300 to-[#d4af37] text-black font-black text-2xl flex items-center justify-center shrink-0 shadow-lg ring-4 ring-[#d4af37]/25">
                 {avatarInitial}
@@ -1066,7 +1004,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </div>
             </div>
 
-            {/* Right: Operational Details */}
+            
             <div className="flex flex-wrap items-center gap-3">
               <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl px-5 py-3 text-xs space-y-0.5 shadow-sm">
                 <div className="text-[10px] text-amber-800/80 uppercase font-black tracking-wider">Operating City</div>
@@ -1091,7 +1029,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         </div>
 
-        {/* Edit Vehicle Modal */}
+        
         {showEditVehicleModal && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
             <div className="bg-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
@@ -1178,7 +1116,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        {/* Incoming Ride Alert Modal / Banner: White & Golden */}
+        
         {incomingRequest && (!activeTrip || !['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase())) && (
           <div className="bg-gradient-to-br from-white via-amber-50/30 to-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/20 space-y-6 ring-8 ring-[#d4af37]/10 animate-in zoom-in-95">
             <div className="flex items-center justify-between">
@@ -1234,7 +1172,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        {/* Active Trip Mode Card: White & Golden */}
+        
         {activeTrip && ['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase()) ? (
           <div className="bg-white border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/10 space-y-6">
             <div className="flex items-center justify-between border-b border-amber-100 pb-4">
@@ -1259,7 +1197,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </span>
             </div>
 
-            {/* Trip Details Grid */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/70 space-y-2">
                 <span className="text-xs font-extrabold text-neutral-500 block uppercase">Destination</span>
@@ -1273,7 +1211,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 </div>
               </div>
 
-              {/* Real-time Location Broadcast Status */}
+              
               <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/70 space-y-2 flex flex-col justify-center">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-extrabold text-neutral-500 block uppercase">Live Route Status</span>
@@ -1291,7 +1229,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </div>
             </div>
 
-            {/* Trip Action Buttons: ONLY Start Trip when ACCEPTED, ONLY Complete Ride when IN_PROGRESS */}
+            
             <div className="pt-2">
               {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED' && (
                 <button

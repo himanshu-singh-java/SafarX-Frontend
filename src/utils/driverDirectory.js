@@ -1,13 +1,10 @@
-/**
- * Driver directory and profile resolution utilities.
- */
+
 
 try {
   localStorage.removeItem('safarx_drivers_registry');
 } catch (e) {}
 
 export function registerDriverProfile(driverData) {
-  // Deprecated in favor of authoritative backend database state
 }
 
 export function getDriverDetails(rideOrVehicle, ridesList = []) {

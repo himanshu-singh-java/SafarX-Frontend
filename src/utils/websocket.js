@@ -2,17 +2,11 @@ import { Client } from '@stomp/stompjs';
 import { WS_URL } from '../config';
 import { getAuthToken } from './auth';
 
-/**
- * SafarX WebSocket & STOMP Service
- * Uses native browser WebSocket connecting to Spring Boot STOMP broker at WS_URL
- * Authenticated via JWT Bearer token on CONNECT (matches Spring Boot WebSocketConfig).
- * Handles multi-tab resilience, auto-resubscription on reconnect, and location streaming.
- */
 class WebSocketService {
   constructor() {
     this.client = null;
     this.connected = false;
-    this.subscriptions = new Map(); // topic -> { callbacks: Set, subHandle: StompSubscription | null }
+    this.subscriptions = new Map();
     this.connectionPromise = null;
   }
 
@@ -48,7 +42,6 @@ class WebSocketService {
             this.connected = true;
             this.connectionPromise = null;
 
-            // Re-establish ALL registered topic subscriptions on the new broker connection
             this.subscriptions.forEach((subData, topic) => {
               try {
                 subData.subHandle = this.client.subscribe(topic, (msg) => {
@@ -71,7 +64,6 @@ class WebSocketService {
           onStompError: (frame) => {
             const errorMsg = (frame?.headers?.message || '').toLowerCase();
             console.warn('[STOMP Error frame]', frame?.headers?.message || frame);
-            // Stop reconnecting on authentication failure
             if (errorMsg.includes('unauthorized') || errorMsg.includes('forbidden') || errorMsg.includes('jwt') || errorMsg.includes('auth')) {
               console.warn('[STOMP] Authentication failure detected. Halting reconnect attempts.');
               if (this.client) {
@@ -85,7 +77,6 @@ class WebSocketService {
             console.log('[STOMP] WebSocket connection closed. Invalidating subscription handles.');
             this.connected = false;
             this.connectionPromise = null;
-            // Mark all handles as null so next onConnect will re-subscribe
             this.subscriptions.forEach((subData) => {
               subData.subHandle = null;
             });
@@ -117,7 +108,6 @@ class WebSocketService {
   }
 
   subscribe(topic, callback) {
-    // Strictly validate topic pattern to match Spring Boot regex: ^/topic/(ride|driver)/\d+$
     if (!topic || !topic.match(/^\/topic\/(ride|driver)\/\d+$/)) {
       console.warn('[WebSocket] Skipped subscription: invalid destination pattern:', topic);
       return () => {};
@@ -153,7 +143,6 @@ class WebSocketService {
       });
     }
 
-    // Unsubscribe helper
     return () => {
       subData.callbacks.delete(callback);
       if (subData.callbacks.size === 0) {

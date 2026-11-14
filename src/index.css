@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-/* ==========================================================================
-   SafarX Print Receipt Stylesheet
-   Ensures single-page printout with no blank pages, page-breaks, or UI clutter
-   ========================================================================== */
 @media print {
   @page {
     size: portrait;
@@ -23,14 +19,14 @@
     print-color-adjust: exact !important;
   }
 
-  /* Reset any full-height container wrappers */
+  
   .min-h-screen {
     min-height: 0 !important;
     height: auto !important;
     background: #ffffff !important;
   }
 
-  /* Hide app navigation header, drawer backdrops, footers, buttons */
+  
   header,
   nav,
   footer,
@@ -40,7 +36,7 @@
     display: none !important;
   }
 
-  /* Modal Backdrop: remove fixed overlay and dark blur */
+  
   .receipt-modal-backdrop {
     position: static !important;
     inset: auto !important;
@@ -57,7 +53,7 @@
     box-shadow: none !important;
   }
 
-  /* Receipt Card: strictly fit onto 1 page without splitting */
+  
   .receipt-print-card {
     position: relative !important;
     width: 100% !important;
@@ -90,14 +86,14 @@
     gap: 8px !important;
   }
 
-  /* Avoid page breaks inside child sections */
+  
   .receipt-avoid-break {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     page-break-before: auto !important;
   }
 
-  /* Compact map height to fit cleanly on single A4 page */
+  
   .receipt-map-preview {
     height: 96px !important;
     page-break-inside: avoid !important;

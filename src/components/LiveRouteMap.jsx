@@ -2,18 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { getDriverDetails } from '../utils/driverDirectory';
 
-/**
- * LiveRouteMap Component
- * Real-time interactive Leaflet map matching Uber's live radar experience.
- * 
- * Features:
- * - Dynamic route polyline between Pickup & Destination.
- * - Styled Uber-like origin dot and destination pin.
- * - Real-time animated 3D vehicle marker for the Driver Partner.
- * - Pulsing radar halo around driver's live GPS coordinates.
- * - Live GPS tracking line from Driver to Passenger/Destination.
- * - Automatic smooth pan & zoom bounds adjustment.
- */
 export default function LiveRouteMap({
   pickupCoords,
   dropCoords,
@@ -31,7 +19,6 @@ export default function LiveRouteMap({
   const mainRouteLineRef = useRef(null);
   const driverRouteLineRef = useRef(null);
 
-  // Determine vehicle icon image
   const normalizedType = (vehicleType || '').toUpperCase();
   const vehicleImg =
     normalizedType === 'BIKE'
@@ -40,7 +27,6 @@ export default function LiveRouteMap({
       ? '/vehicle_auto.jpg'
       : '/vehicle_car.jpg';
 
-  // 1. Initialize Map Instance
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -51,18 +37,15 @@ export default function LiveRouteMap({
         zoomControl: false,
       });
 
-      // Add high-resolution OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
       }).addTo(map);
 
-      // Add zoom control at bottom-right
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       mapRef.current = map;
 
-      // Ensure initial container size is calculated properly
       setTimeout(() => {
         if (mapRef.current) {
           mapRef.current.invalidateSize();
@@ -70,7 +53,6 @@ export default function LiveRouteMap({
       }, 150);
     }
 
-    // Dynamic ResizeObserver: Automatically detects any layout expansion (e.g. from 4 to 8 columns) and forces Leaflet to tile the whole width
     let resizeTimer;
     const resizeObserver = new ResizeObserver(() => {
       if (mapRef.current) {
@@ -103,7 +85,6 @@ export default function LiveRouteMap({
     };
   }, []);
 
-  // 1.1 Invalidate size & re-center bounds on activeRide state change / CSS grid expansion
   useEffect(() => {
     if (!mapRef.current) return;
     mapRef.current.invalidateSize();
@@ -115,7 +96,6 @@ export default function LiveRouteMap({
     const t2 = setTimeout(() => {
       if (mapRef.current) {
         mapRef.current.invalidateSize();
-        // Re-fit bounds nicely across the newly expanded 8-column canvas
         const points = [];
         if (liveDriverGps?.lat && liveDriverGps?.lng) {
           points.push([liveDriverGps.lat, liveDriverGps.lng]);
@@ -137,7 +117,6 @@ export default function LiveRouteMap({
     };
   }, [activeRide, pickupCoords, dropCoords, liveDriverGps]);
 
-  // 2. Update Pickup, Drop Pins & Main Route Line
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !pickupCoords?.lat || !dropCoords?.lat) return;
@@ -147,7 +126,6 @@ export default function LiveRouteMap({
     const dLat = dropCoords.lat;
     const dLng = dropCoords.lng;
 
-    // Pickup Custom HTML Pin (Uber Style Black Circle with White Center)
     const pickupIcon = L.divIcon({
       className: 'safarx-pickup-pin',
       html: `
@@ -181,7 +159,6 @@ export default function LiveRouteMap({
       }
     );
 
-    // Drop Custom HTML Pin (Uber Style Black Square with White Center)
     const dropIcon = L.divIcon({
       className: 'safarx-drop-pin',
       html: `
@@ -212,7 +189,6 @@ export default function LiveRouteMap({
       }
     );
 
-    // Main Route Line (clean dashed route between Pickup and Drop)
     const routeCoords = [
       [pLat, pLng],
       [dLat, dLng],
@@ -229,7 +205,6 @@ export default function LiveRouteMap({
       mainRouteLineRef.current.setLatLngs(routeCoords);
     }
 
-    // Fit bounds to include both points if driver is not active yet
     if (!liveDriverGps) {
       const bounds = L.latLngBounds([
         [pLat, pLng],
@@ -239,13 +214,11 @@ export default function LiveRouteMap({
     }
   }, [pickupCoords, dropCoords, pickupText, dropText, liveDriverGps]);
 
-  // 3. Update Real-Time Live Driver Vehicle Marker
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
     if (!liveDriverGps?.lat || !liveDriverGps?.lng) {
-      // Clean up driver marker if trip finished
       if (driverMarkerRef.current) {
         map.removeLayer(driverMarkerRef.current);
         driverMarkerRef.current = null;
@@ -285,7 +258,6 @@ export default function LiveRouteMap({
 
     const driverBadgeText = driverPlate && driverPlate !== '—' ? `${driverName} • ${driverPlate}` : driverName;
 
-    // Dynamically resolve driver's vehicle icon image matching their actual vehicle
     const effectiveType = (
       driverInfo?.vehicleType ||
       activeRide?.vehicleType ||
@@ -300,7 +272,6 @@ export default function LiveRouteMap({
         ? '/vehicle_auto.jpg'
         : '/vehicle_car.jpg';
 
-    // Custom 3D Vehicle Marker with Emerald Radar Pulse Ring
     const driverIcon = L.divIcon({
       className: 'safarx-live-driver-marker',
       html: `
@@ -331,7 +302,6 @@ export default function LiveRouteMap({
       driverMarkerRef.current.setLatLng([lat, lng]);
     }
 
-    // Dynamic Live Green Path from Driver to Destination
     const targetDropLat = dropCoords?.lat || pickupCoords?.lat;
     const targetDropLng = dropCoords?.lng || pickupCoords?.lng;
 
@@ -352,7 +322,6 @@ export default function LiveRouteMap({
       }
     }
 
-    // Smoothly pan map to follow driver while maintaining bounds
     const allPoints = [[lat, lng]];
     if (pickupCoords?.lat) allPoints.push([pickupCoords.lat, pickupCoords.lng]);
     if (dropCoords?.lat) allPoints.push([dropCoords.lat, dropCoords.lng]);
@@ -385,9 +354,8 @@ export default function LiveRouteMap({
         }
       `}</style>
       
-      {/* Real Map Canvas */}
+      
       <div ref={containerRef} className="w-full h-full" />
     </div>
   );
 }
-
