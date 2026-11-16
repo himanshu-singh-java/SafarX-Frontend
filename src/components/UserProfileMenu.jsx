@@ -132,22 +132,22 @@ export default function UserProfileMenu({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2.5 bg-white hover:bg-neutral-100 text-black px-3.5 py-1.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer border border-neutral-200"
+          className="flex items-center gap-2.5 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 text-black dark:text-white px-3.5 py-1.5 rounded-full font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer border border-neutral-200 dark:border-neutral-700"
           title="Open account menu"
         >
           
-          <div className="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[11px] font-black shrink-0 overflow-hidden ring-1 ring-neutral-300">
+          <div className="w-6 h-6 rounded-full bg-neutral-900 dark:bg-neutral-700 text-white flex items-center justify-center text-[11px] font-black shrink-0 overflow-hidden ring-1 ring-neutral-300 dark:ring-neutral-600">
             <span>{avatarInitial}</span>
           </div>
 
           
-          <span className="font-extrabold text-neutral-900 tracking-tight max-w-[120px] sm:max-w-[160px] truncate">
+          <span className="font-extrabold text-neutral-900 dark:text-white tracking-tight max-w-[120px] sm:max-w-[160px] truncate">
             {displayName}
           </span>
 
           
           <svg
-            className={`w-3.5 h-3.5 text-neutral-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-3.5 h-3.5 text-neutral-600 dark:text-neutral-300 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

@@ -1105,10 +1105,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
                   isFloating
                     ? 'bg-[#121620]/95 backdrop-blur-2xl border-neutral-700 text-white'
-                    : 'bg-white border-neutral-200 text-black'
+                    : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-black dark:text-white'
                 }`}
               >
-                
                 <button
                   type="button"
                   onClick={() => {
@@ -1116,7 +1115,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     setFocusedInput(null);
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition-colors cursor-pointer group ${
-                    isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
+                    isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1124,10 +1123,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                         isFloating
                           ? 'bg-white/10 text-white border-white/20'
-                          : 'bg-neutral-100 text-neutral-900 border-neutral-200'
+                          : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-200 dark:border-neutral-700'
                       }`}
                     >
-                      <svg className={`w-4 h-4 ${isFloating ? 'text-amber-400' : 'text-black'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className={`w-4 h-4 ${isFloating ? 'text-amber-400' : 'text-black dark:text-amber-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="7" />
                         <polyline points="12 2 12 5" />
                         <polyline points="12 19 12 22" />
@@ -1136,10 +1135,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </svg>
                     </div>
                     <div>
-                      <div className={`text-xs font-bold ${isFloating ? 'text-white' : 'text-black'}`}>
+                      <div className={`text-xs font-bold ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>
                         Use current location
                       </div>
-                      <div className={`text-[11px] ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                      <div className={`text-[11px] ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
                         Auto-detect using device GPS
                       </div>
                     </div>
@@ -1147,13 +1146,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   {isFetchingLocation ? (
                     <span className="text-xs animate-spin">⏳</span>
                   ) : (
-                    <span className={`text-xs ${isFloating ? 'text-neutral-400 group-hover:text-white' : 'text-neutral-400 group-hover:text-black'}`}>›</span>
+                    <span className={`text-xs ${isFloating ? 'text-neutral-400 group-hover:text-white' : 'text-neutral-400 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white'}`}>›</span>
                   )}
                 </button>
 
-                
                 {pickupSuggestions.length > 0 ? (
-                  <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
+                  <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100 dark:border-neutral-800'}`}>
                     <div className="text-[10px] font-bold text-neutral-400 uppercase px-2 py-0.5">
                       Search Results
                     </div>
@@ -1163,7 +1161,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         type="button"
                         onClick={() => handleSelectSuggestion(place, 'pickup')}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 ${
-                          isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100 text-neutral-800'
+                          isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
                         }`}
                       >
                         <span className="text-xs mt-0.5">📍</span>
@@ -1173,7 +1171,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </div>
                 ) : (
                   (recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
-                    <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100'}`}>
+                    <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100 dark:border-neutral-800'}`}>
                       <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
                         {recentLocations.length > 0 ? 'Recent locations' : 'Suggested locations'}
                       </div>
@@ -1190,19 +1188,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             setTimeout(() => dropInputRef.current?.focus(), 50);
                           }}
                           className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
-                            isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
+                            isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
                           }`}
                         >
                           <span
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                              isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
+                              isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-amber-400 group-hover:bg-neutral-300 dark:group-hover:bg-neutral-700'
                             }`}
                           >
                             {recentLocations.length > 0 ? '🕒' : '📍'}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
-                            <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>{item.subtitle}</div>
+                            <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>{item.title}</div>
+                            <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>{item.subtitle}</div>
                           </div>
                         </button>
                       ))}
@@ -1261,7 +1259,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
                   isFloating
                     ? 'bg-[#121620]/95 backdrop-blur-2xl border-neutral-700 text-white'
-                    : 'bg-white border-neutral-200 text-black'
+                    : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-black dark:text-white'
                 }`}
               >
                 {dropSuggestions.length > 0 ? (
@@ -1284,7 +1282,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 border-b last:border-0 ${
                           isFloating
                             ? 'hover:bg-white/10 text-neutral-200 border-white/10'
-                            : 'hover:bg-neutral-100 text-neutral-800 border-neutral-50'
+                            : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border-neutral-50 dark:border-neutral-800'
                         }`}
                       >
                         <span className="text-xs mt-0.5">🏁</span>
@@ -1309,19 +1307,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           setFocusedInput(null);
                         }}
                         className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
-                          isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100'
+                          isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
                         }`}
                       >
                         <span
                           className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300'
+                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-amber-400 group-hover:bg-neutral-300 dark:group-hover:bg-neutral-700'
                           }`}
                         >
                           {recentLocations.length > 0 ? '🕒' : '🏁'}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black'}`}>{item.title}</div>
-                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>{item.subtitle}</div>
+                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>{item.title}</div>
+                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>{item.subtitle}</div>
                         </div>
                       </button>
                     ))}
@@ -1333,8 +1331,8 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         </div>
 
         {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
-          <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100'}`}>
-            <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500'}`}>
+          <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100 dark:border-neutral-800'}`}>
+            <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
               {recentLocations.length > 0 ? 'Recent destinations' : 'Suggested destinations'}
             </div>
             {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).slice(0, 3).map((item, idx) => (
@@ -1354,12 +1352,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   }
                 }}
                 className={`flex items-start gap-3.5 p-2 rounded-xl cursor-pointer transition-colors group ${
-                  isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-50'
+                  isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5 ${
-                    isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-neutral-200 text-neutral-800'
+                    isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
                   }`}
                 >
                   🕒
@@ -1369,12 +1367,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     className={`text-xs sm:text-sm font-bold truncate transition-colors ${
                       isFloating
                         ? 'text-white group-hover:text-amber-300 drop-shadow-sm'
-                        : 'text-black group-hover:text-blue-600'
+                        : 'text-black dark:text-white group-hover:text-blue-600 dark:group-hover:text-amber-400'
                     }`}
                   >
                     {item.title}
                   </div>
-                  <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-neutral-500'}`}>
+                  <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-neutral-500 dark:text-neutral-400'}`}>
                     {item.subtitle}
                   </div>
                 </div>
@@ -1490,13 +1488,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             
             
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl sm:text-4xl font-black text-black tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-black text-black dark:text-white tracking-tight">
                 Ride
               </h1>
               <button
                 type="button"
                 onClick={() => setHomeViewMode('motion')}
-                className="px-4 py-2 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold border border-neutral-700 transition-all shadow flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-4 py-2 rounded-full bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black text-xs font-bold border border-neutral-700 dark:border-amber-500 transition-all shadow flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span>🎬</span>
                 <span>Cinematic View</span>
@@ -1510,7 +1508,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               {renderRequestCard(false)}
 
               
-              <div className="lg:col-span-6 min-h-[460px] lg:min-h-[580px] h-full rounded-3xl overflow-hidden border border-neutral-200 shadow-sm relative isolate z-0 bg-neutral-100">
+              <div className="lg:col-span-6 min-h-[460px] lg:min-h-[580px] h-full rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900">
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
                   dropCoords={dropCoords}
@@ -1530,12 +1528,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           <div className="space-y-6 animate-in fade-in">
             
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-3">
               <div className="flex items-center gap-4">
                 <button
                   type="button"
                   onClick={handleBackToHome}
-                  className="flex items-center gap-2 text-xs font-bold text-neutral-700 hover:text-black py-2 px-3 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2 px-3 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                   title="Return to SafarX city view"
                 >
                   <span>←</span>
@@ -1544,7 +1542,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </div>
 
               
-              <div className="flex items-center gap-2 text-sm font-extrabold text-black border-b-2 border-black pb-2.5">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-amber-400 pb-2.5">
                 <span>🚗</span>
                 <span>Ride</span>
               </div>
@@ -1556,7 +1554,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     setShowHistory(true);
                     fetchHistory();
                   }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700 hover:text-black px-3 py-1.5 rounded-full hover:bg-neutral-100 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 >
                   <span>👥</span>
                   <span>Activity</span>
@@ -1569,24 +1567,24 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               
               
               {!activeRide && (
-                <div className="lg:col-span-3 bg-white rounded-2xl border border-neutral-200 p-4 space-y-4 shadow-sm">
-                  <h3 className="text-lg font-black text-black">Get a ride</h3>
+                <div className="lg:col-span-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-4 shadow-sm">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white">Get a ride</h3>
 
                   
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2.5 bg-[#f3f3f3] p-3 rounded-xl">
-                      <span className="w-2.5 h-2.5 rounded-full bg-black shrink-0" />
-                      <span className="text-xs font-bold text-black truncate">{pickupText}</span>
+                    <div className="flex items-center gap-2.5 bg-[#f3f3f3] dark:bg-neutral-800 p-3 rounded-xl">
+                      <span className="w-2.5 h-2.5 rounded-full bg-black dark:bg-amber-400 shrink-0" />
+                      <span className="text-xs font-bold text-gray-900 dark:text-white truncate">{pickupText}</span>
                     </div>
-                    <div className="flex items-center justify-between bg-[#f3f3f3] p-3 rounded-xl">
+                    <div className="flex items-center justify-between bg-[#f3f3f3] dark:bg-neutral-800 p-3 rounded-xl">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-2.5 h-2.5 bg-black shrink-0" />
-                        <span className="text-xs font-bold text-black truncate">{dropText}</span>
+                        <span className="w-2.5 h-2.5 bg-black dark:bg-amber-400 shrink-0" />
+                        <span className="text-xs font-bold text-gray-900 dark:text-white truncate">{dropText}</span>
                       </div>
                       <button
                         type="button"
                         onClick={handleBackToHome}
-                        className="text-neutral-500 hover:text-black font-bold text-base px-1 cursor-pointer"
+                        className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white font-bold text-base px-1 cursor-pointer"
                         title="Edit route"
                       >
                         +
@@ -1596,19 +1594,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                   
                   <div className="space-y-2">
-                    <div className="bg-[#f3f3f3] p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-black">
+                    <div className="bg-[#f3f3f3] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
                         <span>🕒</span>
                         <span>{pickupTime}</span>
                       </div>
-                      <span className="text-neutral-500 text-xs">▾</span>
+                      <span className="text-neutral-500 dark:text-neutral-400 text-xs">▾</span>
                     </div>
-                    <div className="bg-[#f3f3f3] p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-black">
+                    <div className="bg-[#f3f3f3] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
                         <span>{passengerMode}</span>
                       </div>
-                      <span className="text-neutral-500 text-xs">▾</span>
+                      <span className="text-neutral-500 dark:text-neutral-400 text-xs">▾</span>
                     </div>
                   </div>
 
@@ -1616,7 +1614,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   <button
                     type="button"
                     onClick={handleBackToHome}
-                    className="w-full py-2 text-xs font-bold text-neutral-600 hover:text-black underline text-center cursor-pointer"
+                    className="w-full py-2 text-xs font-bold text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white underline text-center cursor-pointer"
                   >
                     Edit pickup or drop location
                   </button>
@@ -1630,10 +1628,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   <>
                     
                     <div className="space-y-1">
-                      <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+                      <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                         Choose a ride
                       </h2>
-                      <p className="text-xs font-semibold text-neutral-800">
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
                         Rides we think you'll like
                       </p>
                     </div>
@@ -1648,32 +1646,32 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           <div
                             key={tier.type}
                             onClick={() => setSelectedVehicle(tier.type)}
-                            className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex items-center justify-between bg-white ${
+                            className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex items-center justify-between bg-white dark:bg-neutral-900 ${
                               isSelected
-                                ? 'border-black shadow-md'
-                                : 'border-neutral-200 hover:border-neutral-300'
+                                ? 'border-black dark:border-amber-400 shadow-md ring-1 ring-black dark:ring-amber-400'
+                                : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700'
                             }`}
                           >
                             <div className="flex items-center gap-3.5">
-                              <div className="w-16 h-14 rounded-xl bg-white flex items-center justify-center p-0.5 border border-neutral-100 shadow-sm shrink-0 overflow-hidden">
+                              <div className="w-16 h-14 rounded-xl bg-white dark:bg-neutral-800 flex items-center justify-center p-0.5 border border-neutral-100 dark:border-neutral-700 shadow-sm shrink-0 overflow-hidden">
                                 <img
                                   src={tier.image}
                                   alt={tier.name}
-                                  className="w-full h-full object-contain mix-blend-multiply"
+                                  className="w-full h-full object-contain dark:brightness-110"
                                 />
                               </div>
 
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-extrabold text-sm text-black">{tier.name}</span>
-                                  <span className="text-xs text-neutral-600 font-bold flex items-center gap-0.5">
+                                  <span className="font-extrabold text-sm text-gray-900 dark:text-white">{tier.name}</span>
+                                  <span className="text-xs text-neutral-600 dark:text-neutral-300 font-bold flex items-center gap-0.5">
                                     👤 {tier.capacity}
                                   </span>
                                   {tier.badge && (
                                     <span className="text-xs">{tier.badge}</span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2 text-[11px] text-neutral-600 font-medium">
+                                <div className="flex items-center gap-2 text-[11px] text-neutral-600 dark:text-neutral-300 font-medium">
                                   <span>{tier.etaMins} mins away • {getEtaDropTime(tier.etaMins)}</span>
                                 </div>
                                 {tier.tag && (
@@ -1682,7 +1680,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   </span>
                                 )}
                                 {tier.desc && !tier.tag && (
-                                  <div className="text-[11px] text-neutral-500 leading-tight">
+                                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-tight">
                                     {tier.desc}
                                   </div>
                                 )}
@@ -1690,7 +1688,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             </div>
 
                             <div className="text-right shrink-0 pl-2">
-                              <div className="text-base font-extrabold text-black">
+                              <div className="text-base font-extrabold text-gray-900 dark:text-white">
                                 ₹{fare.toFixed(2)}
                               </div>
                             </div>
@@ -1700,13 +1698,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
 
                     
-                    <div className="sticky bottom-4 mt-6 bg-white/95 backdrop-blur-md p-3 rounded-2xl border border-neutral-200 shadow-2xl flex items-center gap-3 z-30">
+                    <div className="sticky bottom-4 mt-6 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-2xl flex items-center gap-3 z-30">
                       
                       <div className="relative">
                         <button
                           type="button"
                           onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
-                          className="flex items-center gap-2 bg-[#f3f3f3] hover:bg-[#eaeaea] px-3.5 py-3 rounded-xl text-xs font-bold text-black transition-colors whitespace-nowrap cursor-pointer"
+                          className="flex items-center gap-2 bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 px-3.5 py-3 rounded-xl text-xs font-bold text-gray-900 dark:text-white border border-transparent dark:border-neutral-700 transition-colors whitespace-nowrap cursor-pointer"
                         >
                           <span>👤</span>
                           <span className="hidden sm:inline">Personal •</span>
@@ -1714,7 +1712,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           <span className="text-xs">▾</span>
                         </button>
                         {showPaymentDropdown && (
-                          <div className="absolute bottom-14 left-0 bg-white border border-neutral-200 rounded-xl shadow-xl py-1 z-40 w-52 text-xs">
+                          <div className="absolute bottom-14 left-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-gray-900 dark:text-white rounded-xl shadow-xl py-1 z-40 w-52 text-xs">
                             {['UPI Scan and Pay', 'Cash to Driver', 'Razorpay Online'].map((m) => (
                               <button
                                 key={m}
@@ -1723,7 +1721,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   setPaymentMethod(m);
                                   setShowPaymentDropdown(false);
                                 }}
-                                className="w-full text-left px-3 py-2 hover:bg-neutral-100 font-medium cursor-pointer"
+                                className="w-full text-left px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 font-medium cursor-pointer"
                               >
                                 {m}
                               </button>
@@ -1737,7 +1735,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         type="button"
                         onClick={handleBookRide}
                         disabled={isLoading}
-                        className="flex-1 py-3.5 bg-black hover:bg-neutral-800 disabled:bg-neutral-400 text-white font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 py-3.5 bg-black hover:bg-neutral-800 disabled:bg-neutral-400 dark:bg-amber-400 dark:hover:bg-amber-500 dark:disabled:bg-neutral-700 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                       >
                         {isLoading ? (
                           <>
@@ -1752,51 +1750,51 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </>
                 ) : activeRide.status === 'REQUESTED' ? (
                   
-                  <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-7 shadow-lg space-y-6 animate-in zoom-in-95">
+                  <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 sm:p-7 shadow-lg space-y-6 animate-in zoom-in-95">
                     
                     <div className="flex flex-col items-center justify-center py-6 space-y-4 text-center">
                       <div className="relative flex items-center justify-center w-24 h-24">
-                        <div className="w-24 h-24 rounded-full bg-black/5 animate-ping absolute" />
-                        <div className="w-16 h-16 rounded-full bg-black/10 animate-pulse absolute" />
-                        <div className="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-2xl shadow-xl z-10">
+                        <div className="w-24 h-24 rounded-full bg-black/5 dark:bg-amber-400/10 animate-ping absolute" />
+                        <div className="w-16 h-16 rounded-full bg-black/10 dark:bg-amber-400/20 animate-pulse absolute" />
+                        <div className="w-14 h-14 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-2xl shadow-xl z-10">
                           {currentTier.icon || '🚗'}
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <h2 className="text-2xl font-black text-black tracking-tight">
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                           Searching for drivers...
                         </h2>
-                        <p className="text-xs text-neutral-500 font-medium max-w-xs">
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium max-w-xs">
                           Connecting with nearby {currentTier.name} drivers around your pickup location.
                         </p>
                       </div>
 
                       
-                      <div className="w-full max-w-xs bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-black h-full rounded-full animate-pulse" style={{ width: '70%' }} />
+                      <div className="w-full max-w-xs bg-neutral-100 dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-black dark:bg-amber-400 h-full rounded-full animate-pulse" style={{ width: '70%' }} />
                       </div>
                     </div>
 
                     
-                    <div className="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 space-y-3">
+                    <div className="bg-neutral-50 dark:bg-neutral-800/80 rounded-2xl p-4 border border-neutral-200 dark:border-neutral-700 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <span className="font-extrabold text-sm text-black">{currentTier.name}</span>
-                          <span className="text-xs text-neutral-500">• {displayDistance} km</span>
+                          <span className="font-extrabold text-sm text-gray-900 dark:text-white">{currentTier.name}</span>
+                          <span className="text-xs text-neutral-500 dark:text-neutral-400">• {displayDistance} km</span>
                         </div>
-                        <span className="text-base font-extrabold text-black">
+                        <span className="text-base font-extrabold text-gray-900 dark:text-white">
                           ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : currentFare.toFixed(2)}
                         </span>
                       </div>
 
-                      <div className="space-y-2 pt-2 border-t border-neutral-200/80 text-xs">
-                        <div className="flex items-center gap-2 text-neutral-700 truncate">
-                          <span className="w-2 h-2 rounded-full bg-black shrink-0" />
+                      <div className="space-y-2 pt-2 border-t border-neutral-200/80 dark:border-neutral-700 text-xs">
+                        <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 truncate">
+                          <span className="w-2 h-2 rounded-full bg-black dark:bg-amber-400 shrink-0" />
                           <span className="truncate font-semibold">{pickupText}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-neutral-700 truncate">
-                          <span className="w-2 h-2 bg-black shrink-0" />
+                        <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 truncate">
+                          <span className="w-2 h-2 bg-black dark:bg-amber-400 shrink-0" />
                           <span className="truncate font-semibold">{dropText}</span>
                         </div>
                       </div>
@@ -1806,7 +1804,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     <button
                       type="button"
                       onClick={handleCancelRide}
-                      className="w-full py-3.5 bg-neutral-100 hover:bg-red-50 text-neutral-700 hover:text-red-700 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-neutral-200 hover:border-red-300 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                      className="w-full py-3.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-700 dark:text-neutral-200 hover:text-red-700 dark:hover:text-red-400 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-800 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                     >
                       <span>Cancel Ride</span>
                       <span>✕</span>
@@ -1814,17 +1812,17 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </div>
                 ) : (
                   
-                  <div className="bg-white text-black rounded-3xl p-6 shadow-xl space-y-5 animate-in fade-in border border-neutral-200">
-                    <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+                  <div className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-3xl p-6 shadow-xl space-y-5 animate-in fade-in border border-neutral-200 dark:border-neutral-800">
+                    <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
                             activeRide.status === 'COMPLETED'
-                              ? 'bg-black'
-                              : 'bg-black animate-pulse'
+                              ? 'bg-black dark:bg-amber-400'
+                              : 'bg-black dark:bg-amber-400 animate-pulse'
                           }`}
                         />
-                        <span className="text-xs font-black uppercase tracking-wider text-black">
+                        <span className="text-xs font-black uppercase tracking-wider text-black dark:text-white">
                           {activeRide.status === 'COMPLETED'
                             ? 'Ride Completed'
                             : activeRide.status === 'IN_PROGRESS'
@@ -1832,52 +1830,52 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             : 'Driver on the way'}
                         </span>
                       </div>
-                      <span className="text-xs text-neutral-500 font-mono">Ride #{activeRide.rideId}</span>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">Ride #{activeRide.rideId}</span>
                     </div>
 
                     {activeRide.status === 'COMPLETED' ? (
-                      <div className="bg-neutral-50 p-5 rounded-2xl border border-neutral-200 space-y-4 animate-in zoom-in-95">
-                        <div className="bg-white p-4 rounded-xl border border-neutral-200 space-y-2 shadow-sm">
+                      <div className="bg-neutral-50 dark:bg-neutral-800/60 p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-4 animate-in zoom-in-95">
+                        <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 space-y-2 shadow-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-neutral-500 uppercase font-bold tracking-wider">
+                            <span className="text-[11px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
                               Total Fare
                             </span>
-                            <span className="text-3xl font-black text-black">
+                            <span className="text-3xl font-black text-black dark:text-white">
                               ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : '0.00'}
                             </span>
                           </div>
-                          <div className="text-[11px] text-neutral-700 font-semibold flex items-center justify-between pt-1.5 border-t border-neutral-100">
+                          <div className="text-[11px] text-neutral-700 dark:text-neutral-300 font-semibold flex items-center justify-between pt-1.5 border-t border-neutral-100 dark:border-neutral-700">
                             <span>Settlement Status</span>
-                            <span className="text-black font-bold">
+                            <span className="text-black dark:text-white font-bold">
                               {razorpaySuccessData ? (
                                 <span className="text-emerald-600 font-extrabold flex items-center gap-1">
                                   ✓ Paid via Razorpay
                                 </span>
                               ) : (
-                                <span className="text-amber-600 font-semibold">Payment Pending</span>
+                                <span className="text-amber-600 dark:text-amber-400 font-semibold">Payment Pending</span>
                               )}
                             </span>
                           </div>
                         </div>
 
                         {razorpaySuccessData ? (
-                          <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-neutral-800 space-y-2 animate-in zoom-in-95">
-                            <div className="font-black text-emerald-800 flex items-center gap-1.5 text-sm">
+                          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs text-neutral-800 dark:text-neutral-200 space-y-2 animate-in zoom-in-95">
+                            <div className="font-black text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 text-sm">
                               <span>✓</span>
                               <span>Payment Verified via Razorpay!</span>
                             </div>
-                            <div className="space-y-1 font-mono text-[11px] text-neutral-600 pt-1.5 border-t border-emerald-100">
+                            <div className="space-y-1 font-mono text-[11px] text-neutral-600 dark:text-neutral-300 pt-1.5 border-t border-emerald-100 dark:border-emerald-800">
                               <div className="flex justify-between">
-                                <span className="text-neutral-500">Payment ID:</span>
-                                <span className="font-bold text-black">{razorpaySuccessData.paymentId}</span>
+                                <span className="text-neutral-500 dark:text-neutral-400">Payment ID:</span>
+                                <span className="font-bold text-black dark:text-white">{razorpaySuccessData.paymentId}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-neutral-500">Order ID:</span>
-                                <span className="text-neutral-700">{razorpaySuccessData.orderId}</span>
+                                <span className="text-neutral-500 dark:text-neutral-400">Order ID:</span>
+                                <span className="text-neutral-700 dark:text-neutral-300">{razorpaySuccessData.orderId}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-neutral-500">Amount Paid:</span>
-                                <span className="font-bold text-emerald-700">₹{razorpaySuccessData.amount}</span>
+                                <span className="text-neutral-500 dark:text-neutral-400">Amount Paid:</span>
+                                <span className="font-bold text-emerald-700 dark:text-emerald-400">₹{razorpaySuccessData.amount}</span>
                               </div>
                             </div>
 
@@ -1893,7 +1891,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   isError: false,
                                 });
                               }}
-                              className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 active:scale-95 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
+                              className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
                             >
                               <span>Receipt Saved • Book Next Ride</span>
                               <span>→</span>
@@ -1901,11 +1899,11 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           </div>
                         ) : (
                           <div className="space-y-2.5">
-                            <div className="p-3 bg-white rounded-xl border border-neutral-200 text-xs text-neutral-700 space-y-1">
-                              <div className="font-bold text-black flex items-center gap-1.5">
+                            <div className="p-3 bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs text-neutral-700 dark:text-neutral-300 space-y-1">
+                              <div className="font-bold text-black dark:text-white flex items-center gap-1.5">
                                 <span>✓ Destination Safely Reached</span>
                               </div>
-                              <p className="text-[11px] text-neutral-500 leading-relaxed">
+                              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
                                 Choose your payment method below to complete the settlement for Ride #{activeRide.rideId}.
                               </p>
                             </div>
@@ -1914,7 +1912,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               type="button"
                               onClick={handlePayOnlineWithRazorpay}
                               disabled={isPayingRazorpay}
-                              className="w-full py-3.5 bg-black hover:bg-neutral-800 active:scale-95 text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-xl cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="w-full py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-xl cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                               {isPayingRazorpay ? (
                                 <>
@@ -1941,7 +1939,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   isError: false,
                                 });
                               }}
-                              className="w-full py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold rounded-xl text-[11px] uppercase tracking-wider transition-all border border-neutral-200 cursor-pointer flex items-center justify-center gap-1.5"
+                              className="w-full py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl text-[11px] uppercase tracking-wider transition-all border border-neutral-200 dark:border-neutral-700 cursor-pointer flex items-center justify-center gap-1.5"
                             >
                               <span>💵</span>
                               <span>Pay with Cash directly to Driver</span>
@@ -2005,21 +2003,21 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         return (
                           <div className="space-y-4">
                             
-                            <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 flex items-center justify-between gap-3">
+                            <div className="bg-neutral-50 dark:bg-neutral-800/80 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-black text-white font-black text-lg flex items-center justify-center shadow">
+                                <div className="w-12 h-12 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black font-black text-lg flex items-center justify-center shadow">
                                   {driverName.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-sm font-extrabold text-black">{driverName}</h4>
-                                  <div className="flex items-center gap-1.5 text-xs text-neutral-600 font-semibold">
-                                    <span className="text-black font-bold">★ {Number(driverRating).toFixed(1)}</span>
+                                  <h4 className="text-sm font-extrabold text-black dark:text-white">{driverName}</h4>
+                                  <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-300 font-semibold">
+                                    <span className="text-black dark:text-white font-bold">★ {Number(driverRating).toFixed(1)}</span>
                                     <span>•</span>
                                     <span>{driverModel}</span>
                                     {driverPhone && (
                                       <>
                                         <span>•</span>
-                                        <a href={`tel:${driverPhone}`} className="text-emerald-600 hover:underline font-mono">
+                                        <a href={`tel:${driverPhone}`} className="text-emerald-600 dark:text-emerald-400 hover:underline font-mono">
                                           📞 {driverPhone}
                                         </a>
                                       </>
@@ -2029,30 +2027,30 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </div>
 
                               <div className="text-right">
-                                <div className="inline-block bg-white text-black font-mono font-bold text-xs px-3 py-1 rounded-lg border border-neutral-300 shadow-sm tracking-wider">
+                                <div className="inline-block bg-white dark:bg-neutral-900 text-black dark:text-white font-mono font-bold text-xs px-3 py-1 rounded-lg border border-neutral-300 dark:border-neutral-700 shadow-sm tracking-wider">
                                   {driverPlate}
                                 </div>
                               </div>
                             </div>
 
                             
-                            <div className="flex items-center justify-between py-2 border-b border-neutral-100 text-xs">
-                              <span className="font-bold text-neutral-600">
+                            <div className="flex items-center justify-between py-2 border-b border-neutral-100 dark:border-neutral-800 text-xs">
+                              <span className="font-bold text-neutral-600 dark:text-neutral-400">
                                 {activeRide.status === 'IN_PROGRESS' ? 'Route status' : 'Estimated arrival'}
                               </span>
-                              <span className="font-extrabold text-black">
+                              <span className="font-extrabold text-black dark:text-white">
                                 {activeRide.status === 'IN_PROGRESS' ? 'En route to destination' : '~2-3 mins'}
                               </span>
                             </div>
 
                             
-                            <div className="space-y-2 text-xs border-b border-neutral-100 pb-3">
-                              <div className="flex items-center gap-2 text-neutral-800 truncate">
-                                <span className="w-2 h-2 rounded-full bg-black shrink-0" />
+                            <div className="space-y-2 text-xs border-b border-neutral-100 dark:border-neutral-800 pb-3">
+                              <div className="flex items-center gap-2 text-neutral-800 dark:text-neutral-200 truncate">
+                                <span className="w-2 h-2 rounded-full bg-black dark:bg-amber-400 shrink-0" />
                                 <span className="truncate font-semibold">{pickupText}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-neutral-800 truncate">
-                                <span className="w-2 h-2 bg-black shrink-0" />
+                              <div className="flex items-center gap-2 text-neutral-800 dark:text-neutral-200 truncate">
+                                <span className="w-2 h-2 bg-black dark:bg-amber-400 shrink-0" />
                                 <span className="truncate font-semibold">{dropText}</span>
                               </div>
                             </div>
@@ -2070,7 +2068,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                     isError: false,
                                   });
                                 }}
-                                className="w-full py-2.5 px-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-neutral-200 cursor-pointer"
+                                className="w-full py-2.5 px-3 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-neutral-200 dark:border-neutral-700 cursor-pointer"
                               >
                                 <span>Share Trip Details</span>
                               </button>
@@ -2081,9 +2079,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     )}
 
                     {activeRide.status !== 'COMPLETED' && (
-                      <div className="flex justify-between items-center border-t border-neutral-100 pt-3 text-xs">
+                      <div className="flex justify-between items-center border-t border-neutral-100 dark:border-neutral-800 pt-3 text-xs">
                         <span className="text-neutral-500 font-bold uppercase tracking-wider">Total Fare</span>
-                        <span className="text-xl font-black text-black">
+                        <span className="text-xl font-black text-black dark:text-white">
                           ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : '50.07'}
                         </span>
                       </div>
@@ -2101,7 +2099,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     )}
 
                     {(activeRide.status === 'IN_PROGRESS' || activeRide.rideStatus === 'IN_PROGRESS') && (
-                      <div className="w-full py-3.5 bg-black text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
+                      <div className="w-full py-3.5 bg-black dark:bg-amber-400 text-white dark:text-black font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                         <span>Trip In Progress • Safe Journey</span>
                       </div>
@@ -2112,7 +2110,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </div>
 
               
-              <div className={`${activeRide ? "lg:col-span-8" : "lg:col-span-4"} h-[600px] lg:h-[calc(100vh-140px)] sticky top-20 rounded-3xl overflow-hidden border border-neutral-200 shadow-sm relative isolate z-0 bg-neutral-100 transition-all duration-300`}>
+              <div className={`${activeRide ? "lg:col-span-8" : "lg:col-span-4"} h-[600px] lg:h-[calc(100vh-140px)] sticky top-20 rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900 transition-all duration-300`}>
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
                   dropCoords={dropCoords}
@@ -2134,15 +2132,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       
       {showHistory && (
         <div className="print:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
-          <div className="w-full max-w-md bg-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b pb-4">
+          <div className="w-full max-w-md bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-800 text-black dark:text-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-black">Past Trips</h3>
-                <p className="text-xs text-neutral-500">Rider #{riderId} Journey Records</p>
+                <h3 className="text-xl font-bold text-black dark:text-white">Past Trips</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">Rider #{riderId} Journey Records</p>
               </div>
               <button
                 onClick={() => setShowHistory(false)}
-                className="text-neutral-500 hover:text-black text-xl font-bold"
+                className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white text-xl font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -2156,11 +2154,11 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   <div
                     key={idx}
                     onClick={() => setSelectedRideReceipt(ride)}
-                    className="p-4 rounded-2xl border border-neutral-200 bg-white hover:border-black hover:shadow-lg transition-all cursor-pointer group space-y-2.5"
+                    className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800/80 hover:border-black dark:hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer group space-y-2.5"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-black text-black group-hover:text-blue-600 transition-colors">
+                        <span className="font-mono text-xs font-black text-black dark:text-white group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors">
                           Trip #{ride.rideId || ride.id}
                         </span>
                         <span className="text-[11px] text-neutral-400 font-medium">
@@ -2178,12 +2176,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-neutral-600">
+                    <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">
                           {ride.vehicle?.carModel ? '🚗' : ride.vehicle?.autoModel ? '🛺' : '🏍️'}
                         </span>
-                        <span className="font-semibold text-neutral-800">
+                        <span className="font-semibold text-neutral-800 dark:text-neutral-200">
                           {getDriverDetails(ride, rideHistory).name}
                         </span>
                         <span className="text-neutral-300">•</span>
@@ -2195,12 +2193,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           {ride.distanceKm ? `${Number(ride.distanceKm).toFixed(1)} km` : '—'}
                         </span>
                       </div>
-                      <div className="font-extrabold text-black text-sm">
+                      <div className="font-extrabold text-black dark:text-white text-sm">
                         ₹{ride.fare ? Number(ride.fare).toFixed(2) : '0.00'}
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500 group-hover:text-black font-semibold">
+                    <div className="pt-2 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white font-semibold">
                       <span>Click to view full receipt & route</span>
                       <span className="transition-transform group-hover:translate-x-1">→</span>
                     </div>
@@ -2219,7 +2217,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       
       {selectedRideReceipt && (
         <div className="receipt-modal-backdrop fixed inset-0 z-[70] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in print:p-0 print:m-0 print:bg-transparent print:static print:block print:overflow-visible">
-          <div className="receipt-print-card bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 my-8 print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
+          <div className="receipt-print-card bg-white dark:bg-neutral-900 text-black dark:text-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 my-8 print:bg-white print:text-black print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
             
             
             <div className="receipt-header bg-neutral-900 text-white p-6 flex items-start justify-between print:p-4 print:rounded-t-2xl">
@@ -2263,9 +2261,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 const rPlate = selectedRideReceipt?.plateNumber || rDriver.plateNumber;
                 const rModel = rDriver.model || (selectedRideReceipt?.vehicleType ? `SafarX ${selectedRideReceipt.vehicleType}` : 'Comfort Cab');
                 return (
-                  <div className="receipt-avoid-break p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-between print:p-3 print:bg-neutral-50">
+                  <div className="receipt-avoid-break p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-between print:p-3 print:bg-neutral-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-12 rounded-xl bg-white border border-neutral-200 overflow-hidden flex items-center justify-center p-1 shadow-sm shrink-0">
+                      <div className="w-16 h-12 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 overflow-hidden flex items-center justify-center p-1 shadow-sm shrink-0">
                         <img
                           src={getVehicleImage(selectedRideReceipt.vehicle)}
                           alt="Vehicle"
@@ -2274,15 +2272,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-extrabold text-black text-sm">
+                          <h4 className="font-extrabold text-black dark:text-white text-sm">
                             {rDriverName}
                           </h4>
                           <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
                             ✓ Verified Partner
                           </span>
                         </div>
-                        <div className="text-xs text-neutral-500 font-medium">
-                          {rModel} • <strong className="font-mono text-black">{rPlate}</strong>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
+                          {rModel} • <strong className="font-mono text-black dark:text-white">{rPlate}</strong>
                         </div>
                         <div className="text-xs text-amber-500 font-bold flex items-center gap-1 mt-0.5">
                           <span>★ 5.0</span>
@@ -2293,7 +2291,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                     <div className="text-right">
                       <div className="text-[10px] text-neutral-400 uppercase font-bold">Fare Paid</div>
-                      <div className="text-xl font-black text-black">
+                      <div className="text-xl font-black text-black dark:text-white">
                         ₹{selectedRideReceipt.fare ? Number(selectedRideReceipt.fare).toFixed(2) : '0.00'}
                       </div>
                     </div>
@@ -2303,11 +2301,11 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
               
               <div className="receipt-avoid-break space-y-4 print:space-y-2.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500">
+                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
                   Route Details & GPS Telemetry
                 </div>
 
-                <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-neutral-200 ml-2">
+                <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-neutral-200 dark:border-neutral-700 ml-2">
                   
                   
                   <div className="relative">
@@ -2316,7 +2314,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">
                         Pickup Location
                       </div>
-                      <div className="font-bold text-black text-xs leading-snug mt-0.5">
+                      <div className="font-bold text-black dark:text-white text-xs leading-snug mt-0.5">
                         {receiptPickupName || 'Pickup Coordinates Logged'}
                       </div>
                       {selectedRideReceipt.pickupLat && (
@@ -2334,9 +2332,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                   
                   <div className="py-1">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 text-neutral-700 text-xs font-bold border border-neutral-200">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-bold border border-neutral-200 dark:border-neutral-700">
                       <span>🛣️ Distance Traveled:</span>
-                      <strong className="text-black">
+                      <strong className="text-black dark:text-white">
                         {selectedRideReceipt.distanceKm ? `${Number(selectedRideReceipt.distanceKm).toFixed(2)} km` : '—'}
                       </strong>
                     </span>
@@ -2344,12 +2342,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                   
                   <div className="relative">
-                    <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-black border-2 border-white shadow" />
+                    <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-black dark:bg-amber-400 border-2 border-white dark:border-neutral-900 shadow" />
                     <div>
                       <div className="text-[10px] uppercase font-bold text-neutral-700 tracking-wider">
                         Dropoff Destination
                       </div>
-                      <div className="font-bold text-black text-xs leading-snug mt-0.5">
+                      <div className="font-bold text-black dark:text-white text-xs leading-snug mt-0.5">
                         {receiptDropName || 'Destination Coordinates Logged'}
                       </div>
                       {selectedRideReceipt.dropLat && (
@@ -2369,7 +2367,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                 
                 {selectedRideReceipt.dropLat && selectedRideReceipt.dropLng && (
-                  <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-neutral-200 h-36 bg-neutral-100 shadow-inner print:h-24 print:rounded-xl">
+                  <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 h-36 bg-neutral-100 dark:bg-neutral-800 shadow-inner print:h-24 print:rounded-xl">
                     <iframe
                       title="Trip Route Map"
                       width="100%"
@@ -2379,7 +2377,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(selectedRideReceipt.pickupLng || selectedRideReceipt.dropLng, selectedRideReceipt.dropLng) - 0.015}%2C${Math.min(selectedRideReceipt.pickupLat || selectedRideReceipt.dropLat, selectedRideReceipt.dropLat) - 0.015}%2C${Math.max(selectedRideReceipt.pickupLng || selectedRideReceipt.dropLng, selectedRideReceipt.dropLng) + 0.015}%2C${Math.max(selectedRideReceipt.pickupLat || selectedRideReceipt.dropLat, selectedRideReceipt.dropLat) + 0.015}&layer=mapnik&marker=${selectedRideReceipt.dropLat}%2C${selectedRideReceipt.dropLng}`}
                       className="w-full h-full opacity-90"
                     />
-                    <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-neutral-800 shadow border border-neutral-200 flex items-center gap-1.5">
+                    <div className="absolute top-2 left-2 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-neutral-800 dark:text-neutral-200 shadow border border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Recorded Journey Map
                     </div>
@@ -2388,74 +2386,74 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </div>
 
               
-              <div className="receipt-avoid-break p-4 rounded-2xl bg-[#f8f9fa] border border-neutral-200 space-y-2.5 print:p-3 print:space-y-1.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 pb-1 border-b border-neutral-200">
+              <div className="receipt-avoid-break p-4 rounded-2xl bg-[#f8f9fa] dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 space-y-2.5 print:p-3 print:bg-[#f8f9fa] print:space-y-1.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 pb-1 border-b border-neutral-200 dark:border-neutral-700">
                   Itemized Fare Receipt
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600">
+                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
                   <span>Driver Partner</span>
-                  <span className="font-semibold text-black">{selectedRideReceipt?.driverName || getDriverDetails(selectedRideReceipt).name}</span>
+                  <span className="font-semibold text-black dark:text-white">{selectedRideReceipt?.driverName || getDriverDetails(selectedRideReceipt).name}</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600">
+                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
                   <span>Vehicle Registration</span>
-                  <span className="font-mono font-semibold text-black">{selectedRideReceipt?.plateNumber || getDriverDetails(selectedRideReceipt).plateNumber}</span>
+                  <span className="font-mono font-semibold text-black dark:text-white">{selectedRideReceipt?.plateNumber || getDriverDetails(selectedRideReceipt).plateNumber}</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600">
+                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
                   <span>Base Pickup Fare</span>
-                  <span className="font-mono font-semibold text-black">₹50.00</span>
+                  <span className="font-mono font-semibold text-black dark:text-white">₹50.00</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600">
+                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
                   <span>Distance Transit Charge ({selectedRideReceipt.distanceKm ? Number(selectedRideReceipt.distanceKm).toFixed(1) : 0} km)</span>
-                  <span className="font-mono font-semibold text-black">
+                  <span className="font-mono font-semibold text-black dark:text-white">
                     ₹{Math.max(0, (selectedRideReceipt.fare || 0) - 50).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600">
+                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
                   <span>Taxes & Operational Tolls</span>
                   <span className="font-mono font-semibold text-emerald-600">₹0.00 (Included)</span>
                 </div>
 
-                <div className="pt-2 border-t border-neutral-200 flex justify-between items-center text-sm font-black text-black">
+                <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center text-sm font-black text-black dark:text-white">
                   <span>Total Amount Paid</span>
-                  <span className="text-base text-black">
+                  <span className="text-base text-black dark:text-white">
                     ₹{selectedRideReceipt.fare ? Number(selectedRideReceipt.fare).toFixed(2) : '0.00'}
                   </span>
                 </div>
 
-                <div className="text-[11px] text-neutral-500 flex items-center justify-between pt-1">
+                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center justify-between pt-1">
                   <span>Payment Method</span>
-                  <span className="font-semibold text-neutral-800">💳 Cash / UPI on Arrival</span>
+                  <span className="font-semibold text-neutral-800 dark:text-neutral-200">💳 Cash / UPI on Arrival</span>
                 </div>
               </div>
 
               
-              <div className="receipt-avoid-break flex items-center justify-between text-xs text-neutral-500 px-1 print:pt-1">
+              <div className="receipt-avoid-break flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1 print:pt-1">
                 <div>
-                  Rider: <strong className="text-neutral-800">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
+                  Rider: <strong className="text-neutral-800 dark:text-neutral-200">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
                 </div>
                 <div>
-                  Email: <span className="font-mono text-neutral-600">{selectedRideReceipt.rider?.email || 'verified@safarx.in'}</span>
+                  Email: <span className="font-mono text-neutral-600 dark:text-neutral-400">{selectedRideReceipt.rider?.email || 'verified@safarx.in'}</span>
                 </div>
               </div>
 
             </div>
 
             
-            <div className="print:hidden p-4 bg-neutral-50 border-t border-neutral-200 flex items-center justify-end gap-3">
+            <div className="print:hidden p-4 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end gap-3">
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-white hover:bg-neutral-100 border border-neutral-300 text-neutral-800 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                className="px-4 py-2 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 border border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               >
                 🖨️ Print Receipt
               </button>
               <button
                 onClick={() => setSelectedRideReceipt(null)}
-                className="px-6 py-2 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
+                className="px-6 py-2 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black font-bold rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 Close
               </button>

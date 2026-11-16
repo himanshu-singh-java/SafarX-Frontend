@@ -222,13 +222,13 @@ export default function DriverOnboardingModal({
       <div className="fixed inset-0" onClick={onClose} />
 
       
-      <div className="relative z-10 bg-white border border-neutral-200 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-neutral-900 animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
+      <div className="relative z-10 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-neutral-900 dark:text-white animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
         
         
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-500 hover:text-black flex items-center justify-center font-bold text-base transition-all cursor-pointer"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white flex items-center justify-center font-bold text-base transition-all cursor-pointer"
           title="Close dialog"
         >
           ✕
@@ -238,7 +238,7 @@ export default function DriverOnboardingModal({
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             
-            <div className="w-12 h-10 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
+            <div className="w-12 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
                 alt="SafarX 3D Car"
@@ -247,28 +247,28 @@ export default function DriverOnboardingModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-black tracking-tight">
+                <span className="text-xl font-black text-black dark:text-white tracking-tight">
                   Safar<span className="text-[#d4af37]">X</span>
                 </span>
-                <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold text-[#996515] bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold text-[#996515] dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full">
                   Partner Fleet
                 </span>
               </div>
-              <h2 className="text-lg font-black tracking-tight text-neutral-900">
+              <h2 className="text-lg font-black tracking-tight text-neutral-900 dark:text-white">
                 Drive with SafarX
               </h2>
             </div>
           </div>
 
-          <p className="text-xs text-neutral-500 font-medium">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
             Register your driver account and vehicle in one quick step. Start accepting passenger trips immediately.
           </p>
 
           
-          <div className="flex items-center justify-between bg-neutral-50 border border-neutral-200 px-3.5 py-2 rounded-2xl text-xs">
+          <div className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700 px-3.5 py-2 rounded-2xl text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-neutral-700 font-mono text-[11px] font-semibold">{gpsStatus}</span>
+              <span className="text-neutral-700 dark:text-neutral-300 font-mono text-[11px] font-semibold">{gpsStatus}</span>
             </div>
             <span className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider">
               Auto Dispatch GPS
@@ -314,13 +314,13 @@ export default function DriverOnboardingModal({
           
           
           <div className="space-y-3">
-            <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 pb-1.5 flex items-center gap-2">
+            <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 dark:border-neutral-800 pb-1.5 flex items-center gap-2">
               <span>1. Partner Account Information</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                   Full Name *
                 </label>
                 <input
@@ -329,12 +329,12 @@ export default function DriverOnboardingModal({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Ramesh Kumar"
-                  className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                   Mobile Phone *
                 </label>
                 <input
@@ -343,14 +343,14 @@ export default function DriverOnboardingModal({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 43210"
-                  className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                   Email Address *
                 </label>
                 <input
@@ -359,13 +359,13 @@ export default function DriverOnboardingModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                   placeholder="driver@example.com"
-                  className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                     Password *
                   </label>
                   <button
@@ -382,7 +382,7 @@ export default function DriverOnboardingModal({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 6 characters"
-                  className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
             </div>
@@ -408,7 +408,7 @@ export default function DriverOnboardingModal({
                       : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50'
                   }`}
                 >
-                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white border border-neutral-100 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
+                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
                     <img
                       src="/vehicle_car.jpg"
                       alt="3D Car"
@@ -417,14 +417,14 @@ export default function DriverOnboardingModal({
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-neutral-900 text-xs sm:text-sm">Car / Cab</span>
+                      <span className="font-extrabold text-neutral-900 dark:text-white text-xs sm:text-sm">Car / Cab</span>
                       {vehicleType === 'CAR' && (
-                        <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[9px] font-black">
+                        <span className="w-4 h-4 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-[9px] font-black">
                           ✓
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-neutral-500 font-medium">Sedan, SUV, Mini</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">Sedan, SUV, Mini</div>
                   </div>
                 </button>
 
@@ -438,7 +438,7 @@ export default function DriverOnboardingModal({
                       : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50'
                   }`}
                 >
-                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white border border-neutral-100 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
+                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
                     <img
                       src="/vehicle_moto.jpg"
                       alt="3D Moto"
@@ -447,14 +447,14 @@ export default function DriverOnboardingModal({
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-neutral-900 text-xs sm:text-sm">SafarX Moto</span>
+                      <span className="font-extrabold text-neutral-900 dark:text-white text-xs sm:text-sm">SafarX Moto</span>
                       {vehicleType === 'BIKE' && (
-                        <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[9px] font-black">
+                        <span className="w-4 h-4 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-[9px] font-black">
                           ✓
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-neutral-500 font-medium">Bike & Scooter</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">Bike & Scooter</div>
                   </div>
                 </button>
 
@@ -468,7 +468,7 @@ export default function DriverOnboardingModal({
                       : 'border-neutral-200 bg-white hover:border-neutral-300 hover:bg-neutral-50/50'
                   }`}
                 >
-                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white border border-neutral-100 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
+                  <div className="w-full h-14 sm:h-16 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-100 dark:border-neutral-700 p-1 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
                     <img
                       src="/vehicle_auto.jpg"
                       alt="3D Auto"
@@ -477,14 +477,14 @@ export default function DriverOnboardingModal({
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="font-extrabold text-neutral-900 text-xs sm:text-sm">Auto</span>
+                      <span className="font-extrabold text-neutral-900 dark:text-white text-xs sm:text-sm">Auto</span>
                       {vehicleType === 'AUTO' && (
-                        <span className="w-4 h-4 rounded-full bg-black text-white flex items-center justify-center text-[9px] font-black">
+                        <span className="w-4 h-4 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-[9px] font-black">
                           ✓
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-neutral-500 font-medium">City 3-Wheeler</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">City 3-Wheeler</div>
                   </div>
                 </button>
 
@@ -494,7 +494,7 @@ export default function DriverOnboardingModal({
             
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                   Vehicle License Plate Number *
                 </label>
                 <span className="text-[10px] text-neutral-400 font-mono font-semibold">RTO Registered</span>
@@ -505,16 +505,16 @@ export default function DriverOnboardingModal({
                 value={plateNumber}
                 onChange={(e) => setPlateNumber(e.target.value)}
                 placeholder="e.g. TS-09-UB-8888 or DL-8C-CC-3001"
-                className="w-full bg-[#f6f6f6] hover:bg-[#efefef] focus:bg-white border-2 border-transparent focus:border-black rounded-xl text-black font-mono text-xs font-black uppercase tracking-wider px-4 py-3 outline-none transition-all placeholder:text-neutral-400 shadow-sm"
+                className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white font-mono text-xs font-black uppercase tracking-wider px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
               />
             </div>
 
             
             {vehicleType === 'CAR' && (
-              <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
+              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Car Model
                     </label>
                     <input
@@ -522,18 +522,18 @@ export default function DriverOnboardingModal({
                       value={carModel}
                       onChange={(e) => setCarModel(e.target.value)}
                       placeholder="Maruti Suzuki Dzire"
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-semibold outline-none shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Category
                     </label>
                     <select
                       value={carCategory}
                       onChange={(e) => setCarCategory(e.target.value)}
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
                     >
                       <option value="SEDAN">SEDAN</option>
                       <option value="SUV">SUV</option>
@@ -542,13 +542,13 @@ export default function DriverOnboardingModal({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Capacity
                     </label>
                     <select
                       value={carCapacity}
                       onChange={(e) => setCarCapacity(Number(e.target.value))}
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
                     >
                       <option value={4}>4 Passengers</option>
                       <option value={6}>6 Passengers (SUV)</option>
@@ -602,10 +602,10 @@ export default function DriverOnboardingModal({
 
             
             {vehicleType === 'BIKE' && (
-              <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
+              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Bike Model
                     </label>
                     <input
@@ -613,18 +613,18 @@ export default function DriverOnboardingModal({
                       value={bikeModel}
                       onChange={(e) => setBikeModel(e.target.value)}
                       placeholder="Hero Splendor Plus"
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-semibold outline-none shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Bike Type
                     </label>
                     <select
                       value={bikeType}
                       onChange={(e) => setBikeType(e.target.value)}
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
                     >
                       <option value="COMMUTER">COMMUTER</option>
                       <option value="SCOOTER">SCOOTER</option>
@@ -667,10 +667,10 @@ export default function DriverOnboardingModal({
 
             
             {vehicleType === 'AUTO' && (
-              <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 space-y-3.5">
+              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Auto Model
                     </label>
                     <input
@@ -678,18 +678,18 @@ export default function DriverOnboardingModal({
                       value={autoModel}
                       onChange={(e) => setAutoModel(e.target.value)}
                       placeholder="Bajaj RE Compact"
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-semibold outline-none shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Permit Type
                     </label>
                     <select
                       value={permitType}
                       onChange={(e) => setPermitType(e.target.value)}
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
                     >
                       <option value="CITY_PERMIT">CITY_PERMIT</option>
                       <option value="STATE_PERMIT">STATE_PERMIT</option>
@@ -698,13 +698,13 @@ export default function DriverOnboardingModal({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 block">
+                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
                       Capacity
                     </label>
                     <select
                       value={autoCapacity}
                       onChange={(e) => setAutoCapacity(Number(e.target.value))}
-                      className="w-full bg-white border border-neutral-200 focus:border-black rounded-xl px-3 py-2 text-black text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
                     >
                       <option value={3}>3 Passengers</option>
                       <option value={4}>4 Passengers</option>
@@ -737,7 +737,7 @@ export default function DriverOnboardingModal({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-black hover:bg-neutral-800 active:scale-[0.99] text-white font-extrabold rounded-2xl text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-4 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-2xl text-xs sm:text-sm uppercase tracking-wider transition-all shadow-xl disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -754,7 +754,7 @@ export default function DriverOnboardingModal({
           </div>
 
           
-          <div className="text-center text-xs text-neutral-500 pt-1 border-t border-neutral-100">
+          <div className="text-center text-xs text-neutral-500 dark:text-neutral-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
             <span>Already a registered Driver Partner? </span>
             <button
               type="button"
@@ -762,7 +762,7 @@ export default function DriverOnboardingModal({
                 if (onClose) onClose();
                 if (onSwitchToLogin) onSwitchToLogin(email);
               }}
-              className="text-black font-extrabold hover:text-[#d4af37] underline underline-offset-2 cursor-pointer ml-1 transition-colors"
+              className="text-black dark:text-amber-400 font-extrabold hover:text-[#d4af37] underline underline-offset-2 cursor-pointer ml-1 transition-colors"
             >
               Sign In here →
             </button>
@@ -770,7 +770,7 @@ export default function DriverOnboardingModal({
 
         </form>
 
-        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100">
+        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 dark:text-neutral-500 font-medium border-t border-neutral-100 dark:border-neutral-800">
           © 2026 SafarX | By Himanshu Kumar
         </div>
       </div>
