@@ -17,9 +17,15 @@ export default function AuthModal({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('RIDER');
+  const [otp, setOtp] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -27,6 +33,12 @@ export default function AuthModal({
     if (isOpen) {
       setMode(initialMode || 'login');
       setSuccessMessage('');
+      setIsOtpSent(false);
+      setOtp('');
+      setName('');
+      setRole('RIDER');
+      setIsSendingOtp(false);
+      setIsRegistering(false);
       if (sessionExpired) {
         setErrorMessage('Session expired or unauthorized. Please sign in again.');
       } else if (alertNotice) {
@@ -138,13 +150,66 @@ export default function AuthModal({
     }
   };
 
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setErrorMessage('Please provide an email address.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      setErrorMessage('Please provide a valid email address.');
+      return;
+    }
+
+    setIsSendingOtp(true);
+
+    try {
+      await apiClient.post('/api/auth/send-otp', {
+        email: normalizedEmail,
+      });
+
+      setIsOtpSent(true);
+      setSuccessMessage('OTP sent to your email!');
+    } catch (err) {
+      const errorText = typeof err.response?.data === 'string'
+        ? err.response.data
+        : err.response?.data?.message;
+      setErrorMessage(errorText || 'Failed to send OTP. Please check your email address.');
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
   const handleRegister = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!email.trim() || !password.trim()) {
-      setErrorMessage('Please provide an email and password.');
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      setErrorMessage('Please provide an email address.');
+      return;
+    }
+
+    if (!otp.trim()) {
+      setErrorMessage('Please enter the 6-digit OTP sent to your email.');
+      return;
+    }
+
+    if (!name.trim()) {
+      setErrorMessage('Please provide your full name.');
+      return;
+    }
+
+    if (!password.trim()) {
+      setErrorMessage('Please provide a password.');
       return;
     }
 
@@ -158,29 +223,32 @@ export default function AuthModal({
       return;
     }
 
-    setIsLoading(true);
+    setIsRegistering(true);
 
     try {
       await apiClient.post('/api/auth/register', {
-        email: email.trim(),
+        email: normalizedEmail,
         password: password.trim(),
-        role: 'ROLE_RIDER',
+        name: name.trim(),
+        role: role,
+        otp: otp.trim(),
       });
 
       setSuccessMessage('Account registered! Signing you in automatically...');
-      
+
       setTimeout(async () => {
         try {
           const loginRes = await apiClient.post('/api/auth/login', {
-            email: email.trim(),
+            email: normalizedEmail,
             password: password.trim(),
           });
 
           const rawToken = typeof loginRes.data === 'string' ? loginRes.data : loginRes.data?.token || '';
           const token = rawToken.replace(/^["']|["']$/g, '').trim();
 
-          let resolvedRole = 'ROLE_RIDER';
+          let resolvedRole = role === 'DRIVER' ? 'ROLE_DRIVER' : 'ROLE_RIDER';
           let resolvedRiderId = null;
+
           try {
             const meRes = await apiClient.get('/api/auth/me', {
               headers: { Authorization: `Bearer ${token}` },
@@ -191,15 +259,17 @@ export default function AuthModal({
               resolvedRiderId = meRes.data.riderId;
               setStorageItem('riderId', String(meRes.data.riderId));
             }
-            if (meRes.data?.driverId) setStorageItem('driverId', String(meRes.data.driverId));
+            if (meRes.data?.driverId) {
+              setStorageItem('driverId', String(meRes.data.driverId));
+            }
 
             if (resolvedRole === 'ROLE_RIDER' && !resolvedRiderId) {
               try {
                 await apiClient.post(
                   '/api/auth/complete-profile',
                   {
-                    role: 'ROLE_RIDER',
-                    name: email.trim().split('@')[0],
+                    role: role === 'DRIVER' ? 'ROLE_DRIVER' : 'ROLE_RIDER',
+                    name: name.trim() || normalizedEmail.split('@')[0],
                     phone: '',
                   },
                   { headers: { Authorization: `Bearer ${token}` } }
@@ -207,8 +277,12 @@ export default function AuthModal({
                 const retryMe = await apiClient.get('/api/auth/me', {
                   headers: { Authorization: `Bearer ${token}` },
                 });
+                if (retryMe.data?.role) resolvedRole = retryMe.data.role;
                 if (retryMe.data?.riderId) {
                   setStorageItem('riderId', String(retryMe.data.riderId));
+                }
+                if (retryMe.data?.driverId) {
+                  setStorageItem('driverId', String(retryMe.data.driverId));
                 }
               } catch (regInitErr) {
                 console.warn('[AuthModal] Auto-profile creation on register:', regInitErr);
@@ -219,9 +293,9 @@ export default function AuthModal({
             if (decoded?.role) resolvedRole = decoded.role;
           }
 
-          setAuthToken(token, email.trim(), resolvedRole);
+          setAuthToken(token, normalizedEmail, resolvedRole);
           if (onLoginSuccess) {
-            onLoginSuccess(token, email.trim(), resolvedRole);
+            onLoginSuccess(token, normalizedEmail, resolvedRole);
           }
           if (onClose) {
             onClose();
@@ -232,26 +306,29 @@ export default function AuthModal({
         }
       }, 500);
     } catch (err) {
+      const status = err.response?.status;
       const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
-      setErrorMessage(errorText || 'Unable to register account. Please try again.');
+      if (status === 401) {
+        setErrorMessage(errorText || 'Invalid or expired OTP. Please verify or resend a new OTP.');
+      } else if (status === 409) {
+        setErrorMessage(errorText || 'This email is already registered. Please log in.');
+      } else if (status === 403) {
+        setErrorMessage(errorText || 'Cannot self-assign Admin role.');
+      } else {
+        setErrorMessage(errorText || 'Unable to register account. Please try again.');
+      }
     } finally {
-      setIsLoading(false);
+      setIsRegistering(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in select-none">
-      
-      
       <div className="fixed inset-0" onClick={onClose} />
 
-      
       <div className="w-full max-w-md relative z-10 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-black dark:text-white space-y-5 animate-in zoom-in-95">
-        
-        
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            
             <div className="w-12 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
@@ -268,7 +345,7 @@ export default function AuthModal({
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
                 {mode === 'login'
                   ? 'Sign in to access your ride or driver partner account'
-                  : 'Create a rider account to book rides instantly'}
+                  : 'Create an account to book or drive with SafarX'}
               </p>
             </div>
           </div>
@@ -283,7 +360,6 @@ export default function AuthModal({
           </button>
         </div>
 
-        
         <div className="flex p-1 bg-neutral-100 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700">
           <button
             type="button"
@@ -291,8 +367,11 @@ export default function AuthModal({
               setMode('login');
               setErrorMessage('');
               setSuccessMessage('');
+              setIsOtpSent(false);
+              setOtp('');
+              setName('');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'login'
                 ? 'bg-white text-black shadow-sm font-extrabold'
                 : 'text-neutral-500 hover:text-black font-semibold'
@@ -306,8 +385,11 @@ export default function AuthModal({
               setMode('register');
               setErrorMessage('');
               setSuccessMessage('');
+              setIsOtpSent(false);
+              setOtp('');
+              setName('');
             }}
-            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+            className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'register'
                 ? 'bg-white text-black shadow-sm font-extrabold'
                 : 'text-neutral-500 hover:text-black font-semibold'
@@ -317,7 +399,6 @@ export default function AuthModal({
           </button>
         </div>
 
-        
         {errorMessage && (
           <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-in fade-in font-medium">
             <span className="text-sm shrink-0">⚠️</span>
@@ -332,84 +413,256 @@ export default function AuthModal({
           </div>
         )}
 
-        
-        <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4">
-          
-          
-          <div className="space-y-1.5">
-            <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
-              Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
-              placeholder="name@example.com"
-              className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
-            />
-          </div>
+        <form
+          onSubmit={
+            mode === 'login'
+              ? handleLogin
+              : !isOtpSent
+              ? handleSendOtp
+              : handleRegister
+          }
+          className="space-y-4"
+        >
+          {mode === 'login' ? (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
+                  placeholder="name@example.com"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
 
-          
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
-                Password
-              </label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {isLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Connecting to Spring Boot...</span>
+                  </>
+                ) : (
+                  <span>Sign In to SafarX</span>
+                )}
               </button>
-            </div>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
-            />
-          </div>
+            </>
+          ) : !isOtpSent ? (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
+                  placeholder="name@example.com"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
 
-          
-          {mode === 'register' && (
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
-                Confirm Password
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
-              />
-            </div>
+              <button
+                type="submit"
+                disabled={isSendingOtp}
+                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {isSendingOtp ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Sending OTP to Email...</span>
+                  </>
+                ) : (
+                  <span>Send OTP</span>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Email Address
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOtpSent(false);
+                      setOtp('');
+                      setErrorMessage('');
+                      setSuccessMessage('');
+                    }}
+                    className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-semibold cursor-pointer"
+                  >
+                    Change email
+                  </button>
+                </div>
+                <input
+                  type="email"
+                  disabled
+                  value={email}
+                  className="w-full bg-[#efefef] dark:bg-neutral-800/60 border-2 border-transparent rounded-xl text-neutral-500 dark:text-neutral-400 text-xs font-semibold px-4 py-3 outline-none cursor-not-allowed shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Enter 6-digit OTP
+                  </label>
+                  <button
+                    type="button"
+                    disabled={isSendingOtp}
+                    onClick={handleSendOtp}
+                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none tracking-widest text-center transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm font-mono text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Full Name"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  Account Type
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('RIDER')}
+                    className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                      role === 'RIDER'
+                        ? 'bg-neutral-50 dark:bg-neutral-800 border-black dark:border-amber-400 text-black dark:text-white shadow-sm'
+                        : 'bg-[#f6f6f6] dark:bg-neutral-800/50 border-transparent text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+                    }`}
+                  >
+                    <div className="text-base mb-0.5">🚗</div>
+                    <div className="font-extrabold text-xs text-black dark:text-white">Rider</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400">Book & reserve rides</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('DRIVER')}
+                    className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                      role === 'DRIVER'
+                        ? 'bg-neutral-50 dark:bg-neutral-800 border-black dark:border-amber-400 text-black dark:text-white shadow-sm'
+                        : 'bg-[#f6f6f6] dark:bg-neutral-800/50 border-transparent text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+                    }`}
+                  >
+                    <div className="text-base mb-0.5">🚘</div>
+                    <div className="font-extrabold text-xs text-black dark:text-white">Driver</div>
+                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400">Drive & earn income</div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  Confirm Password
+                </label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isRegistering}
+                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {isRegistering ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                    <span>Signing Up...</span>
+                  </>
+                ) : (
+                  <span>Sign Up</span>
+                )}
+              </button>
+            </>
           )}
 
-          
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-          >
-            {isLoading ? (
-              <>
-                <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Connecting to Spring Boot...</span>
-              </>
-            ) : mode === 'login' ? (
-              <span>Sign In to SafarX</span>
-            ) : (
-              <span>Create SafarX Account</span>
-            )}
-          </button>
-
-          
           <div className="relative my-3 pt-1">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
@@ -419,7 +672,6 @@ export default function AuthModal({
             </div>
           </div>
 
-          
           <a
             href={`${API_BASE_URL}/oauth2/authorization/google`}
             className="w-full py-3 px-4 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 active:bg-neutral-100 dark:active:bg-neutral-600 border border-neutral-300 dark:border-neutral-700 rounded-xl text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center justify-center gap-2.5 transition-all shadow-sm"
@@ -445,7 +697,6 @@ export default function AuthModal({
             <span>Continue with Google</span>
           </a>
 
-          
           {onSwitchToDriverOnboard && (
             <div className="pt-2 text-center border-t border-neutral-100 dark:border-neutral-800">
               <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
@@ -465,11 +716,10 @@ export default function AuthModal({
           )}
         </form>
 
-        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100">
+        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100 dark:border-neutral-800">
           © 2026 SafarX | By Himanshu Kumar
         </div>
       </div>
-
     </div>
   );
 }
