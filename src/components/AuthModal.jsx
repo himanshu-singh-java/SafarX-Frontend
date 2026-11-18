@@ -21,6 +21,7 @@ export default function AuthModal({
   const [role, setRole] = useState('RIDER');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +29,14 @@ export default function AuthModal({
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     if (isOpen) {
@@ -39,6 +48,7 @@ export default function AuthModal({
       setRole('RIDER');
       setIsSendingOtp(false);
       setIsRegistering(false);
+      setCooldown(0);
       if (sessionExpired) {
         setErrorMessage('Session expired or unauthorized. Please sign in again.');
       } else if (alertNotice) {
@@ -137,9 +147,12 @@ export default function AuthModal({
       }
     } catch (err) {
       const status = err.response?.status;
-      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
       if (status === 401) {
         setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+      } else if (status === 429) {
+        setErrorMessage(errorText || 'Too many requests. Please try again after 15 minutes.');
       } else if (status === 403) {
         setErrorMessage(errorText || 'Access forbidden. This account may be linked with Google.');
       } else {
@@ -175,12 +188,19 @@ export default function AuthModal({
       });
 
       setIsOtpSent(true);
+      setCooldown(60);
       setSuccessMessage('OTP sent to your email!');
     } catch (err) {
-      const errorText = typeof err.response?.data === 'string'
-        ? err.response.data
-        : err.response?.data?.message;
-      setErrorMessage(errorText || 'Failed to send OTP. Please check your email address.');
+      const status = err.response?.status;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
+
+      if (status === 429) {
+        setErrorMessage(errorText || 'Please wait 60 seconds before requesting a new OTP.');
+        setCooldown(60);
+      } else {
+        setErrorMessage(errorText || 'Failed to send OTP. Please check your email address.');
+      }
     } finally {
       setIsSendingOtp(false);
     }
@@ -307,9 +327,12 @@ export default function AuthModal({
       }, 500);
     } catch (err) {
       const status = err.response?.status;
-      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
       if (status === 401) {
         setErrorMessage(errorText || 'Invalid or expired OTP. Please verify or resend a new OTP.');
+      } else if (status === 429) {
+        setErrorMessage(errorText || 'Too many requests. Please wait before trying again.');
       } else if (status === 409) {
         setErrorMessage(errorText || 'This email is already registered. Please log in.');
       } else if (status === 403) {
@@ -370,6 +393,7 @@ export default function AuthModal({
               setIsOtpSent(false);
               setOtp('');
               setName('');
+              setCooldown(0);
             }}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'login'
@@ -388,6 +412,7 @@ export default function AuthModal({
               setIsOtpSent(false);
               setOtp('');
               setName('');
+              setCooldown(0);
             }}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'register'
@@ -495,14 +520,16 @@ export default function AuthModal({
 
               <button
                 type="submit"
-                disabled={isSendingOtp}
-                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                disabled={isSendingOtp || cooldown > 0}
+                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSendingOtp ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                     <span>Sending OTP to Email...</span>
                   </>
+                ) : cooldown > 0 ? (
+                  <span>Resend OTP in {cooldown}s</span>
                 ) : (
                   <span>Send OTP</span>
                 )}
@@ -541,14 +568,20 @@ export default function AuthModal({
                   <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
                     Enter 6-digit OTP
                   </label>
-                  <button
-                    type="button"
-                    disabled={isSendingOtp}
-                    onClick={handleSendOtp}
-                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer disabled:opacity-50"
-                  >
-                    {isSendingOtp ? 'Sending...' : 'Resend OTP'}
-                  </button>
+                  {cooldown > 0 ? (
+                    <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                      Resend in {cooldown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isSendingOtp}
+                      onClick={handleSendOtp}
+                      className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-semibold cursor-pointer disabled:opacity-50"
+                    >
+                      {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                  )}
                 </div>
                 <input
                   type="text"

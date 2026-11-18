@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { setAuthToken, setStorageItem, parseJwt } from '../utils/auth';
 import apiClient from '../utils/apiClient';
 import { API_BASE_URL } from '../config';
@@ -13,6 +13,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
   const [role, setRole] = useState('ROLE_RIDER');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,26 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [errorMessage, setErrorMessage] = useState(sessionExpired ? 'Session expired or unauthorized. Please sign in again.' : '');
   const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const oauthError = params.get('error');
+    if (oauthError === 'unverified_email') {
+      setErrorMessage('Your Google account email is not verified. Please verify it or sign up with email & password.');
+    } else if (oauthError === 'oauth_failed') {
+      setErrorMessage('Google sign-in failed. Please try again.');
+    } else if (oauthError) {
+      setErrorMessage(`Notice: ${oauthError.replace(/_/g, ' ')}`);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -96,9 +117,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
       }
     } catch (err) {
       const status = err.response?.status;
-      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
       if (status === 401) {
         setErrorMessage(errorText || 'Invalid credentials. Please check your email and password.');
+      } else if (status === 429) {
+        setErrorMessage(errorText || 'Too many requests. Please try again after 15 minutes.');
       } else {
         setErrorMessage(errorText || 'Unable to connect to service. Please check your connection.');
       }
@@ -132,12 +156,19 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
       });
 
       setIsOtpSent(true);
+      setCooldown(60);
       setSuccessMessage('OTP sent to your email!');
     } catch (err) {
-      const errorText = typeof err.response?.data === 'string'
-        ? err.response.data
-        : err.response?.data?.message;
-      setErrorMessage(errorText || 'Failed to send OTP. Please check your email address.');
+      const status = err.response?.status;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
+
+      if (status === 429) {
+        setErrorMessage(errorText || 'Please wait 60 seconds before requesting a new OTP.');
+        setCooldown(60);
+      } else {
+        setErrorMessage(errorText || 'Failed to send OTP. Please check your email address.');
+      }
     } finally {
       setIsSendingOtp(false);
     }
@@ -260,9 +291,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
       }, 600);
     } catch (err) {
       const status = err.response?.status;
-      const errorText = typeof err.response?.data === 'string' ? err.response.data : err.response?.data?.message;
+      const data = err.response?.data;
+      const errorText = (typeof data === 'string' ? data : data?.message) || data?.error;
       if (status === 401) {
         setErrorMessage(errorText || 'Invalid or expired OTP. Please check the code.');
+      } else if (status === 429) {
+        setErrorMessage(errorText || 'Too many requests. Please wait before trying again.');
       } else if (status === 409) {
         setErrorMessage(errorText || 'Registration failed. Email may already be in use.');
       } else {
@@ -313,6 +347,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                 setIsOtpSent(false);
                 setOtp('');
                 setName('');
+                setCooldown(0);
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 mode === 'login'
@@ -331,6 +366,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                 setIsOtpSent(false);
                 setOtp('');
                 setName('');
+                setCooldown(0);
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 mode === 'register'
@@ -444,7 +480,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
 
                 <button
                   type="submit"
-                  disabled={isSendingOtp}
+                  disabled={isSendingOtp || cooldown > 0}
                   className="w-full mt-2 py-3.5 bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] hover:brightness-110 active:scale-[0.99] text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4af37]/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSendingOtp ? (
@@ -452,6 +488,8 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       <span className="w-4 h-4 border-2 border-[#120f0d] border-t-transparent rounded-full animate-spin" />
                       <span>Sending OTP...</span>
                     </>
+                  ) : cooldown > 0 ? (
+                    <span>Resend OTP in {cooldown}s</span>
                   ) : (
                     <span>Send OTP</span>
                   )}
@@ -490,14 +528,20 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
                       Enter 6-digit OTP
                     </label>
-                    <button
-                      type="button"
-                      disabled={isSendingOtp}
-                      onClick={handleSendOtp}
-                      className="text-[10px] text-[#a89685] hover:text-[#d4af37] font-semibold cursor-pointer disabled:opacity-50"
-                    >
-                      {isSendingOtp ? 'Sending...' : 'Resend OTP'}
-                    </button>
+                    {cooldown > 0 ? (
+                      <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                        Resend in {cooldown}s
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={isSendingOtp}
+                        onClick={handleSendOtp}
+                        className="text-[10px] text-[#a89685] hover:text-[#d4af37] font-semibold cursor-pointer disabled:opacity-50"
+                      >
+                        {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                      </button>
+                    )}
                   </div>
                   <input
                     type="text"

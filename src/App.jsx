@@ -181,7 +181,9 @@ function App() {
     if ((location.pathname === '/login' || oauthError) && !token) {
       setAuthModalMode('login');
       if (oauthError === 'unverified_email') {
-        setAuthAlertNotice('⚠️ Your Google email is unverified. Please verify your email with Google or sign in using your password.');
+        setAuthAlertNotice('Your Google account email is not verified. Please verify it or sign up with email & password.');
+      } else if (oauthError === 'oauth_failed') {
+        setAuthAlertNotice('Google sign-in failed. Please try again.');
       } else if (oauthError === 'account_exists_use_password') {
         setAuthAlertNotice('⚠️ This email is registered with password. Please enter your password to sign in.');
       } else if (oauthError) {

@@ -15,6 +15,11 @@ export default function DriverOnboardingModal({
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState('');
 
+  const [otp, setOtp] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
   const [coords, setCoords] = useState(null);
   const [gpsStatus, setGpsStatus] = useState('Detecting live GPS...');
 
@@ -44,10 +49,22 @@ export default function DriverOnboardingModal({
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
     if (isOpen) {
       setErrorMessage('');
       setIsEmailRegistered(false);
       setSuccessMessage('');
+      setIsOtpSent(false);
+      setOtp('');
+      setCooldown(0);
+      setIsSendingOtp(false);
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -71,6 +88,52 @@ export default function DriverOnboardingModal({
 
   if (!isOpen) return null;
 
+  const handleSendDriverOtp = async (e) => {
+    if (e) e.preventDefault();
+    setErrorMessage('');
+    setIsEmailRegistered(false);
+
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setErrorMessage('Please enter your email address to receive an OTP.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      setErrorMessage('Please provide a valid email address.');
+      return;
+    }
+
+    setIsSendingOtp(true);
+
+    try {
+      await apiClient.post('/api/auth/send-otp', {
+        email: normalizedEmail,
+      });
+
+      setIsOtpSent(true);
+      setCooldown(60);
+      setSuccessMessage('OTP sent successfully to ' + normalizedEmail + '! Enter the 6-digit code below.');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+    } catch (err) {
+      const status = err.response?.status;
+      const data = err.response?.data;
+      const message = (typeof data === 'string' ? data : data?.message) || data?.error;
+
+      if (status === 429) {
+        setErrorMessage(message || 'Please wait 60 seconds before requesting a new OTP.');
+        setCooldown(60);
+      } else {
+        setErrorMessage(message || 'Failed to send OTP. Please check your email address.');
+      }
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
   const handleOnboardSubmit = async (e) => {
     if (e) e.preventDefault();
     setErrorMessage('');
@@ -84,6 +147,26 @@ export default function DriverOnboardingModal({
 
     if (password.length < 6) {
       setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (!isOtpSent || !otp.trim()) {
+      setErrorMessage('Please verify your email address with the 6-digit OTP.');
+      return;
+    }
+
+    if (!coords || typeof coords.lat !== 'number' || typeof coords.lng !== 'number') {
+      setErrorMessage('Please enable device GPS access to register as an active driver partner.');
+      return;
+    }
+
+    if (coords.lat < -90 || coords.lat > 90) {
+      setErrorMessage('Invalid GPS latitude. Must be between -90.0 and 90.0.');
+      return;
+    }
+
+    if (coords.lng < -180 || coords.lng > 180) {
+      setErrorMessage('Invalid GPS longitude. Must be between -180.0 and 180.0.');
       return;
     }
 
@@ -105,11 +188,6 @@ export default function DriverOnboardingModal({
       return;
     }
 
-    if (!coords || !coords.lat || !coords.lng) {
-      setErrorMessage('Please enable device GPS access to register as an active driver partner.');
-      return;
-    }
-
     const payload = {
       fullName: fullName.trim(),
       email: email.trim().toLowerCase(),
@@ -119,6 +197,7 @@ export default function DriverOnboardingModal({
       longitude: coords.lng,
       vehicleType: vehicleType.toUpperCase(),
       plateNumber: plateNumber.trim().toUpperCase(),
+      otp: otp.trim(),
     };
 
     if (vehicleType === 'CAR') {
@@ -197,9 +276,16 @@ export default function DriverOnboardingModal({
       console.warn('Driver onboarding network issue:', err);
       const status = err.response?.status;
       const data = err.response?.data || {};
-      if (
+      const message = (typeof data === 'string' ? data : data?.message) || data?.error;
+
+      if (status === 401) {
+        setErrorMessage(message || 'Invalid or expired OTP! Please re-enter the code or request a new OTP.');
+      } else if (status === 429) {
+        setErrorMessage(message || 'Too many requests. Please wait before trying again.');
+      } else if (
         status === 409 ||
-        (data.message && data.message.toLowerCase().includes('already exists'))
+        (message && message.toLowerCase().includes('already exists')) ||
+        (message && message.toLowerCase().includes('already registered'))
       ) {
         setIsEmailRegistered(true);
         setErrorMessage(
@@ -207,7 +293,7 @@ export default function DriverOnboardingModal({
         );
       } else {
         setErrorMessage(
-          data.message || data.error || 'Unable to connect to service. Please check your connection and try again.'
+          message || 'Unable to connect to service. Please check your connection and try again.'
         );
       }
     } finally {
@@ -217,14 +303,9 @@ export default function DriverOnboardingModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in select-none">
-      
-      
       <div className="fixed inset-0" onClick={onClose} />
 
-      
       <div className="relative z-10 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl text-neutral-900 dark:text-white animate-in zoom-in-95 max-h-[92vh] overflow-y-auto">
-        
-        
         <button
           type="button"
           onClick={onClose}
@@ -234,10 +315,8 @@ export default function DriverOnboardingModal({
           ✕
         </button>
 
-        
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            
             <div className="w-12 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
@@ -264,7 +343,6 @@ export default function DriverOnboardingModal({
             Register your driver account and vehicle in one quick step. Start accepting passenger trips immediately.
           </p>
 
-          
           <div className="flex items-center justify-between bg-neutral-50 dark:bg-neutral-800/80 border border-neutral-200 dark:border-neutral-700 px-3.5 py-2 rounded-2xl text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -276,7 +354,6 @@ export default function DriverOnboardingModal({
           </div>
         </div>
 
-        
         {errorMessage && !successMessage && (
           <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-2.5 animate-in fade-in font-medium">
             <div className="flex items-start gap-2">
@@ -301,7 +378,6 @@ export default function DriverOnboardingModal({
           </div>
         )}
 
-        
         {successMessage && (
           <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
             <span className="text-sm">✓</span>
@@ -309,10 +385,7 @@ export default function DriverOnboardingModal({
           </div>
         )}
 
-        
         <form onSubmit={handleOnboardSubmit} className="space-y-6">
-          
-          
           <div className="space-y-3">
             <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 dark:border-neutral-800 pb-1.5 flex items-center gap-2">
               <span>1. Partner Account Information</span>
@@ -350,17 +423,62 @@ export default function DriverOnboardingModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
-                  placeholder="driver@example.com"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Email Address *
+                  </label>
+                  {isOtpSent && cooldown > 0 ? (
+                    <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                      Resend in {cooldown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isSendingOtp || cooldown > 0}
+                      onClick={handleSendDriverOtp}
+                      className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-extrabold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSendingOtp ? 'Sending...' : isOtpSent ? 'Resend OTP' : 'Send OTP'}
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    required
+                    disabled={isOtpSent}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
+                    placeholder="driver@example.com"
+                    className="flex-1 bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm disabled:opacity-80"
+                  />
+                  {!isOtpSent && (
+                    <button
+                      type="button"
+                      disabled={isSendingOtp || cooldown > 0}
+                      onClick={handleSendDriverOtp}
+                      className="px-3.5 py-3 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black font-extrabold text-xs rounded-xl transition-all shadow-sm shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                    >
+                      {isSendingOtp && (
+                        <span className="w-3 h-3 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                      )}
+                      <span>Send OTP</span>
+                    </button>
+                  )}
+                  {isOtpSent && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOtpSent(false);
+                        setOtp('');
+                      }}
+                      className="px-3 py-3 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 font-bold text-xs rounded-xl transition-all shrink-0 cursor-pointer"
+                      title="Change email"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -371,7 +489,7 @@ export default function DriverOnboardingModal({
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[11px] text-neutral-500 hover:text-black font-semibold"
+                    className="text-[11px] text-neutral-500 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
@@ -386,19 +504,48 @@ export default function DriverOnboardingModal({
                 />
               </div>
             </div>
+
+            {isOtpSent && (
+              <div className="space-y-1 pt-1 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                    Enter 6-Digit Email OTP *
+                  </label>
+                  {cooldown > 0 ? (
+                    <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                      Resend in {cooldown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isSendingOtp}
+                      onClick={handleSendDriverOtp}
+                      className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-extrabold cursor-pointer disabled:opacity-50"
+                    >
+                      {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none tracking-widest text-center transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm font-mono text-sm"
+                />
+              </div>
+            )}
           </div>
 
-          
           <div className="space-y-3.5 pt-1">
             <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 pb-1.5 flex items-center gap-2">
               <span>2. Vehicle Fleet Category</span>
             </div>
 
-            
             <div>
               <div className="grid grid-cols-3 gap-2.5 sm:gap-3 text-xs">
-                
-                
                 <button
                   type="button"
                   onClick={() => setVehicleType('CAR')}
@@ -428,7 +575,6 @@ export default function DriverOnboardingModal({
                   </div>
                 </button>
 
-                
                 <button
                   type="button"
                   onClick={() => setVehicleType('BIKE')}
@@ -458,7 +604,6 @@ export default function DriverOnboardingModal({
                   </div>
                 </button>
 
-                
                 <button
                   type="button"
                   onClick={() => setVehicleType('AUTO')}
@@ -487,11 +632,9 @@ export default function DriverOnboardingModal({
                     <div className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium">City 3-Wheeler</div>
                   </div>
                 </button>
-
               </div>
             </div>
 
-            
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
@@ -503,139 +646,138 @@ export default function DriverOnboardingModal({
                 type="text"
                 required
                 value={plateNumber}
-                onChange={(e) => setPlateNumber(e.target.value)}
-                placeholder="e.g. TS-09-UB-8888 or DL-8C-CC-3001"
-                className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white font-mono text-xs font-black uppercase tracking-wider px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+                placeholder="TS 09 AB 1234 / MH 02 CD 5678"
+                className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-mono font-bold tracking-wider px-4 py-3 outline-none transition-all placeholder:font-sans placeholder:tracking-normal placeholder:font-normal placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
               />
             </div>
 
-            
             {vehicleType === 'CAR' && (
-              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-3.5 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 animate-in fade-in">
+                <div className="text-[11px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                  Car Configuration
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Car Model
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Model Name *
                     </label>
                     <input
                       type="text"
+                      required
                       value={carModel}
                       onChange={(e) => setCarModel(e.target.value)}
-                      placeholder="Maruti Suzuki Dzire"
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
+                      placeholder="e.g. Maruti Dzire, Honda City"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Category
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Body Category
                     </label>
                     <select
                       value={carCategory}
                       onChange={(e) => setCarCategory(e.target.value)}
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400 cursor-pointer"
                     >
-                      <option value="SEDAN">SEDAN</option>
-                      <option value="SUV">SUV</option>
-                      <option value="MINI">MINI</option>
+                      <option value="SEDAN">SEDAN (Dzire, Amaze)</option>
+                      <option value="HATCHBACK">HATCHBACK (WagonR, Swift)</option>
+                      <option value="SUV">SUV (Innova, Ertiga, Scorpio)</option>
+                      <option value="PREMIUM">PREMIUM (Camry, Audi A4)</option>
                     </select>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Capacity
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Passenger Seats
                     </label>
                     <select
                       value={carCapacity}
                       onChange={(e) => setCarCapacity(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400 cursor-pointer"
                     >
-                      <option value={4}>4 Passengers</option>
-                      <option value={6}>6 Passengers (SUV)</option>
+                      <option value={4}>4 Passengers (Standard)</option>
+                      <option value={6}>6 Passengers (XL / SUV)</option>
+                      <option value={7}>7 Passengers (Max XL)</option>
                     </select>
                   </div>
-                </div>
 
-                
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setIsAcAvailable(!isAcAvailable)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                      isAcAvailable
-                        ? 'bg-black text-white border-black shadow-sm'
-                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
-                    }`}
-                  >
-                    <span>{isAcAvailable ? '✓' : '+'}</span>
-                    <span>AC Available</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setHasLuggageCarrier(!hasLuggageCarrier)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                      hasLuggageCarrier
-                        ? 'bg-black text-white border-black shadow-sm'
-                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
-                    }`}
-                  >
-                    <span>{hasLuggageCarrier ? '✓' : '+'}</span>
-                    <span>Luggage Carrier</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setHasWifiOrScreen(!hasWifiOrScreen)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                      hasWifiOrScreen
-                        ? 'bg-black text-white border-black shadow-sm'
-                        : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
-                    }`}
-                  >
-                    <span>{hasWifiOrScreen ? '✓' : '+'}</span>
-                    <span>WiFi / Screen</span>
-                  </button>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Comfort Features
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIsAcAvailable(!isAcAvailable)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer ${
+                          isAcAvailable
+                            ? 'bg-black text-white border-black shadow-sm'
+                            : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
+                        }`}
+                      >
+                        {isAcAvailable ? '✓ AC Active' : '+ AC'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setHasLuggageCarrier(!hasLuggageCarrier)}
+                        className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-bold transition-all cursor-pointer ${
+                          hasLuggageCarrier
+                            ? 'bg-black text-white border-black shadow-sm'
+                            : 'bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-100'
+                        }`}
+                      >
+                        {hasLuggageCarrier ? '✓ Boot / Carrier' : '+ Carrier'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            
             {vehicleType === 'BIKE' && (
-              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
+              <div className="space-y-3.5 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 animate-in fade-in">
+                <div className="text-[11px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                  Two-Wheeler Details
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Bike Model
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Model Name *
                     </label>
                     <input
                       type="text"
+                      required
                       value={bikeModel}
                       onChange={(e) => setBikeModel(e.target.value)}
-                      placeholder="Hero Splendor Plus"
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
+                      placeholder="e.g. Hero Splendor, Honda Activa"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
                       Bike Type
                     </label>
                     <select
                       value={bikeType}
                       onChange={(e) => setBikeType(e.target.value)}
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400 cursor-pointer"
                     >
-                      <option value="COMMUTER">COMMUTER</option>
-                      <option value="SCOOTER">SCOOTER</option>
-                      <option value="SPORTS">SPORTS</option>
-                      <option value="ELECTRIC">ELECTRIC</option>
+                      <option value="COMMUTER">COMMUTER (Splendor, HF Deluxe)</option>
+                      <option value="SCOOTER">SCOOTER (Activa, Jupiter, Access)</option>
+                      <option value="SPORTS">SPORTS (Pulsar, Apache, R15)</option>
+                      <option value="CRUISER">CRUISER (Royal Enfield, Avenger)</option>
                     </select>
                   </div>
                 </div>
 
-                
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setHasExtraHelmet(!hasExtraHelmet)}
@@ -646,7 +788,7 @@ export default function DriverOnboardingModal({
                     }`}
                   >
                     <span>{hasExtraHelmet ? '✓' : '+'}</span>
-                    <span>Extra Passenger Helmet</span>
+                    <span>Spare Passenger Helmet Available</span>
                   </button>
 
                   <button
@@ -659,61 +801,50 @@ export default function DriverOnboardingModal({
                     }`}
                   >
                     <span>{isParcelDeliveryEnabled ? '✓' : '+'}</span>
-                    <span>Parcel Delivery</span>
+                    <span>Accept Package Deliveries</span>
                   </button>
                 </div>
               </div>
             )}
 
-            
             {vehicleType === 'AUTO' && (
-              <div className="bg-neutral-50 dark:bg-neutral-800/60 border border-neutral-200/80 dark:border-neutral-700 rounded-2xl p-4 space-y-3.5">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="space-y-3.5 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700 animate-in fade-in">
+                <div className="text-[11px] font-black uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                  Auto Rickshaw Details
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Auto Model
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
+                      Auto Model *
                     </label>
                     <input
                       type="text"
+                      required
                       value={autoModel}
                       onChange={(e) => setAutoModel(e.target.value)}
-                      placeholder="Bajaj RE Compact"
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-semibold outline-none shadow-sm"
+                      placeholder="e.g. Bajaj RE, Piaggio Ape"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
+                    <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block">
                       Permit Type
                     </label>
                     <select
                       value={permitType}
                       onChange={(e) => setPermitType(e.target.value)}
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
+                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-xs px-3 py-2.5 outline-none font-semibold text-neutral-900 dark:text-white focus:border-black dark:focus:border-amber-400 cursor-pointer"
                     >
-                      <option value="CITY_PERMIT">CITY_PERMIT</option>
-                      <option value="STATE_PERMIT">STATE_PERMIT</option>
-                      <option value="ALL_NCR">ALL_NCR</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider font-bold text-neutral-500 dark:text-neutral-400 block">
-                      Capacity
-                    </label>
-                    <select
-                      value={autoCapacity}
-                      onChange={(e) => setAutoCapacity(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 rounded-xl px-3 py-2 text-black dark:text-white text-xs font-bold outline-none cursor-pointer shadow-sm"
-                    >
-                      <option value={3}>3 Passengers</option>
-                      <option value={4}>4 Passengers</option>
+                      <option value="CITY_PERMIT">CITY METRO PERMIT</option>
+                      <option value="DISTRICT_PERMIT">DISTRICT SUB-URBAN PERMIT</option>
+                      <option value="ALL_INDIA_PERMIT">STATE PERMIT</option>
                     </select>
                   </div>
                 </div>
 
-                
-                <div className="flex items-center gap-2 pt-1 text-xs">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setIsSharedAuto(!isSharedAuto)}
@@ -729,10 +860,8 @@ export default function DriverOnboardingModal({
                 </div>
               </div>
             )}
-
           </div>
 
-          
           <div className="pt-2">
             <button
               type="submit"
@@ -741,7 +870,7 @@ export default function DriverOnboardingModal({
             >
               {isLoading ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                   <span>Registering Driver & Vehicle...</span>
                 </>
               ) : (
@@ -753,7 +882,6 @@ export default function DriverOnboardingModal({
             </button>
           </div>
 
-          
           <div className="text-center text-xs text-neutral-500 dark:text-neutral-400 pt-1 border-t border-neutral-100 dark:border-neutral-800">
             <span>Already a registered Driver Partner? </span>
             <button
@@ -767,7 +895,6 @@ export default function DriverOnboardingModal({
               Sign In here →
             </button>
           </div>
-
         </form>
 
         <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 dark:text-neutral-500 font-medium border-t border-neutral-100 dark:border-neutral-800">
