@@ -316,28 +316,28 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0706] text-[#f4efe6] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden select-none">
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#d4af37]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#8a5a44]/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#FFF5F7] dark:bg-[#0a0706] text-[#1F1218] dark:text-[#f4efe6] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden select-none">
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#E11D48]/10 dark:bg-[#d4af37]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#F43F5E]/10 dark:bg-[#8a5a44]/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#1e1915] via-[#2d251e] to-[#45372b] border border-[#d4af37]/40 shadow-xl shadow-black/50 mb-2">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#FFF0F4] dark:bg-gradient-to-tr dark:from-[#1e1915] dark:via-[#2d251e] dark:to-[#45372b] border border-[#F3D1DC] dark:border-[#d4af37]/40 shadow-xl mb-2 text-[#E11D48] dark:text-[#d4af37]">
             <span className="text-2xl">🚗</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
-            Safar<span className="text-[#d4af37]">X</span>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#a89685] bg-[#1e1915] px-2 py-0.5 rounded-full border border-[#3d3227]">
+          <h1 className="text-3xl font-black tracking-tight text-[#1F1218] dark:text-white flex items-center justify-center gap-2">
+            Safar<span className="text-[#E11D48] dark:text-[#d4af37]">X</span>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#664D58] bg-[#FCE7EE] dark:text-[#a89685] dark:bg-[#1e1915] px-2 py-0.5 rounded-full border border-[#F3D1DC] dark:border-[#3d3227]">
               Security
             </span>
           </h1>
-          <p className="text-xs text-[#a89685] max-w-xs mx-auto">
+          <p className="text-xs text-[#664D58] dark:text-[#a89685] max-w-xs mx-auto">
             Intelligent urban mobility gateway secured with Spring Security & 256-bit JWT Tokens
           </p>
         </div>
 
-        <div className="bg-[#120f0d]/90 backdrop-blur-xl border border-[#2d251e] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-          <div className="flex p-1 bg-[#1e1915] rounded-2xl border border-[#3d3227]">
+        <div className="bg-[#FFF9FA] dark:bg-[#120f0d]/90 backdrop-blur-xl border border-[#F3D1DC] dark:border-[#2d251e] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-[#1F1218] dark:text-white">
+          <div className="flex p-1 bg-[#FCE7EE] dark:bg-[#1e1915] rounded-2xl border border-[#F3D1DC] dark:border-[#3d3227]">
             <button
               type="button"
               onClick={() => {
@@ -351,8 +351,8 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] text-[#120f0d] shadow-md'
-                  : 'text-[#a89685] hover:text-[#d4af37]'
+                  ? 'bg-[#E11D48] text-white shadow-md dark:bg-gradient-to-r dark:from-[#b88c34] dark:via-[#d4af37] dark:to-[#e6c564] dark:text-[#120f0d]'
+                  : 'text-[#664D58] hover:text-[#1F1218] dark:text-[#a89685] dark:hover:text-[#d4af37]'
               }`}
             >
               Sign In
@@ -370,8 +370,8 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               }}
               className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                 mode === 'register'
-                  ? 'bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] text-[#120f0d] shadow-md'
-                  : 'text-[#a89685] hover:text-[#d4af37]'
+                  ? 'bg-[#E11D48] text-white shadow-md dark:bg-gradient-to-r dark:from-[#b88c34] dark:via-[#d4af37] dark:to-[#e6c564] dark:text-[#120f0d]'
+                  : 'text-[#664D58] hover:text-[#1F1218] dark:text-[#a89685] dark:hover:text-[#d4af37]'
               }`}
             >
               Create Account
@@ -405,7 +405,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             {mode === 'login' ? (
               <>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                     Email Address
                   </label>
                   <div className="relative">
@@ -415,20 +415,20 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                       placeholder="rider@safarx.in"
-                      className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                      className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                       Password
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-[10px] text-[#a89685] hover:text-[#d4af37] font-semibold cursor-pointer"
+                      className="text-[10px] text-[#664D58] hover:text-[#1F1218] dark:text-[#a89685] dark:hover:text-[#d4af37] font-semibold cursor-pointer"
                     >
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
@@ -440,7 +440,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                      className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                     />
                   </div>
                 </div>
@@ -448,11 +448,11 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full mt-2 py-3.5 bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] hover:brightness-110 active:scale-[0.99] text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4af37]/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-[#b88c34] dark:via-[#d4af37] dark:to-[#e6c564] dark:hover:brightness-110 active:scale-[0.99] dark:text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isLoading ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-[#120f0d] border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-white dark:border-[#120f0d] border-t-transparent rounded-full animate-spin" />
                       <span>Connecting to Backend...</span>
                     </>
                   ) : (
@@ -463,7 +463,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             ) : !isOtpSent ? (
               <>
                 <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                     Email Address
                   </label>
                   <div className="relative">
@@ -473,7 +473,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                       placeholder="rider@safarx.in"
-                      className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                      className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                     />
                   </div>
                 </div>
@@ -481,11 +481,11 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                 <button
                   type="submit"
                   disabled={isSendingOtp || cooldown > 0}
-                  className="w-full mt-2 py-3.5 bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] hover:brightness-110 active:scale-[0.99] text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4af37]/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-[#b88c34] dark:via-[#d4af37] dark:to-[#e6c564] dark:hover:brightness-110 active:scale-[0.99] dark:text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isSendingOtp ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-[#120f0d] border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-white dark:border-[#120f0d] border-t-transparent rounded-full animate-spin" />
                       <span>Sending OTP...</span>
                     </>
                   ) : cooldown > 0 ? (
@@ -499,7 +499,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
               <>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                       Email Address
                     </label>
                     <button
@@ -510,7 +510,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                         setErrorMessage('');
                         setSuccessMessage('');
                       }}
-                      className="text-[10px] text-[#d4af37] hover:underline font-semibold cursor-pointer"
+                      className="text-[10px] text-[#E11D48] hover:text-[#BE123C] dark:text-[#d4af37] hover:underline font-semibold cursor-pointer"
                     >
                       Change Email
                     </button>
@@ -519,17 +519,17 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     type="email"
                     disabled
                     value={email}
-                    className="w-full bg-[#1a1512]/60 border border-[#3d3227] text-neutral-400 text-xs rounded-xl px-3.5 py-3 outline-none cursor-not-allowed"
+                    className="w-full bg-[#FCE7EE]/60 border border-[#F3D1DC] text-[#664D58] dark:bg-[#1a1512]/60 dark:border-[#3d3227] dark:text-neutral-400 text-xs rounded-xl px-3.5 py-3 outline-none cursor-not-allowed"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                       Enter 6-digit OTP
                     </label>
                     {cooldown > 0 ? (
-                      <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                      <span className="text-[10px] text-[#664D58] dark:text-neutral-400 font-mono font-semibold">
                         Resend in {cooldown}s
                       </span>
                     ) : (
@@ -537,7 +537,7 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                         type="button"
                         disabled={isSendingOtp}
                         onClick={handleSendOtp}
-                        className="text-[10px] text-[#a89685] hover:text-[#d4af37] font-semibold cursor-pointer disabled:opacity-50"
+                        className="text-[10px] text-[#E11D48] hover:text-[#BE123C] dark:text-[#a89685] dark:hover:text-[#d4af37] font-semibold cursor-pointer disabled:opacity-50"
                       >
                         {isSendingOtp ? 'Sending...' : 'Resend OTP'}
                       </button>
@@ -550,12 +550,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="123456"
-                    className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none tracking-widest text-center transition-all placeholder-[#5e5348] font-mono text-sm"
+                    className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none tracking-widest text-center transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348] font-mono text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                     Full Name
                   </label>
                   <input
@@ -564,12 +564,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Full Name"
-                    className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                    className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                   />
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                     Select Account Role
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -578,13 +578,13 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       onClick={() => setRole('ROLE_RIDER')}
                       className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                         role === 'ROLE_RIDER'
-                          ? 'bg-[#2b2219] border-[#d4af37] text-white shadow-sm'
-                          : 'bg-[#1a1512] border-[#3d3227] text-[#a89685] hover:border-[#5e5348]'
+                          ? 'bg-[#FFF0F4] border-[#E11D48] text-[#1F1218] shadow-sm dark:bg-[#2b2219] dark:border-[#d4af37] dark:text-white'
+                          : 'bg-white border-[#F3D1DC] text-[#664D58] hover:border-[#F4B8CA] dark:bg-[#1a1512] dark:border-[#3d3227] dark:text-[#a89685] dark:hover:border-[#5e5348]'
                       }`}
                     >
                       <div className="text-base mb-0.5">🚗</div>
-                      <div className="font-bold text-xs text-white">Rider</div>
-                      <div className="text-[10px] text-[#a89685]">Book & reserve rides</div>
+                      <div className="font-bold text-xs text-[#1F1218] dark:text-white">Rider</div>
+                      <div className="text-[10px] text-[#664D58] dark:text-[#a89685]">Book & reserve rides</div>
                     </button>
 
                     <button
@@ -592,26 +592,26 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                       onClick={() => setRole('ROLE_DRIVER')}
                       className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                         role === 'ROLE_DRIVER'
-                          ? 'bg-[#2b2219] border-[#d4af37] text-white shadow-sm'
-                          : 'bg-[#1a1512] border-[#3d3227] text-[#a89685] hover:border-[#5e5348]'
+                          ? 'bg-[#FFF0F4] border-[#E11D48] text-[#1F1218] shadow-sm dark:bg-[#2b2219] dark:border-[#d4af37] dark:text-white'
+                          : 'bg-white border-[#F3D1DC] text-[#664D58] hover:border-[#F4B8CA] dark:bg-[#1a1512] dark:border-[#3d3227] dark:text-[#a89685] dark:hover:border-[#5e5348]'
                       }`}
                     >
                       <div className="text-base mb-0.5">🚘</div>
-                      <div className="font-bold text-xs text-white">Driver Partner</div>
-                      <div className="text-[10px] text-[#a89685]">Drive & earn income</div>
+                      <div className="font-bold text-xs text-[#1F1218] dark:text-white">Driver Partner</div>
+                      <div className="text-[10px] text-[#664D58] dark:text-[#a89685]">Drive & earn income</div>
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                    <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                       Password
                     </label>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-[10px] text-[#a89685] hover:text-[#d4af37] font-semibold cursor-pointer"
+                      className="text-[10px] text-[#664D58] hover:text-[#1F1218] dark:text-[#a89685] dark:hover:text-[#d4af37] font-semibold cursor-pointer"
                     >
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
@@ -622,12 +622,12 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                    className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#a89685] block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-[#a89685] block">
                     Confirm Password
                   </label>
                   <input
@@ -636,18 +636,18 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-[#1a1512] border border-[#3d3227] focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder-[#5e5348]"
+                    className="w-full bg-[#FFF0F4] border border-[#F3D1DC] focus:border-[#E11D48] focus:ring-1 focus:ring-[#E11D48] text-[#1F1218] dark:bg-[#1a1512] dark:border-[#3d3227] dark:focus:border-[#d4af37] dark:focus:ring-1 dark:focus:ring-[#d4af37] dark:text-white text-xs rounded-xl px-3.5 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder-[#5e5348]"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isRegistering}
-                  className="w-full mt-2 py-3.5 bg-gradient-to-r from-[#b88c34] via-[#d4af37] to-[#e6c564] hover:brightness-110 active:scale-[0.99] text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-[#d4af37]/20 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-[#b88c34] dark:via-[#d4af37] dark:to-[#e6c564] dark:hover:brightness-110 active:scale-[0.99] dark:text-[#120f0d] font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {isRegistering ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-[#120f0d] border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-white dark:border-[#120f0d] border-t-transparent rounded-full animate-spin" />
                       <span>Signing Up...</span>
                     </>
                   ) : (
@@ -658,22 +658,22 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
             )}
           </form>
 
-          <div className="pt-2 border-t border-[#2d251e] space-y-2">
-            <div className="text-[10px] uppercase font-bold tracking-wider text-[#736353] text-center">
+          <div className="pt-2 border-t border-[#F3D1DC] dark:border-[#2d251e] space-y-2">
+            <div className="text-[10px] uppercase font-bold tracking-wider text-[#664D58] dark:text-[#736353] text-center">
               Quick Test Autofill
             </div>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => fillDemo('himanshu@safarx.in', 'password123', 'ROLE_RIDER')}
-                className="flex-1 py-1.5 px-2 bg-[#1a1512] hover:bg-[#251f1a] border border-[#3d3227] text-[10px] text-[#a89685] hover:text-[#d4af37] rounded-lg transition-all text-center cursor-pointer"
+                className="flex-1 py-1.5 px-2 bg-[#FCE7EE] hover:bg-[#FAD4E1] border border-[#F4B8CA] text-[10px] text-[#9F1239] dark:bg-[#1a1512] dark:hover:bg-[#251f1a] dark:border-[#3d3227] dark:text-[#a89685] dark:hover:text-[#d4af37] rounded-lg transition-all text-center cursor-pointer"
               >
                 👤 Test Rider
               </button>
               <button
                 type="button"
                 onClick={() => fillDemo('driver@safarx.in', 'driver123', 'ROLE_DRIVER')}
-                className="flex-1 py-1.5 px-2 bg-[#1a1512] hover:bg-[#251f1a] border border-[#3d3227] text-[10px] text-[#a89685] hover:text-[#d4af37] rounded-lg transition-all text-center cursor-pointer"
+                className="flex-1 py-1.5 px-2 bg-[#FCE7EE] hover:bg-[#FAD4E1] border border-[#F4B8CA] text-[10px] text-[#9F1239] dark:bg-[#1a1512] dark:hover:bg-[#251f1a] dark:border-[#3d3227] dark:text-[#a89685] dark:hover:text-[#d4af37] rounded-lg transition-all text-center cursor-pointer"
               >
                 🚘 Test Driver
               </button>
@@ -681,16 +681,16 @@ export default function AuthPage({ onLoginSuccess, sessionExpired }) {
           </div>
         </div>
 
-        <div className="text-center text-[11px] text-[#736353] flex items-center justify-center gap-3">
+        <div className="text-center text-[11px] text-[#664D58] dark:text-[#736353] flex items-center justify-center gap-3">
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Backend: <code className="text-[#a89685]">{API_BASE_URL.replace(/^https?:\/\//, '')}</code>
+            Backend: <code className="text-[#1F1218] dark:text-[#a89685]">{API_BASE_URL.replace(/^https?:\/\//, '')}</code>
           </span>
           <span>•</span>
           <span>JWT Filter Enabled</span>
         </div>
 
-        <div className="mt-4 text-center text-xs text-neutral-500 font-medium">
+        <div className="mt-4 text-center text-xs text-[#664D58] dark:text-neutral-500 font-medium">
           © 2026 SafarX | By Himanshu Kumar
         </div>
       </div>

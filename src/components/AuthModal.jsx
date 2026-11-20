@@ -349,10 +349,10 @@ export default function AuthModal({
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in select-none">
       <div className="fixed inset-0" onClick={onClose} />
 
-      <div className="w-full max-w-md relative z-10 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-black dark:text-white space-y-5 animate-in zoom-in-95">
+      <div className="w-full max-w-md relative z-10 bg-[#FFF9FA] dark:bg-neutral-900 border border-[#F3D1DC] dark:border-neutral-800 rounded-3xl shadow-2xl p-6 sm:p-8 text-[#1F1218] dark:text-white space-y-5 animate-in zoom-in-95">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-10 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
+            <div className="w-12 h-10 rounded-xl bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
               <img
                 src="/vehicle_car.jpg"
                 alt="SafarX 3D Car"
@@ -361,11 +361,11 @@ export default function AuthModal({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xl font-black text-black dark:text-white tracking-tight">
-                  Safar<span className="text-[#d4af37]">X</span>
+                <span className="text-xl font-black text-[#1F1218] dark:text-white tracking-tight">
+                  Safar<span className="text-[#E11D48] dark:text-[#d4af37]">X</span>
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+              <p className="text-[11px] text-[#664D58] dark:text-neutral-400 font-medium">
                 {mode === 'login'
                   ? 'Sign in to access your ride or driver partner account'
                   : 'Create an account to book or drive with SafarX'}
@@ -376,14 +376,14 @@ export default function AuthModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white flex items-center justify-center font-bold text-base transition-all cursor-pointer"
+            className="w-8 h-8 rounded-full bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-[#FAD4E1] dark:hover:bg-neutral-700 text-[#664D58] dark:text-neutral-400 hover:text-[#1F1218] dark:hover:text-white flex items-center justify-center font-bold text-base transition-all cursor-pointer"
             title="Close dialog"
           >
             ✕
           </button>
         </div>
 
-        <div className="flex p-1 bg-neutral-100 dark:bg-neutral-800 rounded-2xl border border-neutral-200 dark:border-neutral-700">
+        <div className="flex p-1 bg-[#FCE7EE] dark:bg-neutral-800 rounded-2xl border border-[#F3D1DC] dark:border-neutral-700">
           <button
             type="button"
             onClick={() => {
@@ -397,8 +397,8 @@ export default function AuthModal({
             }}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'login'
-                ? 'bg-white text-black shadow-sm font-extrabold'
-                : 'text-neutral-500 hover:text-black font-semibold'
+                ? 'bg-white text-[#9F1239] shadow-sm font-extrabold dark:bg-white dark:text-black'
+                : 'text-[#664D58] hover:text-[#1F1218] font-semibold dark:text-neutral-500 dark:hover:text-black'
             }`}
           >
             Log in
@@ -416,8 +416,8 @@ export default function AuthModal({
             }}
             className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
               mode === 'register'
-                ? 'bg-white text-black shadow-sm font-extrabold'
-                : 'text-neutral-500 hover:text-black font-semibold'
+                ? 'bg-white text-[#9F1239] shadow-sm font-extrabold dark:bg-white dark:text-black'
+                : 'text-[#664D58] hover:text-[#1F1218] font-semibold dark:text-neutral-500 dark:hover:text-black'
             }`}
           >
             Sign up
@@ -451,7 +451,7 @@ export default function AuthModal({
           {mode === 'login' ? (
             <>
               <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                   Email Address
                 </label>
                 <input
@@ -460,19 +460,19 @@ export default function AuthModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                   placeholder="name@example.com"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
+                    className="text-[11px] text-[#664D58] dark:text-neutral-400 hover:text-[#1F1218] dark:hover:text-white font-semibold cursor-pointer"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
@@ -483,14 +483,14 @@ export default function AuthModal({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -505,7 +505,7 @@ export default function AuthModal({
           ) : !isOtpSent ? (
             <>
               <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                   Email Address
                 </label>
                 <input
@@ -514,14 +514,14 @@ export default function AuthModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value.toLowerCase().trim())}
                   placeholder="name@example.com"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSendingOtp || cooldown > 0}
-                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSendingOtp ? (
                   <>
@@ -539,7 +539,7 @@ export default function AuthModal({
             <>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                     Email Address
                   </label>
                   <button
@@ -550,7 +550,7 @@ export default function AuthModal({
                       setErrorMessage('');
                       setSuccessMessage('');
                     }}
-                    className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-semibold cursor-pointer"
+                    className="text-[11px] text-[#E11D48] hover:text-[#BE123C] dark:text-amber-400 hover:underline font-semibold cursor-pointer"
                   >
                     Change email
                   </button>
@@ -559,17 +559,17 @@ export default function AuthModal({
                   type="email"
                   disabled
                   value={email}
-                  className="w-full bg-[#efefef] dark:bg-neutral-800/60 border-2 border-transparent rounded-xl text-neutral-500 dark:text-neutral-400 text-xs font-semibold px-4 py-3 outline-none cursor-not-allowed shadow-sm"
+                  className="w-full bg-[#FCE7EE]/60 dark:bg-neutral-800/60 border-2 border-[#F3D1DC] dark:border-transparent rounded-xl text-[#664D58] dark:text-neutral-400 text-xs font-semibold px-4 py-3 outline-none cursor-not-allowed shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                     Enter 6-digit OTP
                   </label>
                   {cooldown > 0 ? (
-                    <span className="text-[10px] text-neutral-400 font-mono font-semibold">
+                    <span className="text-[10px] text-[#664D58] dark:text-neutral-400 font-mono font-semibold">
                       Resend in {cooldown}s
                     </span>
                   ) : (
@@ -577,7 +577,7 @@ export default function AuthModal({
                       type="button"
                       disabled={isSendingOtp}
                       onClick={handleSendOtp}
-                      className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-semibold cursor-pointer disabled:opacity-50"
+                      className="text-[11px] text-[#E11D48] hover:text-[#BE123C] dark:text-amber-400 hover:underline font-semibold cursor-pointer disabled:opacity-50"
                     >
                       {isSendingOtp ? 'Sending...' : 'Resend OTP'}
                     </button>
@@ -590,12 +590,12 @@ export default function AuthModal({
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="123456"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none tracking-widest text-center transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm font-mono text-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none tracking-widest text-center transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm font-mono text-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                   Full Name
                 </label>
                 <input
@@ -604,12 +604,12 @@ export default function AuthModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Full Name"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                   Account Type
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -618,39 +618,39 @@ export default function AuthModal({
                     onClick={() => setRole('RIDER')}
                     className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                       role === 'RIDER'
-                        ? 'bg-neutral-50 dark:bg-neutral-800 border-black dark:border-amber-400 text-black dark:text-white shadow-sm'
-                        : 'bg-[#f6f6f6] dark:bg-neutral-800/50 border-transparent text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+                        ? 'bg-[#FFF0F4] dark:bg-neutral-800 border-[#E11D48] dark:border-amber-400 text-[#1F1218] dark:text-white shadow-sm'
+                        : 'bg-white dark:bg-neutral-800/50 border-[#F3D1DC] dark:border-transparent text-[#664D58] dark:text-neutral-400 hover:border-[#F4B8CA] dark:hover:border-neutral-700'
                     }`}
                   >
                     <div className="text-base mb-0.5">🚗</div>
-                    <div className="font-extrabold text-xs text-black dark:text-white">Rider</div>
-                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400">Book & reserve rides</div>
+                    <div className="font-extrabold text-xs text-[#1F1218] dark:text-white">Rider</div>
+                    <div className="text-[10px] text-[#664D58] dark:text-neutral-400">Book & reserve rides</div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('DRIVER')}
                     className={`p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                       role === 'DRIVER'
-                        ? 'bg-neutral-50 dark:bg-neutral-800 border-black dark:border-amber-400 text-black dark:text-white shadow-sm'
-                        : 'bg-[#f6f6f6] dark:bg-neutral-800/50 border-transparent text-neutral-500 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+                        ? 'bg-[#FFF0F4] dark:bg-neutral-800 border-[#E11D48] dark:border-amber-400 text-[#1F1218] dark:text-white shadow-sm'
+                        : 'bg-white dark:bg-neutral-800/50 border-[#F3D1DC] dark:border-transparent text-[#664D58] dark:text-neutral-400 hover:border-[#F4B8CA] dark:hover:border-neutral-700'
                     }`}
                   >
                     <div className="text-base mb-0.5">🚘</div>
-                    <div className="font-extrabold text-xs text-black dark:text-white">Driver</div>
-                    <div className="text-[10px] text-neutral-500 dark:text-neutral-400">Drive & earn income</div>
+                    <div className="font-extrabold text-xs text-[#1F1218] dark:text-white">Driver</div>
+                    <div className="text-[10px] text-[#664D58] dark:text-neutral-400">Drive & earn income</div>
                   </button>
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                  <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold cursor-pointer"
+                    className="text-[11px] text-[#664D58] dark:text-neutral-400 hover:text-[#1F1218] dark:hover:text-white font-semibold cursor-pointer"
                   >
                     {showPassword ? 'Hide' : 'Show'}
                   </button>
@@ -661,12 +661,12 @@ export default function AuthModal({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-600 dark:text-neutral-400 block">
+                <label className="text-[11px] uppercase tracking-wider font-bold text-[#664D58] dark:text-neutral-400 block">
                   Confirm Password
                 </label>
                 <input
@@ -675,14 +675,14 @@ export default function AuthModal({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-[#f6f6f6] dark:bg-neutral-800 hover:bg-[#efefef] dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-transparent focus:border-black dark:focus:border-amber-400 rounded-xl text-black dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-500 shadow-sm"
+                  className="w-full bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE]/70 dark:hover:bg-neutral-750 focus:bg-white dark:focus:bg-neutral-900 border-2 border-[#F3D1DC] focus:border-[#E11D48] dark:border-transparent dark:focus:border-amber-400 rounded-xl text-[#1F1218] dark:text-white text-xs font-semibold px-4 py-3 outline-none transition-all placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-500 shadow-sm"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isRegistering}
-                className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full mt-2 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-[0.99] text-white dark:text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {isRegistering ? (
                   <>
@@ -698,16 +698,16 @@ export default function AuthModal({
 
           <div className="relative my-3 pt-1">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
+              <div className="w-full border-t border-[#F3D1DC] dark:border-neutral-800" />
             </div>
             <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-wider">
-              <span className="bg-white dark:bg-neutral-900 px-3 text-neutral-400 dark:text-neutral-500">or</span>
+              <span className="bg-[#FFF9FA] dark:bg-neutral-900 px-3 text-[#664D58] dark:text-neutral-500">or</span>
             </div>
           </div>
 
           <a
             href={`${API_BASE_URL}/oauth2/authorization/google`}
-            className="w-full py-3 px-4 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 active:bg-neutral-100 dark:active:bg-neutral-600 border border-neutral-300 dark:border-neutral-700 rounded-xl text-xs font-bold text-neutral-800 dark:text-neutral-200 flex items-center justify-center gap-2.5 transition-all shadow-sm"
+            className="w-full py-3 px-4 bg-white dark:bg-neutral-800 hover:bg-[#FFF0F4] dark:hover:bg-neutral-700 active:bg-[#FCE7EE] dark:active:bg-neutral-600 border border-[#F3D1DC] dark:border-neutral-700 rounded-xl text-xs font-bold text-[#1F1218] dark:text-neutral-200 flex items-center justify-center gap-2.5 transition-all shadow-sm"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path
@@ -731,8 +731,8 @@ export default function AuthModal({
           </a>
 
           {onSwitchToDriverOnboard && (
-            <div className="pt-2 text-center border-t border-neutral-100 dark:border-neutral-800">
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
+            <div className="pt-2 text-center border-t border-[#F3D1DC] dark:border-neutral-800">
+              <p className="text-[11px] text-[#664D58] dark:text-neutral-400 font-medium">
                 Want to drive and earn on your schedule?{' '}
                 <button
                   type="button"
@@ -740,7 +740,7 @@ export default function AuthModal({
                     if (onClose) onClose();
                     onSwitchToDriverOnboard();
                   }}
-                  className="font-extrabold text-black dark:text-amber-400 hover:text-[#d4af37] underline underline-offset-2 transition-colors cursor-pointer"
+                  className="font-extrabold text-[#E11D48] dark:text-amber-400 hover:text-[#BE123C] dark:hover:text-[#d4af37] underline underline-offset-2 transition-colors cursor-pointer"
                 >
                   Drive with SafarX →
                 </button>
@@ -749,7 +749,7 @@ export default function AuthModal({
           )}
         </form>
 
-        <div className="mt-4 pt-2 text-center text-[11px] text-neutral-400 font-medium border-t border-neutral-100 dark:border-neutral-800">
+        <div className="mt-4 pt-2 text-center text-[11px] text-[#664D58] dark:text-neutral-400 font-medium border-t border-[#F3D1DC] dark:border-neutral-800">
           © 2026 SafarX | By Himanshu Kumar
         </div>
       </div>

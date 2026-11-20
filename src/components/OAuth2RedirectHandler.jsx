@@ -107,31 +107,26 @@ export default function OAuth2RedirectHandler() {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-white select-none">
-      <div className="w-full max-w-sm bg-neutral-950 border border-neutral-800 rounded-3xl p-8 flex flex-col items-center space-y-6 shadow-2xl text-center animate-in fade-in zoom-in-95">
-        
-        
+    <div className="min-h-screen bg-[#FFF5F7] dark:bg-[#0b0f19] flex flex-col items-center justify-center p-6 text-[#1F1218] dark:text-white select-none">
+      <div className="w-full max-w-sm bg-[#FFF9FA] dark:bg-neutral-950 border border-[#F3D1DC] dark:border-neutral-800 rounded-3xl p-8 flex flex-col items-center space-y-6 shadow-2xl text-center animate-in fade-in zoom-in-95">
         <div className="flex items-center gap-1">
-          <span className="text-3xl font-black tracking-tight text-white">Safar</span>
-          <span className="text-3xl font-black tracking-tight text-[#d4af37]">X</span>
+          <span className="text-3xl font-black tracking-tight text-[#1F1218] dark:text-white">Safar</span>
+          <span className="text-3xl font-black tracking-tight text-[#E11D48] dark:text-[#d4af37]">X</span>
         </div>
 
-        
         <div className="relative w-14 h-14">
-          <div className="absolute inset-0 rounded-full border-4 border-neutral-800" />
-          <div className="absolute inset-0 rounded-full border-4 border-[#d4af37] border-t-transparent animate-spin" />
+          <div className="absolute inset-0 rounded-full border-4 border-[#F3D1DC] dark:border-neutral-800" />
+          <div className="absolute inset-0 rounded-full border-4 border-[#E11D48] dark:border-[#d4af37] border-t-transparent animate-spin" />
         </div>
 
-        
         <div className="space-y-1.5">
-          <h2 className="text-base font-bold tracking-tight text-white">
+          <h2 className="text-base font-bold tracking-tight text-[#1F1218] dark:text-white">
             Authenticating with Google
           </h2>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-[#664D58] dark:text-neutral-400">
             Securely syncing your credentials with SafarX...
           </p>
         </div>
-
       </div>
     </div>
   );

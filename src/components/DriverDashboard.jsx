@@ -851,29 +851,27 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
   const avatarInitial = (driverProfile.name || 'D').charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] dark:bg-[#0b0f19] text-neutral-900 dark:text-neutral-100 p-4 sm:p-8 transition-colors">
+    <div className="min-h-screen bg-[#FFF5F7] dark:bg-[#0b0f19] text-[#1F1218] dark:text-neutral-100 p-4 sm:p-8 transition-colors">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        
-        <div className="bg-white/95 dark:bg-[#121620]/95 backdrop-blur border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent" />
+        <div className="bg-[#FFF9FA]/95 dark:bg-[#121620]/95 backdrop-blur border border-[#F3D1DC] dark:border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-[#E11D48]/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#E11D48] to-transparent dark:via-[#d4af37]" />
           
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-black text-neutral-950 dark:text-white tracking-tight">Safar</span>
-              <span className="text-2xl font-black text-[#d4af37]">X</span>
-              <span className="bg-gradient-to-r from-amber-50 to-amber-100 text-[#8c6200] px-3 py-1 rounded-full text-xs font-black border border-[#d4af37]/40 shadow-sm uppercase tracking-wide">
+              <span className="text-2xl font-black text-[#1F1218] dark:text-white tracking-tight">Safar</span>
+              <span className="text-2xl font-black text-[#E11D48] dark:text-[#d4af37]">X</span>
+              <span className="bg-[#FCE7EE] text-[#9F1239] px-3 py-1 rounded-full text-xs font-black border border-[#F4B8CA] shadow-sm uppercase tracking-wide dark:bg-neutral-800 dark:text-amber-400 dark:border-amber-500/30">
                 Driver Partner Console
               </span>
             </div>
-            <p className="text-xs text-neutral-500 font-medium">
+            <p className="text-xs text-[#664D58] dark:text-neutral-400 font-medium">
               Manage trips, navigate routes, and accept passenger ride requests.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-full text-[11px] font-mono font-bold text-neutral-700 shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#FFF0F4] border border-[#F3D1DC] rounded-full text-[11px] font-mono font-bold text-[#1F1218] shadow-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>
                 GPS: {currentCoords?.lat ? `${currentCoords.lat.toFixed(4)}, ${currentCoords.lng.toFixed(4)}` : 'Locating...'}
@@ -882,7 +880,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 type="button"
                 onClick={handleUpdateCurrentLocation}
                 disabled={isUpdatingLocation}
-                className="text-[10px] bg-amber-400 hover:bg-amber-500 active:scale-95 text-neutral-950 font-sans font-extrabold px-2.5 py-1 rounded-md cursor-pointer transition-all flex items-center gap-1 shadow-sm border border-amber-500/30"
+                className="text-[10px] bg-[#E11D48] hover:bg-[#BE123C] active:scale-95 text-white font-sans font-extrabold px-2.5 py-1 rounded-md cursor-pointer transition-all flex items-center gap-1 shadow-sm border border-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 dark:text-neutral-950 dark:border-amber-500/30"
                 title="Update and synchronize current live GPS location with backend"
               >
                 {isUpdatingLocation ? (
@@ -894,14 +892,13 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
               </button>
             </div>
 
-            
             <button
               type="button"
               onClick={handleToggleOnline}
               className={`px-5 py-2.5 rounded-full text-xs font-black transition-all shadow-md cursor-pointer flex items-center gap-2 border ${
                 isOnline
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white border-emerald-400 shadow-emerald-500/20 active:scale-95'
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-300'
+                  : 'bg-[#FCE7EE] hover:bg-[#FAD4E1] text-[#664D58] border-[#F4B8CA] dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-700'
               }`}
             >
               <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-white animate-pulse' : 'bg-red-500'}`} />
@@ -913,13 +910,12 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         </div>
 
-        
         {statusMessage.text && (
           <div
             className={`p-4 rounded-2xl text-xs font-bold flex items-center justify-between shadow-md animate-in fade-in ${
               statusMessage.isError
                 ? 'bg-red-50 border border-red-300 text-red-800'
-                : 'bg-amber-50 border border-[#d4af37]/60 text-amber-950'
+                : 'bg-[#FFF0F4] border border-[#F3D1DC] text-[#9F1239] dark:bg-amber-50 dark:border-[#d4af37]/60 dark:text-amber-950'
             }`}
           >
             <span>{statusMessage.text}</span>
@@ -934,34 +930,34 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
         
         {completedTripReceipt && (
-          <div className="bg-gradient-to-br from-white via-amber-50/40 to-white dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/15 space-y-5 animate-in zoom-in-95 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#d4af37] via-amber-300 to-[#d4af37]" />
+          <div className="bg-gradient-to-br from-[#FFF9FA] via-[#FFF0F4] to-[#FFF9FA] dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 border-2 border-[#F3D1DC] dark:border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-[#E11D48]/10 space-y-5 animate-in zoom-in-95 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#E11D48] via-[#F43F5E] to-[#E11D48] dark:from-[#d4af37] dark:via-amber-300 dark:to-[#d4af37]" />
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#d4af37] to-amber-300 text-black flex items-center justify-center font-black text-lg shadow-md">
+                <span className="w-10 h-10 rounded-full bg-[#E11D48] text-white flex items-center justify-center font-black text-lg shadow-md dark:bg-gradient-to-tr dark:from-[#d4af37] dark:to-amber-300 dark:text-black">
                   ✓
                 </span>
                 <div>
-                  <h3 className="text-xl font-black text-neutral-950 dark:text-white">Ride Completed!</h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Trip #{completedTripReceipt.rideId} • Destination safely reached</p>
+                  <h3 className="text-xl font-black text-[#1F1218] dark:text-white">Ride Completed!</h3>
+                  <p className="text-xs text-[#664D58] dark:text-neutral-400 font-medium">Trip #{completedTripReceipt.rideId} • Destination safely reached</p>
                 </div>
               </div>
-              <span className="px-3.5 py-1 bg-[#d4af37]/15 text-[#8c6200] border border-[#d4af37]/40 rounded-full text-xs font-black uppercase tracking-wider shadow-sm">
+              <span className="px-3.5 py-1 bg-[#FCE7EE] text-[#9F1239] border border-[#F4B8CA] rounded-full text-xs font-black uppercase tracking-wider shadow-sm dark:bg-[#d4af37]/15 dark:text-amber-400 dark:border-[#d4af37]/40">
                 Trip Finished
               </span>
             </div>
 
-            <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+            <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-[#F3D1DC] dark:border-amber-500/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <div>
-                <span className="text-xs text-neutral-400 uppercase font-extrabold tracking-wider block">Collect from Passenger</span>
-                <span className="text-4xl font-black text-neutral-950 dark:text-white tracking-tight">₹{(Number(completedTripReceipt?.fare) || 0).toFixed(2)}</span>
-                <div className="text-xs text-[#b8860b] dark:text-amber-400 font-bold mt-1">💳 Cash / UPI on Arrival</div>
+                <span className="text-xs text-[#664D58] dark:text-neutral-400 uppercase font-extrabold tracking-wider block">Collect from Passenger</span>
+                <span className="text-4xl font-black text-[#1F1218] dark:text-white tracking-tight">₹{(Number(completedTripReceipt?.fare) || 0).toFixed(2)}</span>
+                <div className="text-xs text-[#9F1239] dark:text-amber-400 font-bold mt-1">💳 Cash / UPI on Arrival</div>
               </div>
               <button
                 type="button"
                 onClick={handleDismissReceipt}
-                className="px-7 py-4 bg-gradient-to-r from-[#d4af37] via-amber-400 to-[#d4af37] hover:brightness-105 active:scale-95 text-black font-black rounded-2xl text-xs uppercase tracking-wider transition-all shadow-xl shadow-amber-500/25 cursor-pointer whitespace-nowrap"
+                className="px-7 py-4 bg-[#E11D48] hover:bg-[#BE123C] active:scale-95 text-white dark:bg-gradient-to-r dark:from-[#d4af37] dark:via-amber-400 dark:to-[#d4af37] dark:text-black font-black rounded-2xl text-xs uppercase tracking-wider transition-all shadow-xl shadow-[#E11D48]/25 dark:shadow-amber-500/25 cursor-pointer whitespace-nowrap"
               >
                 Payment Received • Ready for Next Ride →
               </button>
@@ -969,57 +965,54 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        
-        <div className="bg-white dark:bg-neutral-900 border border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-amber-500/5">
+        <div className="bg-[#FFF9FA] dark:bg-neutral-900 border border-[#F3D1DC] dark:border-[#d4af37]/35 rounded-3xl p-6 sm:p-7 shadow-xl shadow-[#E11D48]/5">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             
-            
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#d4af37] via-amber-300 to-[#d4af37] text-black font-black text-2xl flex items-center justify-center shrink-0 shadow-lg ring-4 ring-[#d4af37]/25">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#E11D48] via-[#F43F5E] to-[#E11D48] text-white font-black text-2xl flex items-center justify-center shrink-0 shadow-lg ring-4 ring-[#E11D48]/20 dark:from-[#d4af37] dark:via-amber-300 dark:to-[#d4af37] dark:text-black dark:ring-[#d4af37]/25">
                 {avatarInitial}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
-                  <h2 className="text-xl font-black text-neutral-950 dark:text-white tracking-tight">{driverProfile.name}</h2>
+                  <h2 className="text-xl font-black text-[#1F1218] dark:text-white tracking-tight">{driverProfile.name}</h2>
                   <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700 text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm">
                     ⭐ {(Number(driverProfile?.rating) || 5.0).toFixed(1)} Driver
                   </span>
                 </div>
-                <div className="text-xs text-neutral-500 dark:text-neutral-400 flex flex-wrap items-center gap-3 font-medium">
+                <div className="text-xs text-[#664D58] dark:text-neutral-400 flex flex-wrap items-center gap-3 font-medium">
                   <span>{userEmail || 'Active Partner Account'}</span>
                   <span>•</span>
-                  <span className="inline-flex items-center gap-1.5 bg-amber-50/80 dark:bg-neutral-800 border border-amber-200/80 dark:border-neutral-700 px-2.5 py-0.5 rounded-lg text-neutral-800 dark:text-neutral-200">
+                  <span className="inline-flex items-center gap-1.5 bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 px-2.5 py-0.5 rounded-lg text-[#1F1218] dark:text-neutral-200">
                     <span>Driver ID:</span>
-                    <strong className="text-black dark:text-white font-mono">#{driverProfile.id}</strong>
+                    <strong className="text-[#1F1218] dark:text-white font-mono">#{driverProfile.id}</strong>
                   </span>
                   <span>•</span>
-                  <span className="font-mono text-[#b8860b] dark:text-amber-400 font-bold">Plate: {driverProfile.plateNumber}</span>
+                  <span className="font-mono text-[#9F1239] dark:text-amber-400 font-bold">Plate: {driverProfile.plateNumber}</span>
                   <span>•</span>
-                  <span className="text-neutral-800 dark:text-neutral-200 font-bold">{driverProfile.vehicleType}</span>
+                  <span className="text-[#1F1218] dark:text-neutral-200 font-bold">{driverProfile.vehicleType}</span>
                   <span>•</span>
-                  <span className="px-2.5 py-0.5 bg-amber-100/90 dark:bg-amber-950/60 text-amber-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700 rounded-md font-sans text-[11px] font-bold">
+                  <span className="px-2.5 py-0.5 bg-[#FCE7EE] text-[#9F1239] border border-[#F4B8CA] rounded-md font-sans text-[11px] font-bold dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700">
                     Matches: {driverProfile.vehicleType === 'CAR' ? 'SafarX AC & Sedan Premier' : driverProfile.vehicleType === 'BIKE' ? 'Bike' : 'Auto'}
                   </span>
                 </div>
               </div>
             </div>
 
-            
             <div className="flex flex-wrap items-center gap-3">
-              <div className="bg-amber-50/60 dark:bg-neutral-800 border border-amber-200/80 dark:border-neutral-700 rounded-2xl px-5 py-3 text-xs space-y-0.5 shadow-sm">
-                <div className="text-[10px] text-amber-800/80 dark:text-amber-400 uppercase font-black tracking-wider">Operating City</div>
-                <div className="font-black text-neutral-900 dark:text-white">{driverProfile.city || 'Hyderabad'}</div>
+              <div className="bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 rounded-2xl px-5 py-3 text-xs space-y-0.5 shadow-sm">
+                <div className="text-[10px] text-[#664D58] dark:text-amber-400 uppercase font-black tracking-wider">Operating City</div>
+                <div className="font-black text-[#1F1218] dark:text-white">{driverProfile.city || 'Hyderabad'}</div>
               </div>
 
-              <div className="bg-amber-50/60 dark:bg-neutral-800 border border-amber-200/80 dark:border-neutral-700 rounded-2xl px-5 py-3 text-xs space-y-0.5 shadow-sm">
-                <div className="text-[10px] text-amber-800/80 dark:text-amber-400 uppercase font-black tracking-wider">Vehicle Model</div>
-                <div className="font-black text-[#b8860b] dark:text-amber-300">{driverProfile.model || 'Standard'}</div>
+              <div className="bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 rounded-2xl px-5 py-3 text-xs space-y-0.5 shadow-sm">
+                <div className="text-[10px] text-[#664D58] dark:text-amber-400 uppercase font-black tracking-wider">Vehicle Model</div>
+                <div className="font-black text-[#9F1239] dark:text-amber-300">{driverProfile.model || 'Standard'}</div>
               </div>
 
               <button
                 type="button"
                 onClick={handleOpenEditVehicle}
-                className="bg-white dark:bg-neutral-800 hover:bg-amber-50 dark:hover:bg-neutral-700 border border-amber-300 dark:border-amber-600/40 text-amber-900 dark:text-amber-300 font-extrabold px-4 py-3 rounded-2xl text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+                className="bg-[#FCE7EE] hover:bg-[#FAD4E1] border border-[#F4B8CA] text-[#9F1239] font-extrabold px-4 py-3 rounded-2xl text-xs shadow-sm transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:border-amber-600/40 dark:text-amber-300"
               >
                 <span>✏️</span>
                 <span>Edit Vehicle</span>
@@ -1032,16 +1025,16 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         
         {showEditVehicleModal && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-white dark:bg-neutral-900 border-2 border-[#d4af37] rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
-              <div className="flex items-center justify-between border-b border-amber-100 dark:border-neutral-800 pb-3">
+            <div className="bg-[#FFF9FA] dark:bg-neutral-900 border-2 border-[#F3D1DC] dark:border-[#d4af37] rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+              <div className="flex items-center justify-between border-b border-[#F3D1DC] dark:border-neutral-800 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🛵</span>
-                  <h3 className="text-lg font-black text-neutral-950 dark:text-white">Update Vehicle Details</h3>
+                  <h3 className="text-lg font-black text-[#1F1218] dark:text-white">Update Vehicle Details</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowEditVehicleModal(false)}
-                  className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 flex items-center justify-center text-xs font-black cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-[#FAD4E1] dark:hover:bg-neutral-700 text-[#664D58] dark:text-neutral-300 flex items-center justify-center text-xs font-black cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1049,7 +1042,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
               <form onSubmit={handleSaveVehicle} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">Vehicle Fleet Category</label>
+                  <label className="text-xs font-bold text-[#664D58] dark:text-neutral-300 block">Vehicle Fleet Category</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'BIKE', label: '🛵 Scooter / Bike' },
@@ -1062,8 +1055,8 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                         onClick={() => setEditVehicleType(v.id)}
                         className={`py-2.5 px-1.5 rounded-xl border text-[11px] font-extrabold transition-all cursor-pointer text-center ${
                           editVehicleType === v.id
-                            ? 'bg-amber-100 border-[#d4af37] text-amber-950 shadow-sm'
-                            : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                            ? 'bg-[#FFF0F4] border-[#E11D48] text-[#1F1218] dark:bg-amber-100 dark:border-[#d4af37] dark:text-amber-950 shadow-sm'
+                            : 'bg-white border-[#F3D1DC] text-[#664D58] hover:bg-[#FFF0F4] dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300'
                         }`}
                       >
                         {v.label}
@@ -1073,26 +1066,26 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">Vehicle Model Name</label>
+                  <label className="text-xs font-bold text-[#664D58] dark:text-neutral-300 block">Vehicle Model Name</label>
                   <input
                     type="text"
                     required
                     value={editVehicleModel}
                     onChange={(e) => setEditVehicleModel(e.target.value)}
                     placeholder={editVehicleType === 'BIKE' ? 'e.g. Honda Activa 6G (Scooter)' : 'e.g. Maruti Suzuki Dzire'}
-                    className="w-full bg-[#f6f6f6] dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 text-black dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold outline-none shadow-sm"
+                    className="w-full bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 focus:border-[#E11D48] dark:focus:border-amber-400 text-[#1F1218] dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold outline-none shadow-sm"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300 block">License Plate Number</label>
+                  <label className="text-xs font-bold text-[#664D58] dark:text-neutral-300 block">License Plate Number</label>
                   <input
                     type="text"
                     required
                     value={editPlateNumber}
                     onChange={(e) => setEditPlateNumber(e.target.value.toUpperCase())}
                     placeholder="e.g. TS-09-KL-2026"
-                    className="w-full bg-[#f6f6f6] dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 focus:border-black dark:focus:border-amber-400 text-black dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold font-mono outline-none shadow-sm uppercase"
+                    className="w-full bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 focus:border-[#E11D48] dark:focus:border-amber-400 text-[#1F1218] dark:text-white rounded-xl px-3.5 py-2.5 text-xs font-bold font-mono outline-none shadow-sm uppercase"
                   />
                 </div>
 
@@ -1100,13 +1093,13 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                   <button
                     type="button"
                     onClick={() => setShowEditVehicleModal(false)}
-                    className="px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-extrabold rounded-xl text-xs cursor-pointer"
+                    className="px-4 py-2.5 bg-[#FCE7EE] hover:bg-[#FAD4E1] dark:bg-neutral-800 dark:hover:bg-neutral-700 text-[#664D58] dark:text-neutral-300 font-extrabold rounded-xl text-xs cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-[#d4af37] via-amber-400 to-[#d4af37] text-black font-black rounded-xl text-xs uppercase tracking-wider shadow-md hover:brightness-105 cursor-pointer"
+                    className="px-6 py-2.5 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-[#d4af37] dark:via-amber-400 dark:to-[#d4af37] dark:text-black font-black rounded-xl text-xs uppercase tracking-wider shadow-md cursor-pointer"
                   >
                     Save Changes
                   </button>
@@ -1118,35 +1111,35 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
 
         
         {incomingRequest && (!activeTrip || !['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase())) && (
-          <div className="bg-gradient-to-br from-white via-amber-50/30 to-white dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/20 space-y-6 ring-8 ring-[#d4af37]/10 animate-in zoom-in-95">
+          <div className="bg-gradient-to-br from-[#FFF9FA] via-[#FFF0F4] to-[#FFF9FA] dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 border-2 border-[#E11D48] dark:border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-[#E11D48]/20 space-y-6 ring-8 ring-[#E11D48]/10 dark:ring-[#d4af37]/10 animate-in zoom-in-95">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="w-3.5 h-3.5 rounded-full bg-[#d4af37] animate-ping" />
-                <h3 className="text-lg font-black tracking-tight text-neutral-950 dark:text-white">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#E11D48] dark:bg-[#d4af37] animate-ping" />
+                <h3 className="text-lg font-black tracking-tight text-[#1F1218] dark:text-white">
                   New Ride Request
                 </h3>
               </div>
-              <span className="bg-amber-100 border border-amber-300 text-amber-900 px-3.5 py-1 rounded-full text-xs font-mono font-bold shadow-sm">
+              <span className="bg-[#FCE7EE] border border-[#F4B8CA] text-[#9F1239] dark:bg-amber-100 dark:border-amber-300 dark:text-amber-900 px-3.5 py-1 rounded-full text-xs font-mono font-bold shadow-sm">
                 Ride #{incomingRequest.rideId}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 shadow-sm">
-                <span className="text-[11px] text-neutral-400 font-extrabold block uppercase">Offered Fare</span>
+              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-[#F3D1DC] dark:border-amber-500/30 shadow-sm">
+                <span className="text-[11px] text-[#664D58] dark:text-neutral-400 font-extrabold block uppercase">Offered Fare</span>
                 <span className="text-2xl font-black text-emerald-600">
                   ₹{incomingRequest.fare && Number(incomingRequest.fare) > 0 ? Number(incomingRequest.fare).toFixed(2) : '50.00'}
                 </span>
               </div>
-              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 shadow-sm">
-                <span className="text-[11px] text-neutral-400 font-extrabold block uppercase">Pickup Location</span>
-                <span className="text-xs text-neutral-800 dark:text-neutral-200 font-bold truncate block">
+              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-[#F3D1DC] dark:border-amber-500/30 shadow-sm">
+                <span className="text-[11px] text-[#664D58] dark:text-neutral-400 font-extrabold block uppercase">Pickup Location</span>
+                <span className="text-xs text-[#1F1218] dark:text-neutral-200 font-bold truncate block">
                   {pickupAddressName || (incomingRequest.pickupLat ? `${incomingRequest.pickupLat.toFixed(4)}, ${incomingRequest.pickupLng.toFixed(4)}` : 'Pickup Point')}
                 </span>
               </div>
-              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 shadow-sm">
-                <span className="text-[11px] text-neutral-400 font-extrabold block uppercase">Drop Location</span>
-                <span className="text-xs text-neutral-800 dark:text-neutral-200 font-bold truncate block">
+              <div className="bg-white dark:bg-neutral-800 p-4 rounded-2xl border border-[#F3D1DC] dark:border-amber-500/30 shadow-sm">
+                <span className="text-[11px] text-[#664D58] dark:text-neutral-400 font-extrabold block uppercase">Drop Location</span>
+                <span className="text-xs text-[#1F1218] dark:text-neutral-200 font-bold truncate block">
                   {dropAddressName || (incomingRequest.dropLat ? `${incomingRequest.dropLat.toFixed(4)}, ${incomingRequest.dropLng.toFixed(4)}` : 'Drop Location')}
                 </span>
               </div>
@@ -1157,14 +1150,14 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 type="button"
                 onClick={() => handleAcceptRide(incomingRequest)}
                 disabled={isAccepting}
-                className="flex-1 py-4 bg-gradient-to-r from-[#d4af37] via-amber-400 to-[#d4af37] hover:brightness-105 active:scale-95 text-black font-black rounded-2xl text-base transition-all shadow-xl shadow-amber-500/25 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-4 bg-[#E11D48] hover:bg-[#BE123C] active:scale-95 text-white dark:bg-gradient-to-r dark:from-[#d4af37] dark:via-amber-400 dark:to-[#d4af37] dark:text-black font-black rounded-2xl text-base transition-all shadow-xl shadow-[#E11D48]/25 dark:shadow-amber-500/25 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isAccepting ? 'Accepting...' : '✓ ACCEPT RIDE NOW'}
               </button>
               <button
                 type="button"
                 onClick={handleDeclineRide}
-                className="px-6 py-4 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-600 dark:text-neutral-300 rounded-2xl text-sm font-bold transition-all cursor-pointer"
+                className="px-6 py-4 bg-[#FCE7EE] hover:bg-[#FAD4E1] text-[#664D58] dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 rounded-2xl text-sm font-bold transition-all cursor-pointer"
               >
                 Decline
               </button>
@@ -1172,19 +1165,18 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         )}
 
-        
         {activeTrip && ['ACCEPTED', 'IN_PROGRESS'].includes((activeTrip.status || activeTrip.rideStatus || '').toUpperCase()) ? (
-          <div className="bg-white dark:bg-neutral-900 border-2 border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-amber-500/10 space-y-6">
-            <div className="flex items-center justify-between border-b border-amber-100 dark:border-neutral-800 pb-4">
+          <div className="bg-[#FFF9FA] dark:bg-neutral-900 border-2 border-[#F3D1DC] dark:border-[#d4af37] rounded-3xl p-6 sm:p-8 shadow-2xl shadow-[#E11D48]/10 dark:shadow-amber-500/10 space-y-6">
+            <div className="flex items-center justify-between border-b border-[#F3D1DC] dark:border-neutral-800 pb-4">
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
                 <div>
-                  <h3 className="text-lg font-black text-neutral-950 dark:text-white">
+                  <h3 className="text-lg font-black text-[#1F1218] dark:text-white">
                     {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED'
                       ? 'Ride Accepted'
                       : 'Active Trip in Progress'}
                   </h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="text-xs text-[#664D58] dark:text-neutral-400">
                     Ride #{activeTrip.rideId} •{' '}
                     {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED'
                       ? 'En route to pickup'
@@ -1192,16 +1184,15 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                   </p>
                 </div>
               </div>
-              <span className="text-2xl font-black text-neutral-950 dark:text-white">
+              <span className="text-2xl font-black text-[#1F1218] dark:text-white">
                 ₹{activeTrip.fare ? Number(activeTrip.fare).toFixed(2) : '50.00'}
               </span>
             </div>
 
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-amber-50/40 dark:bg-neutral-800/80 p-4 rounded-2xl border border-amber-200/70 dark:border-neutral-700 space-y-2">
-                <span className="text-xs font-extrabold text-neutral-500 dark:text-neutral-400 block uppercase">Destination</span>
-                <div className="text-sm font-bold text-neutral-900 dark:text-white">
+              <div className="bg-[#FFF0F4]/70 dark:bg-neutral-800/80 p-4 rounded-2xl border border-[#F3D1DC] dark:border-neutral-700 space-y-2">
+                <span className="text-xs font-extrabold text-[#664D58] dark:text-neutral-400 block uppercase">Destination</span>
+                <div className="text-sm font-bold text-[#1F1218] dark:text-white">
                   {dropAddressName || 'Destination reached upon arrival'}
                 </div>
                 <div className="text-xs text-emerald-600 font-bold">
@@ -1211,31 +1202,29 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 </div>
               </div>
 
-              
-              <div className="bg-amber-50/40 dark:bg-neutral-800/80 p-4 rounded-2xl border border-amber-200/70 dark:border-neutral-700 space-y-2 flex flex-col justify-center">
+              <div className="bg-[#FFF0F4]/70 dark:bg-neutral-800/80 p-4 rounded-2xl border border-[#F3D1DC] dark:border-neutral-700 space-y-2 flex flex-col justify-center">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-neutral-500 block uppercase">Live Route Status</span>
+                  <span className="text-xs font-extrabold text-[#664D58] dark:text-neutral-400 block uppercase">Live Route Status</span>
                   <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-300">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                     Live Route Active
                   </span>
                 </div>
-                <div className="text-xs text-neutral-700 dark:text-neutral-300 font-medium">
+                <div className="text-xs text-[#664D58] dark:text-neutral-300 font-medium">
                   Sharing live route updates with passenger
                 </div>
-                <p className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                <p className="text-[10px] text-[#664D58] dark:text-neutral-400">
                   Passenger can track your vehicle approach on the map in real time.
                 </p>
               </div>
             </div>
 
-            
             <div className="pt-2">
               {(activeTrip.status || activeTrip.rideStatus || '').toUpperCase() === 'ACCEPTED' && (
                 <button
                   type="button"
                   onClick={handleStartTrip}
-                  className="w-full py-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-amber-400 dark:to-amber-500 dark:hover:from-amber-300 dark:hover:to-amber-400 dark:text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-lg active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Start Trip</span>
                   <span>🚀</span>
@@ -1245,7 +1234,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 <button
                   type="button"
                   onClick={handleCompleteRide}
-                  className="w-full py-4 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#1F1218] hover:bg-[#3D2531] text-white dark:bg-amber-400 dark:hover:bg-amber-500 dark:text-black font-black rounded-2xl text-sm uppercase tracking-wider transition-all shadow-xl active:scale-95 cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>Complete Ride</span>
                   <span>✓</span>
@@ -1254,19 +1243,19 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             </div>
           </div>
         ) : !isOnline ? (
-          <div className="bg-white/90 dark:bg-neutral-900/90 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-12 text-center space-y-4 shadow-lg">
-            <div className="w-20 h-20 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 flex items-center justify-center mx-auto text-3xl text-neutral-400 shadow-inner">
+          <div className="bg-[#FFF9FA]/90 dark:bg-neutral-900/90 border border-[#F3D1DC] dark:border-neutral-800 rounded-3xl p-12 text-center space-y-4 shadow-lg">
+            <div className="w-20 h-20 rounded-full bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 flex items-center justify-center mx-auto text-3xl text-[#664D58] shadow-inner">
               ⏸️
             </div>
             <div className="space-y-2">
-              <h4 className="text-lg font-black text-neutral-900 dark:text-white">You are currently Offline</h4>
-              <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
+              <h4 className="text-lg font-black text-[#1F1218] dark:text-white">You are currently Offline</h4>
+              <p className="text-xs text-[#664D58] dark:text-neutral-400 max-w-md mx-auto leading-relaxed">
                 You will not receive new ride requests while offline. Click "Go Online" when you are ready to accept trips.
               </p>
               <button
                 type="button"
                 onClick={handleToggleOnline}
-                className="mt-3 px-7 py-3 bg-gradient-to-r from-[#d4af37] via-amber-400 to-[#d4af37] hover:brightness-105 text-black font-black rounded-2xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-amber-500/25 active:scale-95"
+                className="mt-3 px-7 py-3 bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-gradient-to-r dark:from-[#d4af37] dark:via-amber-400 dark:to-[#d4af37] dark:text-black font-black rounded-2xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xl shadow-[#E11D48]/25 active:scale-95"
               >
                 Go Online Now
               </button>
@@ -1274,16 +1263,16 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
           </div>
         ) : (
           !incomingRequest && (
-            <div className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur border border-[#d4af37]/35 rounded-3xl p-12 text-center space-y-4 shadow-xl shadow-amber-500/5">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-100 via-amber-50 to-white dark:from-neutral-800 dark:via-neutral-800 dark:to-neutral-800 border-2 border-[#d4af37]/50 flex items-center justify-center mx-auto text-3xl text-[#b8860b] dark:text-amber-400 shadow-md ring-8 ring-amber-100/50 dark:ring-amber-500/10 animate-pulse">
+            <div className="bg-[#FFF9FA]/90 dark:bg-neutral-900/90 backdrop-blur border border-[#F3D1DC] dark:border-[#d4af37]/35 rounded-3xl p-12 text-center space-y-4 shadow-xl shadow-[#E11D48]/5">
+              <div className="w-20 h-20 rounded-full bg-[#FFF0F4] dark:from-neutral-800 dark:via-neutral-800 dark:to-neutral-800 border-2 border-[#F3D1DC] dark:border-[#d4af37]/50 flex items-center justify-center mx-auto text-3xl text-[#E11D48] dark:text-amber-400 shadow-md ring-8 ring-[#FCE7EE]/50 dark:ring-amber-500/10 animate-pulse">
                 📡
               </div>
               <div className="space-y-1.5">
-                <h4 className="text-lg font-black text-neutral-950 dark:text-white tracking-tight">
+                <h4 className="text-lg font-black text-[#1F1218] dark:text-white tracking-tight">
                   Radar Active • Waiting for Next Ride Request...
                 </h4>
-                <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
-                  You are currently online as <span className="text-neutral-900 dark:text-white font-bold">{driverProfile.name}</span>. 
+                <p className="text-xs text-[#664D58] dark:text-neutral-400 max-w-md mx-auto leading-relaxed">
+                  You are currently online as <span className="text-[#1F1218] dark:text-white font-bold">{driverProfile.name}</span>. 
                   When a nearby rider books a trip, the request will appear on your screen instantly.
                 </p>
               </div>

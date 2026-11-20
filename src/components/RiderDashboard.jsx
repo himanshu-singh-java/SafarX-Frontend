@@ -950,20 +950,18 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
       className={
         isFloating
           ? "w-full bg-black/25 hover:bg-black/35 backdrop-blur-[4px] rounded-3xl border border-white/25 p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col justify-between space-y-5 transition-all text-white"
-          : "lg:col-span-6 bg-white dark:bg-[#121620] rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 sm:p-8 shadow-sm flex flex-col justify-between space-y-6 text-black dark:text-white transition-colors"
+          : "lg:col-span-6 bg-white dark:bg-[#121620] rounded-3xl border border-[#F3D1DC] dark:border-neutral-800 p-6 sm:p-8 shadow-sm flex flex-col justify-between space-y-6 text-[#1F1218] dark:text-white transition-colors"
       }
     >
       <div className="space-y-5">
-        
         <h2
           className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight ${
-            isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-black dark:text-white'
+            isFloating ? 'text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]' : 'text-[#1F1218] dark:text-white'
           }`}
         >
           Welcome to SafarX
         </h2>
 
-        
         <div className="relative inline-block">
           <button
             type="button"
@@ -971,7 +969,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
               isFloating
                 ? 'bg-black/30 hover:bg-black/45 text-white border border-white/20 backdrop-blur-sm drop-shadow-sm'
-                : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 text-black dark:text-white'
+                : 'bg-[#FCE7EE] hover:bg-[#FAD4E1] text-[#1F1218] border border-[#F3D1DC] dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-white dark:border-transparent'
             }`}
           >
             <span>🕒</span>
@@ -984,14 +982,14 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               className={`absolute top-11 left-0 rounded-xl shadow-2xl py-1 z-30 w-48 text-xs border ${
                 isFloating
                   ? 'bg-[#121620]/95 backdrop-blur-md border-neutral-700 text-white'
-                  : 'bg-white border-neutral-200 text-black'
+                  : 'bg-[#FFF9FA] border-[#F3D1DC] text-[#1F1218] dark:bg-neutral-900 dark:border-neutral-800 dark:text-white'
               }`}
             >
               <button
                 type="button"
                 onClick={() => { setPickupTime('Pickup now'); setShowTimeDropdown(false); }}
                 className={`w-full text-left px-3 py-2 font-medium cursor-pointer ${
-                  isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100'
+                  isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-[#FFF0F4] text-[#1F1218] dark:hover:bg-neutral-800 dark:text-white'
                 }`}
               >
                 Pickup now
@@ -1000,7 +998,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 type="button"
                 onClick={() => { setPickupTime('Schedule for later'); setShowTimeDropdown(false); }}
                 className={`w-full text-left px-3 py-2 font-medium cursor-pointer ${
-                  isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100'
+                  isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-[#FFF0F4] text-[#1F1218] dark:hover:bg-neutral-800 dark:text-white'
                 }`}
               >
                 Schedule for later
@@ -1009,27 +1007,25 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           )}
         </div>
 
-        
         <div className="relative space-y-2 pt-1">
           <div className="absolute left-[18px] top-5 bottom-5 flex flex-col items-center pointer-events-none z-10">
             <div
               className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                isFloating ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]' : 'bg-black'
+                isFloating ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]' : 'bg-[#E11D48] dark:bg-amber-400'
               }`}
             />
             <div
               className={`w-[1.5px] flex-1 my-1 ${
-                isFloating ? 'bg-white/30' : 'bg-black'
+                isFloating ? 'bg-white/30' : 'bg-[#F4B8CA] dark:bg-neutral-700'
               }`}
             />
             <div
               className={`w-2.5 h-2.5 shrink-0 ${
-                isFloating ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]' : 'bg-black'
+                isFloating ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]' : 'bg-[#1F1218] dark:bg-amber-400'
               }`}
             />
           </div>
 
-          
           <div ref={pickupContainerRef} className="relative">
             <input
               ref={pickupInputRef}
@@ -1049,10 +1045,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 activeField === 'pickup' || focusedInput === 'pickup'
                   ? isFloating
                     ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
-                    : 'bg-white dark:bg-neutral-800 border-2 border-amber-500 ring-2 ring-amber-500/20 text-black dark:text-white shadow-sm'
+                    : 'bg-white dark:bg-neutral-800 border-2 border-[#E11D48] ring-2 ring-[#E11D48]/20 text-[#1F1218] dark:text-white dark:border-amber-500 dark:ring-amber-500/20 shadow-sm'
                   : isFloating
                   ? 'bg-black/30 hover:bg-black/45 border-2 border-white/20 text-white placeholder:text-neutral-300'
-                  : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 border-2 border-transparent text-black dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400'
+                  : 'bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE] dark:hover:bg-neutral-700 border-2 border-[#F3D1DC] dark:border-transparent text-[#1F1218] dark:text-white placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-400'
               }`}
             />
             <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
@@ -1062,15 +1058,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 disabled={isFetchingLocation}
                 className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center shadow-sm ${
                   isFetchingLocation
-                    ? 'bg-amber-300 text-neutral-900 animate-pulse'
-                    : 'bg-amber-400 hover:bg-amber-500 active:scale-95 text-neutral-950 border border-amber-500/40'
+                    ? 'bg-[#F4B8CA] text-white animate-pulse'
+                    : 'bg-[#E11D48] hover:bg-[#BE123C] active:scale-95 text-white border border-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 dark:text-neutral-950 dark:border-amber-500/40'
                 }`}
                 title="Detect live GPS location for pickup"
               >
                 {isFetchingLocation ? (
                   <span className="text-xs animate-spin">⏳</span>
                 ) : (
-                  <svg className="w-4 h-4 text-neutral-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="w-4 h-4 text-white dark:text-neutral-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="7" />
                     <polyline points="12 2 12 5" />
                     <polyline points="12 19 12 22" />
@@ -1090,7 +1086,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     pickupInputRef.current?.focus();
                   }}
                   className={`font-bold text-sm px-1 cursor-pointer ${
-                    isFloating ? 'text-neutral-400 hover:text-white' : 'text-neutral-400 hover:text-black'
+                    isFloating ? 'text-neutral-400 hover:text-white' : 'text-[#664D58] hover:text-[#1F1218]'
                   }`}
                   title="Clear location"
                 >
@@ -1099,13 +1095,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               )}
             </div>
 
-            
             {focusedInput === 'pickup' && (
               <div
                 className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
                   isFloating
                     ? 'bg-[#121620]/95 backdrop-blur-2xl border-neutral-700 text-white'
-                    : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-black dark:text-white'
+                    : 'bg-[#FFF9FA] dark:bg-neutral-900 border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-white'
                 }`}
               >
                 <button
@@ -1115,7 +1110,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     setFocusedInput(null);
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition-colors cursor-pointer group ${
-                    isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                    isFloating ? 'hover:bg-white/10' : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1123,10 +1118,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${
                         isFloating
                           ? 'bg-white/10 text-white border-white/20'
-                          : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border-neutral-200 dark:border-neutral-700'
+                          : 'bg-[#FCE7EE] text-[#9F1239] border border-[#F4B8CA] dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700'
                       }`}
                     >
-                      <svg className={`w-4 h-4 ${isFloating ? 'text-amber-400' : 'text-black dark:text-amber-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className={`w-4 h-4 ${isFloating ? 'text-amber-400' : 'text-[#E11D48] dark:text-amber-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="7" />
                         <polyline points="12 2 12 5" />
                         <polyline points="12 19 12 22" />
@@ -1135,10 +1130,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </svg>
                     </div>
                     <div>
-                      <div className={`text-xs font-bold ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>
+                      <div className={`text-xs font-bold ${isFloating ? 'text-white' : 'text-[#1F1218] dark:text-white'}`}>
                         Use current location
                       </div>
-                      <div className={`text-[11px] ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                      <div className={`text-[11px] ${isFloating ? 'text-neutral-400' : 'text-[#664D58] dark:text-neutral-400'}`}>
                         Auto-detect using device GPS
                       </div>
                     </div>
@@ -1146,13 +1141,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   {isFetchingLocation ? (
                     <span className="text-xs animate-spin">⏳</span>
                   ) : (
-                    <span className={`text-xs ${isFloating ? 'text-neutral-400 group-hover:text-white' : 'text-neutral-400 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white'}`}>›</span>
+                    <span className={`text-xs ${isFloating ? 'text-neutral-400 group-hover:text-white' : 'text-[#664D58] dark:text-neutral-400 group-hover:text-[#1F1218] dark:group-hover:text-white'}`}>›</span>
                   )}
                 </button>
 
                 {pickupSuggestions.length > 0 ? (
-                  <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100 dark:border-neutral-800'}`}>
-                    <div className="text-[10px] font-bold text-neutral-400 uppercase px-2 py-0.5">
+                  <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-[#F3D1DC] dark:border-neutral-800'}`}>
+                    <div className="text-[10px] font-bold text-[#664D58] dark:text-neutral-400 uppercase px-2 py-0.5">
                       Search Results
                     </div>
                     {pickupSuggestions.map((place, idx) => (
@@ -1161,7 +1156,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         type="button"
                         onClick={() => handleSelectSuggestion(place, 'pickup')}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 ${
-                          isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                          isFloating ? 'hover:bg-white/10 text-neutral-200' : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800 text-[#1F1218] dark:text-neutral-200'
                         }`}
                       >
                         <span className="text-xs mt-0.5">📍</span>
@@ -1171,8 +1166,8 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </div>
                 ) : (
                   (recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
-                    <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-neutral-100 dark:border-neutral-800'}`}>
-                      <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
+                    <div className={`pt-1 border-t space-y-1 ${isFloating ? 'border-white/10' : 'border-[#F3D1DC] dark:border-neutral-800'}`}>
+                      <div className="text-[10px] font-bold text-[#664D58] dark:text-neutral-400 uppercase px-3 py-1 tracking-wider">
                         {recentLocations.length > 0 ? 'Recent locations' : 'Suggested locations'}
                       </div>
                       {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).map((item, idx) => (
@@ -1188,19 +1183,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             setTimeout(() => dropInputRef.current?.focus(), 50);
                           }}
                           className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
-                            isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                            isFloating ? 'hover:bg-white/10' : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800'
                           }`}
                         >
                           <span
                             className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                              isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-amber-400 group-hover:bg-neutral-300 dark:group-hover:bg-neutral-700'
+                              isFloating ? 'bg-white/10 text-amber-300' : 'bg-[#FCE7EE] dark:bg-neutral-800 text-[#9F1239] dark:text-amber-400 border border-[#F4B8CA] dark:border-transparent group-hover:bg-[#FAD4E1]'
                             }`}
                           >
                             {recentLocations.length > 0 ? '🕒' : '📍'}
                           </span>
                           <div className="min-w-0 flex-1">
-                            <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>{item.title}</div>
-                            <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>{item.subtitle}</div>
+                            <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-[#1F1218] dark:text-white'}`}>{item.title}</div>
+                            <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-[#664D58] dark:text-neutral-400'}`}>{item.subtitle}</div>
                           </div>
                         </button>
                       ))}
@@ -1230,10 +1225,10 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 activeField === 'drop' || focusedInput === 'drop'
                   ? isFloating
                     ? 'bg-black/50 border-2 border-amber-400 ring-2 ring-amber-400/40 text-white placeholder:text-neutral-300'
-                    : 'bg-white dark:bg-neutral-800 border-2 border-amber-500 ring-2 ring-amber-500/20 text-black dark:text-white shadow-sm'
+                    : 'bg-white dark:bg-neutral-800 border-2 border-[#E11D48] ring-2 ring-[#E11D48]/20 text-[#1F1218] dark:text-white dark:border-amber-500 dark:ring-amber-500/20 shadow-sm'
                   : isFloating
                   ? 'bg-black/30 hover:bg-black/40 border-2 border-white/20 text-white placeholder:text-neutral-300'
-                  : 'bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 border-2 border-transparent text-black dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400'
+                  : 'bg-[#FFF0F4] dark:bg-neutral-800 hover:bg-[#FCE7EE] dark:hover:bg-neutral-700 border-2 border-[#F3D1DC] dark:border-transparent text-[#1F1218] dark:text-white placeholder:text-[#664D58]/60 dark:placeholder:text-neutral-400'
               }`}
             />
             {dropText && (
@@ -1245,8 +1240,8 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   setActiveField('drop');
                   dropInputRef.current?.focus();
                 }}
-                className={`absolute right-3 top-3.5 font-bold text-sm cursor-pointer ${
-                  isFloating ? 'text-neutral-400 hover:text-white' : 'text-neutral-400 hover:text-black'
+                className={`font-bold text-sm px-1 cursor-pointer ${
+                  isFloating ? 'text-neutral-400 hover:text-white' : 'text-[#664D58] hover:text-[#1F1218]'
                 }`}
                 title="Clear destination"
               >
@@ -1259,17 +1254,17 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 className={`absolute top-14 left-0 right-0 rounded-2xl shadow-2xl p-2 z-50 space-y-1 animate-in fade-in border ${
                   isFloating
                     ? 'bg-[#121620]/95 backdrop-blur-2xl border-neutral-700 text-white'
-                    : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-black dark:text-white'
+                    : 'bg-[#FFF9FA] dark:bg-neutral-900 border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-white'
                 }`}
               >
                 {dropSuggestions.length > 0 ? (
                   <div className="space-y-1">
-                    <div className="text-[10px] font-bold text-neutral-400 px-2 py-1 uppercase flex justify-between items-center">
+                    <div className="text-[10px] font-bold text-[#664D58] dark:text-neutral-400 px-2 py-1 uppercase flex justify-between items-center">
                       <span>Search Results</span>
                       <button
                         type="button"
                         onClick={() => setDropSuggestions([])}
-                        className="hover:text-black dark:hover:text-white cursor-pointer px-1"
+                        className="hover:text-[#1F1218] dark:hover:text-white cursor-pointer px-1"
                       >
                         ✕
                       </button>
@@ -1282,7 +1277,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-start gap-2 border-b last:border-0 ${
                           isFloating
                             ? 'hover:bg-white/10 text-neutral-200 border-white/10'
-                            : 'hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border-neutral-50 dark:border-neutral-800'
+                            : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800 text-[#1F1218] dark:text-neutral-200 border-[#F3D1DC]/60 dark:border-neutral-800'
                         }`}
                       >
                         <span className="text-xs mt-0.5">🏁</span>
@@ -1292,7 +1287,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <div className="text-[10px] font-bold text-neutral-400 uppercase px-3 py-1 tracking-wider">
+                    <div className="text-[10px] font-bold text-[#664D58] dark:text-neutral-400 uppercase px-3 py-1 tracking-wider">
                       {recentLocations.length > 0 ? 'Recent destinations' : 'Suggested destinations'}
                     </div>
                     {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).slice(0, 5).map((item, idx) => (
@@ -1307,19 +1302,19 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           setFocusedInput(null);
                         }}
                         className={`w-full text-left px-3 py-2 rounded-xl flex items-center gap-3 transition-colors cursor-pointer group ${
-                          isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                          isFloating ? 'hover:bg-white/10' : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800'
                         }`}
                       >
                         <span
                           className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-amber-400 group-hover:bg-neutral-300 dark:group-hover:bg-neutral-700'
+                            isFloating ? 'bg-white/10 text-amber-300' : 'bg-[#FCE7EE] dark:bg-neutral-800 text-[#9F1239] dark:text-amber-400 border border-[#F4B8CA] dark:border-transparent group-hover:bg-[#FAD4E1]'
                           }`}
                         >
                           {recentLocations.length > 0 ? '🕒' : '🏁'}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-black dark:text-white'}`}>{item.title}</div>
-                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>{item.subtitle}</div>
+                          <div className={`text-xs font-bold truncate ${isFloating ? 'text-white' : 'text-[#1F1218] dark:text-white'}`}>{item.title}</div>
+                          <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-400' : 'text-[#664D58] dark:text-neutral-400'}`}>{item.subtitle}</div>
                         </div>
                       </button>
                     ))}
@@ -1331,8 +1326,8 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         </div>
 
         {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).length > 0 && (
-          <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-neutral-100 dark:border-neutral-800'}`}>
-            <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+          <div className={`space-y-3 pt-2 border-t ${isFloating ? 'border-white/15' : 'border-[#F3D1DC] dark:border-neutral-800'}`}>
+            <div className={`text-[11px] font-bold uppercase tracking-wider ${isFloating ? 'text-neutral-400' : 'text-[#664D58] dark:text-neutral-400'}`}>
               {recentLocations.length > 0 ? 'Recent destinations' : 'Suggested destinations'}
             </div>
             {(recentLocations.length > 0 ? recentLocations : SUGGESTED_DESTINATIONS).slice(0, 3).map((item, idx) => (
@@ -1352,12 +1347,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                   }
                 }}
                 className={`flex items-start gap-3.5 p-2 rounded-xl cursor-pointer transition-colors group ${
-                  isFloating ? 'hover:bg-white/10' : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
+                  isFloating ? 'hover:bg-white/10' : 'hover:bg-[#FFF0F4] dark:hover:bg-neutral-800/60'
                 }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 font-bold mt-0.5 ${
-                    isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200'
+                    isFloating ? 'bg-black/40 text-amber-300 border border-white/15 backdrop-blur-sm' : 'bg-[#FCE7EE] dark:bg-neutral-800 text-[#9F1239] dark:text-neutral-200 border border-[#F4B8CA] dark:border-transparent'
                   }`}
                 >
                   🕒
@@ -1367,12 +1362,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     className={`text-xs sm:text-sm font-bold truncate transition-colors ${
                       isFloating
                         ? 'text-white group-hover:text-amber-300 drop-shadow-sm'
-                        : 'text-black dark:text-white group-hover:text-blue-600 dark:group-hover:text-amber-400'
+                        : 'text-[#1F1218] dark:text-white group-hover:text-[#E11D48] dark:group-hover:text-amber-400'
                     }`}
                   >
                     {item.title}
                   </div>
-                  <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                  <div className={`text-[11px] truncate ${isFloating ? 'text-neutral-300 drop-shadow-sm' : 'text-[#664D58] dark:text-neutral-400'}`}>
                     {item.subtitle}
                   </div>
                 </div>
@@ -1383,7 +1378,6 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
       </div>
 
-      
       <div className="pt-2">
         <button
           type="button"
@@ -1391,7 +1385,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
           className={
             isFloating
               ? "px-8 py-3.5 bg-gradient-to-r from-[#d4af37] via-[#f3d97d] to-[#d4af37] hover:brightness-110 text-black font-black rounded-xl text-sm transition-all shadow-[0_4px_25px_rgba(212,175,55,0.4)] active:scale-95 flex items-center gap-2 cursor-pointer"
-              : "px-8 py-3.5 bg-black dark:bg-[#d4af37] hover:bg-neutral-800 dark:hover:bg-amber-400 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
+              : "px-8 py-3.5 bg-[#E11D48] dark:bg-[#d4af37] hover:bg-[#BE123C] dark:hover:bg-amber-400 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center gap-2 cursor-pointer"
           }
         >
           <span>See prices</span>
@@ -1403,7 +1397,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0b0f19] text-[#000000] dark:text-neutral-100 font-sans antialiased transition-colors">
+    <div className="min-h-screen bg-[#FFF5F7] dark:bg-[#0b0f19] text-[#1F1218] dark:text-neutral-100 font-sans antialiased transition-colors">
       
       
       {statusMessage.text && (
@@ -1488,27 +1482,23 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             
             
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl sm:text-4xl font-black text-black dark:text-white tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-black text-[#1F1218] dark:text-white tracking-tight">
                 Ride
               </h1>
               <button
                 type="button"
                 onClick={() => setHomeViewMode('motion')}
-                className="px-4 py-2 rounded-full bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black text-xs font-bold border border-neutral-700 dark:border-amber-500 transition-all shadow flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-4 py-2 rounded-full bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black text-xs font-bold border border-[#BE123C] dark:border-amber-500 transition-all shadow flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <span>🎬</span>
                 <span>Cinematic View</span>
               </button>
             </div>
 
-            
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-              
-              
               {renderRequestCard(false)}
 
-              
-              <div className="lg:col-span-6 min-h-[460px] lg:min-h-[580px] h-full rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900">
+              <div className="lg:col-span-6 min-h-[460px] lg:min-h-[580px] h-full rounded-3xl overflow-hidden border border-[#F3D1DC] dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900">
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
                   dropCoords={dropCoords}
@@ -1524,16 +1514,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
           </div>
         ) : (
-          
           <div className="space-y-6 animate-in fade-in">
-            
-            
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#F3D1DC] dark:border-neutral-800 pb-3">
               <div className="flex items-center gap-4">
                 <button
                   type="button"
                   onClick={handleBackToHome}
-                  className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2 px-3 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 text-xs font-bold text-[#664D58] dark:text-gray-300 hover:text-[#1F1218] dark:hover:text-white py-2 px-3 rounded-full hover:bg-[#FCE7EE] dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                   title="Return to SafarX city view"
                 >
                   <span>←</span>
@@ -1541,20 +1528,18 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 </button>
               </div>
 
-              
-              <div className="flex items-center gap-2 text-sm font-extrabold text-gray-900 dark:text-white border-b-2 border-gray-900 dark:border-amber-400 pb-2.5">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-[#1F1218] dark:text-white border-b-2 border-[#E11D48] dark:border-amber-400 pb-2.5">
                 <span>🚗</span>
                 <span>Ride</span>
               </div>
 
-              
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
                     setShowHistory(true);
                     fetchHistory();
                   }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#664D58] dark:text-gray-300 hover:text-[#1F1218] dark:hover:text-white px-3 py-1.5 rounded-full hover:bg-[#FCE7EE] dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 >
                   <span>👥</span>
                   <span>Activity</span>
@@ -1562,29 +1547,25 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
               </div>
             </div>
 
-            
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-20">
-              
-              
               {!activeRide && (
-                <div className="lg:col-span-3 bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-4 shadow-sm">
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white">Get a ride</h3>
+                <div className="lg:col-span-3 bg-white dark:bg-neutral-900 rounded-2xl border border-[#F3D1DC] dark:border-neutral-800 p-4 space-y-4 shadow-sm">
+                  <h3 className="text-lg font-black text-[#1F1218] dark:text-white">Get a ride</h3>
 
-                  
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2.5 bg-[#f3f3f3] dark:bg-neutral-800 p-3 rounded-xl">
-                      <span className="w-2.5 h-2.5 rounded-full bg-black dark:bg-amber-400 shrink-0" />
-                      <span className="text-xs font-bold text-gray-900 dark:text-white truncate">{pickupText}</span>
+                    <div className="flex items-center gap-2.5 bg-[#FFF0F4] dark:bg-neutral-800 p-3 rounded-xl">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#E11D48] dark:bg-amber-400 shrink-0" />
+                      <span className="text-xs font-bold text-[#1F1218] dark:text-white truncate">{pickupText}</span>
                     </div>
-                    <div className="flex items-center justify-between bg-[#f3f3f3] dark:bg-neutral-800 p-3 rounded-xl">
+                    <div className="flex items-center justify-between bg-[#FFF0F4] dark:bg-neutral-800 p-3 rounded-xl">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="w-2.5 h-2.5 bg-black dark:bg-amber-400 shrink-0" />
-                        <span className="text-xs font-bold text-gray-900 dark:text-white truncate">{dropText}</span>
+                        <span className="w-2.5 h-2.5 bg-[#1F1218] dark:bg-amber-400 shrink-0" />
+                        <span className="text-xs font-bold text-[#1F1218] dark:text-white truncate">{dropText}</span>
                       </div>
                       <button
                         type="button"
                         onClick={handleBackToHome}
-                        className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white font-bold text-base px-1 cursor-pointer"
+                        className="text-[#664D58] hover:text-[#E11D48] dark:text-neutral-400 dark:hover:text-white font-bold text-base px-1 cursor-pointer"
                         title="Edit route"
                       >
                         +
@@ -1592,46 +1573,41 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </div>
 
-                  
                   <div className="space-y-2">
-                    <div className="bg-[#f3f3f3] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-gray-900 dark:text-white">
+                    <div className="bg-[#FFF0F4] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-[#1F1218] dark:text-white">
                       <div className="flex items-center gap-2">
                         <span>🕒</span>
                         <span>{pickupTime}</span>
                       </div>
-                      <span className="text-neutral-500 dark:text-neutral-400 text-xs">▾</span>
+                      <span className="text-[#664D58] dark:text-neutral-400 text-xs">▾</span>
                     </div>
-                    <div className="bg-[#f3f3f3] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-gray-900 dark:text-white">
+                    <div className="bg-[#FFF0F4] dark:bg-neutral-800 p-2.5 rounded-xl flex items-center justify-between text-xs font-bold text-[#1F1218] dark:text-white">
                       <div className="flex items-center gap-2">
                         <span>👤</span>
                         <span>{passengerMode}</span>
                       </div>
-                      <span className="text-neutral-500 dark:text-neutral-400 text-xs">▾</span>
+                      <span className="text-[#664D58] dark:text-neutral-400 text-xs">▾</span>
                     </div>
                   </div>
 
-                  
                   <button
                     type="button"
                     onClick={handleBackToHome}
-                    className="w-full py-2 text-xs font-bold text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white underline text-center cursor-pointer"
+                    className="w-full py-2 text-xs font-bold text-[#E11D48] hover:text-[#BE123C] dark:text-neutral-400 dark:hover:text-white underline text-center cursor-pointer"
                   >
                     Edit pickup or drop location
                   </button>
                 </div>
               )}
 
-              
               <div className={activeRide ? "lg:col-span-4 space-y-4" : "lg:col-span-5 space-y-4"}>
-                
                 {!activeRide ? (
                   <>
-                    
                     <div className="space-y-1">
-                      <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                      <h2 className="text-2xl sm:text-3xl font-black text-[#1F1218] dark:text-white tracking-tight">
                         Choose a ride
                       </h2>
-                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                      <p className="text-xs font-semibold text-[#664D58] dark:text-gray-300">
                         Rides we think you'll like
                       </p>
                     </div>
@@ -1648,12 +1624,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             onClick={() => setSelectedVehicle(tier.type)}
                             className={`cursor-pointer p-4 rounded-2xl border-2 transition-all flex items-center justify-between bg-white dark:bg-neutral-900 ${
                               isSelected
-                                ? 'border-black dark:border-amber-400 shadow-md ring-1 ring-black dark:ring-amber-400'
-                                : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700'
+                                ? 'border-[#E11D48] bg-[#FFF0F4] dark:border-amber-400 dark:bg-neutral-900 shadow-md ring-1 ring-[#E11D48] dark:ring-amber-400'
+                                : 'border-[#F3D1DC] dark:border-neutral-800 hover:border-[#F4B8CA] dark:hover:border-neutral-700'
                             }`}
                           >
                             <div className="flex items-center gap-3.5">
-                              <div className="w-16 h-14 rounded-xl bg-white dark:bg-neutral-800 flex items-center justify-center p-0.5 border border-neutral-100 dark:border-neutral-700 shadow-sm shrink-0 overflow-hidden">
+                              <div className="w-16 h-14 rounded-xl bg-white dark:bg-neutral-800 flex items-center justify-center p-0.5 border border-[#F3D1DC] dark:border-neutral-700 shadow-sm shrink-0 overflow-hidden">
                                 <img
                                   src={tier.image}
                                   alt={tier.name}
@@ -1663,24 +1639,24 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-extrabold text-sm text-gray-900 dark:text-white">{tier.name}</span>
-                                  <span className="text-xs text-neutral-600 dark:text-neutral-300 font-bold flex items-center gap-0.5">
+                                  <span className="font-extrabold text-sm text-[#1F1218] dark:text-white">{tier.name}</span>
+                                  <span className="text-xs text-[#664D58] dark:text-neutral-300 font-bold flex items-center gap-0.5">
                                     👤 {tier.capacity}
                                   </span>
                                   {tier.badge && (
                                     <span className="text-xs">{tier.badge}</span>
                                   )}
                                 </div>
-                                <div className="flex items-center gap-2 text-[11px] text-neutral-600 dark:text-neutral-300 font-medium">
+                                <div className="flex items-center gap-2 text-[11px] text-[#664D58] dark:text-neutral-300 font-medium">
                                   <span>{tier.etaMins} mins away • {getEtaDropTime(tier.etaMins)}</span>
                                 </div>
                                 {tier.tag && (
-                                  <span className="inline-block bg-blue-600 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded">
+                                  <span className="inline-block bg-[#E11D48] text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded">
                                     {tier.tag}
                                   </span>
                                 )}
                                 {tier.desc && !tier.tag && (
-                                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-tight">
+                                  <div className="text-[11px] text-[#664D58] dark:text-neutral-400 leading-tight">
                                     {tier.desc}
                                   </div>
                                 )}
@@ -1688,7 +1664,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             </div>
 
                             <div className="text-right shrink-0 pl-2">
-                              <div className="text-base font-extrabold text-gray-900 dark:text-white">
+                              <div className="text-base font-extrabold text-[#1F1218] dark:text-white">
                                 ₹{fare.toFixed(2)}
                               </div>
                             </div>
@@ -1697,14 +1673,12 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       })}
                     </div>
 
-                    
-                    <div className="sticky bottom-4 mt-6 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-2xl flex items-center gap-3 z-30">
-                      
+                    <div className="sticky bottom-4 mt-6 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 rounded-2xl border border-[#F3D1DC] dark:border-neutral-800 shadow-2xl flex items-center gap-3 z-30">
                       <div className="relative">
                         <button
                           type="button"
                           onClick={() => setShowPaymentDropdown(!showPaymentDropdown)}
-                          className="flex items-center gap-2 bg-[#f3f3f3] dark:bg-neutral-800 hover:bg-[#eaeaea] dark:hover:bg-neutral-700 px-3.5 py-3 rounded-xl text-xs font-bold text-gray-900 dark:text-white border border-transparent dark:border-neutral-700 transition-colors whitespace-nowrap cursor-pointer"
+                          className="flex items-center gap-2 bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-[#FAD4E1] dark:hover:bg-neutral-700 px-3.5 py-3 rounded-xl text-xs font-bold text-[#9F1239] dark:text-white border border-[#F4B8CA] dark:border-neutral-700 transition-colors whitespace-nowrap cursor-pointer"
                         >
                           <span>👤</span>
                           <span className="hidden sm:inline">Personal •</span>
@@ -1712,7 +1686,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                           <span className="text-xs">▾</span>
                         </button>
                         {showPaymentDropdown && (
-                          <div className="absolute bottom-14 left-0 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-gray-900 dark:text-white rounded-xl shadow-xl py-1 z-40 w-52 text-xs">
+                          <div className="absolute bottom-14 left-0 bg-[#FFF9FA] dark:bg-neutral-900 border border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-white rounded-xl shadow-xl py-1 z-40 w-52 text-xs">
                             {['UPI Scan and Pay', 'Cash to Driver', 'Razorpay Online'].map((m) => (
                               <button
                                 key={m}
@@ -1721,7 +1695,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   setPaymentMethod(m);
                                   setShowPaymentDropdown(false);
                                 }}
-                                className="w-full text-left px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 font-medium cursor-pointer"
+                                className="w-full text-left px-3 py-2 hover:bg-[#FFF0F4] dark:hover:bg-neutral-800 font-medium cursor-pointer"
                               >
                                 {m}
                               </button>
@@ -1730,12 +1704,11 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                         )}
                       </div>
 
-                      
                       <button
                         type="button"
                         onClick={handleBookRide}
                         disabled={isLoading}
-                        className="flex-1 py-3.5 bg-black hover:bg-neutral-800 disabled:bg-neutral-400 dark:bg-amber-400 dark:hover:bg-amber-500 dark:disabled:bg-neutral-700 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 py-3.5 bg-[#E11D48] hover:bg-[#BE123C] disabled:bg-[#F4B8CA] dark:bg-amber-400 dark:hover:bg-amber-500 dark:disabled:bg-neutral-700 text-white dark:text-black font-extrabold rounded-xl text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                       >
                         {isLoading ? (
                           <>
@@ -1749,80 +1722,74 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     </div>
                   </>
                 ) : activeRide.status === 'REQUESTED' ? (
-                  
-                  <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-200 dark:border-neutral-800 p-6 sm:p-7 shadow-lg space-y-6 animate-in zoom-in-95">
-                    
+                  <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-[#F3D1DC] dark:border-neutral-800 p-6 sm:p-7 shadow-lg space-y-6 animate-in zoom-in-95">
                     <div className="flex flex-col items-center justify-center py-6 space-y-4 text-center">
                       <div className="relative flex items-center justify-center w-24 h-24">
-                        <div className="w-24 h-24 rounded-full bg-black/5 dark:bg-amber-400/10 animate-ping absolute" />
-                        <div className="w-16 h-16 rounded-full bg-black/10 dark:bg-amber-400/20 animate-pulse absolute" />
-                        <div className="w-14 h-14 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-2xl shadow-xl z-10">
+                        <div className="w-24 h-24 rounded-full bg-[#E11D48]/5 dark:bg-amber-400/10 animate-ping absolute" />
+                        <div className="w-16 h-16 rounded-full bg-[#E11D48]/10 dark:bg-amber-400/20 animate-pulse absolute" />
+                        <div className="w-14 h-14 rounded-full bg-[#E11D48] dark:bg-amber-400 text-white dark:text-black flex items-center justify-center text-2xl shadow-xl z-10">
                           {currentTier.icon || '🚗'}
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                        <h2 className="text-2xl font-black text-[#1F1218] dark:text-white tracking-tight">
                           Searching for drivers...
                         </h2>
-                        <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium max-w-xs">
+                        <p className="text-xs text-[#664D58] dark:text-neutral-400 font-medium max-w-xs">
                           Connecting with nearby {currentTier.name} drivers around your pickup location.
                         </p>
                       </div>
 
-                      
-                      <div className="w-full max-w-xs bg-neutral-100 dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-black dark:bg-amber-400 h-full rounded-full animate-pulse" style={{ width: '70%' }} />
+                      <div className="w-full max-w-xs bg-[#FFF0F4] dark:bg-neutral-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-[#E11D48] dark:bg-amber-400 h-full rounded-full animate-pulse" style={{ width: '70%' }} />
                       </div>
                     </div>
 
-                    
-                    <div className="bg-neutral-50 dark:bg-neutral-800/80 rounded-2xl p-4 border border-neutral-200 dark:border-neutral-700 space-y-3">
+                    <div className="bg-[#FFF0F4]/70 dark:bg-neutral-800/80 rounded-2xl p-4 border border-[#F3D1DC] dark:border-neutral-700 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <span className="font-extrabold text-sm text-gray-900 dark:text-white">{currentTier.name}</span>
-                          <span className="text-xs text-neutral-500 dark:text-neutral-400">• {displayDistance} km</span>
+                          <span className="font-extrabold text-sm text-[#1F1218] dark:text-white">{currentTier.name}</span>
+                          <span className="text-xs text-[#664D58] dark:text-neutral-400">• {displayDistance} km</span>
                         </div>
-                        <span className="text-base font-extrabold text-gray-900 dark:text-white">
+                        <span className="text-base font-extrabold text-[#1F1218] dark:text-white">
                           ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : currentFare.toFixed(2)}
                         </span>
                       </div>
 
-                      <div className="space-y-2 pt-2 border-t border-neutral-200/80 dark:border-neutral-700 text-xs">
-                        <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 truncate">
-                          <span className="w-2 h-2 rounded-full bg-black dark:bg-amber-400 shrink-0" />
+                      <div className="space-y-2 pt-2 border-t border-[#F3D1DC] dark:border-neutral-700 text-xs">
+                        <div className="flex items-center gap-2 text-[#1F1218] dark:text-neutral-300 truncate">
+                          <span className="w-2 h-2 rounded-full bg-[#E11D48] dark:bg-amber-400 shrink-0" />
                           <span className="truncate font-semibold">{pickupText}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 truncate">
-                          <span className="w-2 h-2 bg-black dark:bg-amber-400 shrink-0" />
+                        <div className="flex items-center gap-2 text-[#1F1218] dark:text-neutral-300 truncate">
+                          <span className="w-2 h-2 bg-[#1F1218] dark:bg-amber-400 shrink-0" />
                           <span className="truncate font-semibold">{dropText}</span>
                         </div>
                       </div>
                     </div>
 
-                    
                     <button
                       type="button"
                       onClick={handleCancelRide}
-                      className="w-full py-3.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-neutral-700 dark:text-neutral-200 hover:text-red-700 dark:hover:text-red-400 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-neutral-200 dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-800 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                      className="w-full py-3.5 bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-[#9F1239] dark:text-neutral-200 hover:text-red-700 dark:hover:text-red-400 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-[#F4B8CA] dark:border-neutral-700 hover:border-red-300 dark:hover:border-red-800 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                     >
                       <span>Cancel Ride</span>
                       <span>✕</span>
                     </button>
                   </div>
                 ) : (
-                  
-                  <div className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-3xl p-6 shadow-xl space-y-5 animate-in fade-in border border-neutral-200 dark:border-neutral-800">
-                    <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+                  <div className="bg-white dark:bg-neutral-900 text-[#1F1218] dark:text-white rounded-3xl p-6 shadow-xl space-y-5 animate-in fade-in border border-[#F3D1DC] dark:border-neutral-800">
+                    <div className="flex items-center justify-between border-b border-[#F3D1DC] dark:border-neutral-800 pb-3">
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`w-2.5 h-2.5 rounded-full ${
                             activeRide.status === 'COMPLETED'
-                              ? 'bg-black dark:bg-amber-400'
-                              : 'bg-black dark:bg-amber-400 animate-pulse'
+                              ? 'bg-[#E11D48] dark:bg-amber-400'
+                              : 'bg-[#E11D48] dark:bg-amber-400 animate-pulse'
                           }`}
                         />
-                        <span className="text-xs font-black uppercase tracking-wider text-black dark:text-white">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#1F1218] dark:text-white">
                           {activeRide.status === 'COMPLETED'
                             ? 'Ride Completed'
                             : activeRide.status === 'IN_PROGRESS'
@@ -1830,23 +1797,23 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                             : 'Driver on the way'}
                         </span>
                       </div>
-                      <span className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">Ride #{activeRide.rideId}</span>
+                      <span className="text-xs text-[#664D58] dark:text-neutral-400 font-mono">Ride #{activeRide.rideId}</span>
                     </div>
 
                     {activeRide.status === 'COMPLETED' ? (
-                      <div className="bg-neutral-50 dark:bg-neutral-800/60 p-5 rounded-2xl border border-neutral-200 dark:border-neutral-700 space-y-4 animate-in zoom-in-95">
-                        <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 space-y-2 shadow-sm">
+                      <div className="bg-[#FFF0F4]/60 dark:bg-neutral-800/60 p-5 rounded-2xl border border-[#F3D1DC] dark:border-neutral-700 space-y-4 animate-in zoom-in-95">
+                        <div className="bg-white dark:bg-neutral-800 p-4 rounded-xl border border-[#F3D1DC] dark:border-neutral-700 space-y-2 shadow-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-[11px] text-neutral-500 dark:text-neutral-400 uppercase font-bold tracking-wider">
+                            <span className="text-[11px] text-[#664D58] dark:text-neutral-400 uppercase font-bold tracking-wider">
                               Total Fare
                             </span>
-                            <span className="text-3xl font-black text-black dark:text-white">
+                            <span className="text-3xl font-black text-[#1F1218] dark:text-white">
                               ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : '0.00'}
                             </span>
                           </div>
-                          <div className="text-[11px] text-neutral-700 dark:text-neutral-300 font-semibold flex items-center justify-between pt-1.5 border-t border-neutral-100 dark:border-neutral-700">
+                          <div className="text-[11px] text-[#664D58] dark:text-neutral-300 font-semibold flex items-center justify-between pt-1.5 border-t border-[#F3D1DC] dark:border-neutral-700">
                             <span>Settlement Status</span>
-                            <span className="text-black dark:text-white font-bold">
+                            <span className="text-[#1F1218] dark:text-white font-bold">
                               {razorpaySuccessData ? (
                                 <span className="text-emerald-600 font-extrabold flex items-center gap-1">
                                   ✓ Paid via Razorpay
@@ -1891,7 +1858,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   isError: false,
                                 });
                               }}
-                              className="w-full mt-2 py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
+                              className="w-full mt-2 py-3.5 bg-[#1F1218] hover:bg-[#3D2531] dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer flex items-center justify-center gap-2"
                             >
                               <span>Receipt Saved • Book Next Ride</span>
                               <span>→</span>
@@ -1912,7 +1879,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               type="button"
                               onClick={handlePayOnlineWithRazorpay}
                               disabled={isPayingRazorpay}
-                              className="w-full py-3.5 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-xl cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="w-full py-3.5 bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 active:scale-95 text-white dark:text-black font-black rounded-xl text-xs uppercase tracking-wider transition-all shadow-xl cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                               {isPayingRazorpay ? (
                                 <>
@@ -1939,7 +1906,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                   isError: false,
                                 });
                               }}
-                              className="w-full py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl text-[11px] uppercase tracking-wider transition-all border border-neutral-200 dark:border-neutral-700 cursor-pointer flex items-center justify-center gap-1.5"
+                              className="w-full py-2.5 bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-[#FAD4E1] dark:hover:bg-neutral-700 text-[#9F1239] dark:text-neutral-200 font-bold rounded-xl text-[11px] uppercase tracking-wider transition-all border border-[#F4B8CA] dark:border-neutral-700 cursor-pointer flex items-center justify-center gap-1.5"
                             >
                               <span>💵</span>
                               <span>Pay with Cash directly to Driver</span>
@@ -2002,16 +1969,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                         return (
                           <div className="space-y-4">
-                            
-                            <div className="bg-neutral-50 dark:bg-neutral-800/80 p-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 flex items-center justify-between gap-3">
+                            <div className="bg-[#FFF0F4]/70 dark:bg-neutral-800/80 p-4 rounded-2xl border border-[#F3D1DC] dark:border-neutral-700 flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-black dark:bg-amber-400 text-white dark:text-black font-black text-lg flex items-center justify-center shadow">
+                                <div className="w-12 h-12 rounded-full bg-[#E11D48] dark:bg-amber-400 text-white dark:text-black font-black text-lg flex items-center justify-center shadow">
                                   {driverName.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="space-y-0.5">
-                                  <h4 className="text-sm font-extrabold text-black dark:text-white">{driverName}</h4>
-                                  <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-300 font-semibold">
-                                    <span className="text-black dark:text-white font-bold">★ {Number(driverRating).toFixed(1)}</span>
+                                  <h4 className="text-sm font-extrabold text-[#1F1218] dark:text-white">{driverName}</h4>
+                                  <div className="flex items-center gap-1.5 text-xs text-[#664D58] dark:text-neutral-300 font-semibold">
+                                    <span className="text-[#1F1218] dark:text-white font-bold">★ {Number(driverRating).toFixed(1)}</span>
                                     <span>•</span>
                                     <span>{driverModel}</span>
                                     {driverPhone && (
@@ -2027,35 +1993,32 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </div>
 
                               <div className="text-right">
-                                <div className="inline-block bg-white dark:bg-neutral-900 text-black dark:text-white font-mono font-bold text-xs px-3 py-1 rounded-lg border border-neutral-300 dark:border-neutral-700 shadow-sm tracking-wider">
+                                <div className="inline-block bg-white dark:bg-neutral-900 text-[#1F1218] dark:text-white font-mono font-bold text-xs px-3 py-1 rounded-lg border border-[#F3D1DC] dark:border-neutral-700 shadow-sm tracking-wider">
                                   {driverPlate}
                                 </div>
                               </div>
                             </div>
 
-                            
-                            <div className="flex items-center justify-between py-2 border-b border-neutral-100 dark:border-neutral-800 text-xs">
-                              <span className="font-bold text-neutral-600 dark:text-neutral-400">
+                            <div className="flex items-center justify-between py-2 border-b border-[#F3D1DC] dark:border-neutral-800 text-xs">
+                              <span className="font-bold text-[#664D58] dark:text-neutral-400">
                                 {activeRide.status === 'IN_PROGRESS' ? 'Route status' : 'Estimated arrival'}
                               </span>
-                              <span className="font-extrabold text-black dark:text-white">
+                              <span className="font-extrabold text-[#1F1218] dark:text-white">
                                 {activeRide.status === 'IN_PROGRESS' ? 'En route to destination' : '~2-3 mins'}
                               </span>
                             </div>
 
-                            
-                            <div className="space-y-2 text-xs border-b border-neutral-100 dark:border-neutral-800 pb-3">
-                              <div className="flex items-center gap-2 text-neutral-800 dark:text-neutral-200 truncate">
-                                <span className="w-2 h-2 rounded-full bg-black dark:bg-amber-400 shrink-0" />
+                            <div className="space-y-2 text-xs border-b border-[#F3D1DC] dark:border-neutral-800 pb-3">
+                              <div className="flex items-center gap-2 text-[#1F1218] dark:text-neutral-200 truncate">
+                                <span className="w-2 h-2 rounded-full bg-[#E11D48] dark:bg-amber-400 shrink-0" />
                                 <span className="truncate font-semibold">{pickupText}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-neutral-800 dark:text-neutral-200 truncate">
-                                <span className="w-2 h-2 bg-black dark:bg-amber-400 shrink-0" />
+                              <div className="flex items-center gap-2 text-[#1F1218] dark:text-neutral-200 truncate">
+                                <span className="w-2 h-2 bg-[#1F1218] dark:bg-amber-400 shrink-0" />
                                 <span className="truncate font-semibold">{dropText}</span>
                               </div>
                             </div>
 
-                            
                             <div>
                               <button
                                 type="button"
@@ -2068,7 +2031,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                                     isError: false,
                                   });
                                 }}
-                                className="w-full py-2.5 px-3 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-neutral-200 dark:border-neutral-700 cursor-pointer"
+                                className="w-full py-2.5 px-3 bg-[#FCE7EE] dark:bg-neutral-800 hover:bg-[#FAD4E1] dark:hover:bg-neutral-700 text-[#9F1239] dark:text-neutral-200 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-[#F4B8CA] dark:border-neutral-700 cursor-pointer"
                               >
                                 <span>Share Trip Details</span>
                               </button>
@@ -2079,9 +2042,9 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     )}
 
                     {activeRide.status !== 'COMPLETED' && (
-                      <div className="flex justify-between items-center border-t border-neutral-100 dark:border-neutral-800 pt-3 text-xs">
-                        <span className="text-neutral-500 font-bold uppercase tracking-wider">Total Fare</span>
-                        <span className="text-xl font-black text-black dark:text-white">
+                      <div className="flex justify-between items-center border-t border-[#F3D1DC] dark:border-neutral-800 pt-3 text-xs">
+                        <span className="text-[#664D58] font-bold uppercase tracking-wider">Total Fare</span>
+                        <span className="text-xl font-black text-[#1F1218] dark:text-white">
                           ₹{activeRide.fare ? Number(activeRide.fare).toFixed(2) : '50.07'}
                         </span>
                       </div>
@@ -2091,7 +2054,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       <button
                         type="button"
                         onClick={handleCancelRide}
-                        className="w-full py-3.5 bg-neutral-100 hover:bg-red-50 text-neutral-800 hover:text-red-700 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-neutral-200 hover:border-red-300 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+                        className="w-full py-3.5 bg-[#FCE7EE] hover:bg-red-50 text-[#9F1239] hover:text-red-700 font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all border border-[#F4B8CA] hover:border-red-300 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
                       >
                         <span>Cancel Ride</span>
                         <span>✕</span>
@@ -2099,7 +2062,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                     )}
 
                     {(activeRide.status === 'IN_PROGRESS' || activeRide.rideStatus === 'IN_PROGRESS') && (
-                      <div className="w-full py-3.5 bg-black dark:bg-amber-400 text-white dark:text-black font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
+                      <div className="w-full py-3.5 bg-[#1F1218] dark:bg-amber-400 text-white dark:text-black font-extrabold rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                         <span>Trip In Progress • Safe Journey</span>
                       </div>
@@ -2109,8 +2072,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
               </div>
 
-              
-              <div className={`${activeRide ? "lg:col-span-8" : "lg:col-span-4"} h-[600px] lg:h-[calc(100vh-140px)] sticky top-20 rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900 transition-all duration-300`}>
+              <div className={`${activeRide ? "lg:col-span-8" : "lg:col-span-4"} h-[600px] lg:h-[calc(100vh-140px)] sticky top-20 rounded-3xl overflow-hidden border border-[#F3D1DC] dark:border-neutral-800 shadow-sm relative isolate z-0 bg-neutral-100 dark:bg-neutral-900 transition-all duration-300`}>
                 <LiveRouteMap
                   pickupCoords={pickupCoords}
                   dropCoords={dropCoords}
@@ -2129,39 +2091,38 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
       </main>
 
-      
       {showHistory && (
         <div className="print:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-in fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-neutral-900 border-l border-neutral-200 dark:border-neutral-800 text-black dark:text-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-4">
+          <div className="w-full max-w-md bg-[#FFF9FA] dark:bg-neutral-900 border-l border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-white h-full p-6 overflow-y-auto space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#F3D1DC] dark:border-neutral-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-black dark:text-white">Past Trips</h3>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">Rider #{riderId} Journey Records</p>
+                <h3 className="text-xl font-bold text-[#1F1218] dark:text-white">Past Trips</h3>
+                <p className="text-xs text-[#664D58] dark:text-neutral-400">Rider #{riderId} Journey Records</p>
               </div>
               <button
                 onClick={() => setShowHistory(false)}
-                className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white text-xl font-bold cursor-pointer"
+                className="text-[#664D58] hover:text-[#1F1218] dark:text-neutral-400 dark:hover:text-white text-xl font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {loadingHistory ? (
-              <div className="text-center py-10 text-neutral-400 text-sm">Loading trips...</div>
+              <div className="text-center py-10 text-[#664D58] text-sm">Loading trips...</div>
             ) : rideHistory.length > 0 ? (
               <div className="space-y-3">
                 {rideHistory.map((ride, idx) => (
                   <div
                     key={idx}
                     onClick={() => setSelectedRideReceipt(ride)}
-                    className="p-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800/80 hover:border-black dark:hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer group space-y-2.5"
+                    className="p-4 rounded-2xl border border-[#F3D1DC] dark:border-neutral-800 bg-white dark:bg-neutral-800/80 hover:border-[#E11D48] dark:hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer group space-y-2.5"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-black text-black dark:text-white group-hover:text-blue-600 dark:group-hover:text-amber-400 transition-colors">
+                        <span className="font-mono text-xs font-black text-[#1F1218] dark:text-white group-hover:text-[#E11D48] dark:group-hover:text-amber-400 transition-colors">
                           Trip #{ride.rideId || ride.id}
                         </span>
-                        <span className="text-[11px] text-neutral-400 font-medium">
+                        <span className="text-[11px] text-[#664D58] dark:text-neutral-400 font-medium">
                           {formatDateTime(ride.startTime || ride.endTime)}
                         </span>
                       </div>
@@ -2176,29 +2137,29 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-neutral-600 dark:text-neutral-400">
+                    <div className="flex items-center justify-between text-xs text-[#664D58] dark:text-neutral-400">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">
                           {ride.vehicle?.carModel ? '🚗' : ride.vehicle?.autoModel ? '🛺' : '🏍️'}
                         </span>
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                        <span className="font-semibold text-[#1F1218] dark:text-neutral-200">
                           {getDriverDetails(ride, rideHistory).name}
                         </span>
-                        <span className="text-neutral-300">•</span>
-                        <span className="text-neutral-500 font-mono text-[11px]">
+                        <span className="text-[#F4B8CA] dark:text-neutral-700">•</span>
+                        <span className="text-[#664D58] dark:text-neutral-400 font-mono text-[11px]">
                           {getDriverDetails(ride, rideHistory).plateNumber}
                         </span>
-                        <span className="text-neutral-300">•</span>
-                        <span className="text-neutral-500 font-mono text-[11px]">
+                        <span className="text-[#F4B8CA] dark:text-neutral-700">•</span>
+                        <span className="text-[#664D58] dark:text-neutral-400 font-mono text-[11px]">
                           {ride.distanceKm ? `${Number(ride.distanceKm).toFixed(1)} km` : '—'}
                         </span>
                       </div>
-                      <div className="font-extrabold text-black dark:text-white text-sm">
+                      <div className="font-extrabold text-[#1F1218] dark:text-white text-sm">
                         ₹{ride.fare ? Number(ride.fare).toFixed(2) : '0.00'}
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-neutral-100 dark:border-neutral-700 flex items-center justify-between text-[11px] text-neutral-500 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white font-semibold">
+                    <div className="pt-2 border-t border-[#F3D1DC] dark:border-neutral-700 flex items-center justify-between text-[11px] text-[#664D58] dark:text-neutral-400 group-hover:text-[#E11D48] dark:group-hover:text-white font-semibold">
                       <span>Click to view full receipt & route</span>
                       <span className="transition-transform group-hover:translate-x-1">→</span>
                     </div>
@@ -2206,7 +2167,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-neutral-400 text-xs">
+              <div className="text-center py-12 text-[#664D58] text-xs">
                 No past trips found for Rider #{riderId}.
               </div>
             )}
@@ -2214,16 +2175,13 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         </div>
       )}
 
-      
       {selectedRideReceipt && (
         <div className="receipt-modal-backdrop fixed inset-0 z-[70] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in print:p-0 print:m-0 print:bg-transparent print:static print:block print:overflow-visible">
-          <div className="receipt-print-card bg-white dark:bg-neutral-900 text-black dark:text-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800 my-8 print:bg-white print:text-black print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
-            
-            
-            <div className="receipt-header bg-neutral-900 text-white p-6 flex items-start justify-between print:p-4 print:rounded-t-2xl">
+          <div className="receipt-print-card bg-white dark:bg-neutral-900 text-[#1F1218] dark:text-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-[#F3D1DC] dark:border-neutral-800 my-8 print:bg-white print:text-black print:max-w-[620px] print:my-0 print:mx-auto print:border print:border-neutral-300 print:shadow-none print:rounded-2xl print:overflow-visible">
+            <div className="receipt-header bg-[#1F1218] text-white p-6 flex items-start justify-between print:p-4 print:rounded-t-2xl">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase font-extrabold tracking-widest text-neutral-400">
+                  <span className="text-xs uppercase font-extrabold tracking-widest text-[#F4B8CA]">
                     SafarX Receipt
                   </span>
                   <span
@@ -2253,17 +2211,15 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
             </div>
 
             <div className="receipt-scroll-body p-6 space-y-6 max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-4 print:space-y-3.5">
-              
-              
               {(() => {
                 const rDriver = getDriverDetails(selectedRideReceipt, rideHistory);
                 const rDriverName = selectedRideReceipt?.driverName || rDriver.name;
                 const rPlate = selectedRideReceipt?.plateNumber || rDriver.plateNumber;
                 const rModel = rDriver.model || (selectedRideReceipt?.vehicleType ? `SafarX ${selectedRideReceipt.vehicleType}` : 'Comfort Cab');
                 return (
-                  <div className="receipt-avoid-break p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-between print:p-3 print:bg-neutral-50">
+                  <div className="receipt-avoid-break p-4 rounded-2xl bg-[#FFF0F4] dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 flex items-center justify-between print:p-3 print:bg-neutral-50">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-12 rounded-xl bg-white dark:bg-neutral-700 border border-neutral-200 dark:border-neutral-600 overflow-hidden flex items-center justify-center p-1 shadow-sm shrink-0">
+                      <div className="w-16 h-12 rounded-xl bg-white dark:bg-neutral-700 border border-[#F3D1DC] dark:border-neutral-600 overflow-hidden flex items-center justify-center p-1 shadow-sm shrink-0">
                         <img
                           src={getVehicleImage(selectedRideReceipt.vehicle)}
                           alt="Vehicle"
@@ -2272,26 +2228,26 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-extrabold text-black dark:text-white text-sm">
+                          <h4 className="font-extrabold text-[#1F1218] dark:text-white text-sm">
                             {rDriverName}
                           </h4>
                           <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
                             ✓ Verified Partner
                           </span>
                         </div>
-                        <div className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">
-                          {rModel} • <strong className="font-mono text-black dark:text-white">{rPlate}</strong>
+                        <div className="text-xs text-[#664D58] dark:text-neutral-400 font-medium">
+                          {rModel} • <strong className="font-mono text-[#1F1218] dark:text-white">{rPlate}</strong>
                         </div>
                         <div className="text-xs text-amber-500 font-bold flex items-center gap-1 mt-0.5">
                           <span>★ 5.0</span>
-                          <span className="text-neutral-400 text-[10px] font-normal">• Top Rated Driver ({rDriver.tripsCompleted || 5} {rDriver.tripsCompleted === 1 ? 'ride' : 'rides'} completed)</span>
+                          <span className="text-[#664D58] dark:text-neutral-400 text-[10px] font-normal">• Top Rated Driver ({rDriver.tripsCompleted || 5} {rDriver.tripsCompleted === 1 ? 'ride' : 'rides'} completed)</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-[10px] text-neutral-400 uppercase font-bold">Fare Paid</div>
-                      <div className="text-xl font-black text-black dark:text-white">
+                      <div className="text-[10px] text-[#664D58] dark:text-neutral-400 uppercase font-bold">Fare Paid</div>
+                      <div className="text-xl font-black text-[#1F1218] dark:text-white">
                         ₹{selectedRideReceipt.fare ? Number(selectedRideReceipt.fare).toFixed(2) : '0.00'}
                       </div>
                     </div>
@@ -2299,64 +2255,59 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 );
               })()}
 
-              
               <div className="receipt-avoid-break space-y-4 print:space-y-2.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#664D58] dark:text-neutral-400">
                   Route Details & GPS Telemetry
                 </div>
 
-                <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-neutral-200 dark:border-neutral-700 ml-2">
-                  
-                  
+                <div className="relative pl-6 space-y-5 border-l-2 border-dashed border-[#F3D1DC] dark:border-neutral-700 ml-2">
                   <div className="relative">
                     <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow" />
                     <div>
                       <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">
                         Pickup Location
                       </div>
-                      <div className="font-bold text-black dark:text-white text-xs leading-snug mt-0.5">
+                      <div className="font-bold text-[#1F1218] dark:text-white text-xs leading-snug mt-0.5">
                         {receiptPickupName || 'Pickup Coordinates Logged'}
                       </div>
                       {selectedRideReceipt.pickupLat && (
-                        <div className="font-mono text-[10px] text-neutral-400 mt-0.5">
+                        <div className="font-mono text-[10px] text-[#664D58] dark:text-neutral-400 mt-0.5">
                           GPS: {Number(selectedRideReceipt.pickupLat).toFixed(4)}°, {Number(selectedRideReceipt.pickupLng).toFixed(4)}°
                         </div>
                       )}
                       {selectedRideReceipt.startTime && (
-                        <div className="text-[10px] text-neutral-500 font-medium mt-0.5">
+                        <div className="text-[10px] text-[#664D58] dark:text-neutral-400 font-medium mt-0.5">
                           Departed: {formatDateTime(selectedRideReceipt.startTime)}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  
                   <div className="py-1">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-xs font-bold border border-neutral-200 dark:border-neutral-700">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF0F4] dark:bg-neutral-800 text-[#664D58] dark:text-neutral-300 text-xs font-bold border border-[#F3D1DC] dark:border-neutral-700">
                       <span>🛣️ Distance Traveled:</span>
-                      <strong className="text-black dark:text-white">
+                      <strong className="text-[#1F1218] dark:text-white">
                         {selectedRideReceipt.distanceKm ? `${Number(selectedRideReceipt.distanceKm).toFixed(2)} km` : '—'}
                       </strong>
                     </span>
                   </div>
 
-                  
                   <div className="relative">
-                    <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-black dark:bg-amber-400 border-2 border-white dark:border-neutral-900 shadow" />
+                    <div className="absolute -left-[31px] top-0.5 w-4 h-4 bg-[#1F1218] dark:bg-amber-400 border-2 border-white dark:border-neutral-900 shadow" />
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-neutral-700 tracking-wider">
+                      <div className="text-[10px] uppercase font-bold text-[#664D58] dark:text-neutral-300 tracking-wider">
                         Dropoff Destination
                       </div>
-                      <div className="font-bold text-black dark:text-white text-xs leading-snug mt-0.5">
+                      <div className="font-bold text-[#1F1218] dark:text-white text-xs leading-snug mt-0.5">
                         {receiptDropName || 'Destination Coordinates Logged'}
                       </div>
                       {selectedRideReceipt.dropLat && (
-                        <div className="font-mono text-[10px] text-neutral-400 mt-0.5">
+                        <div className="font-mono text-[10px] text-[#664D58] dark:text-neutral-400 mt-0.5">
                           GPS: {Number(selectedRideReceipt.dropLat).toFixed(4)}°, {Number(selectedRideReceipt.dropLng).toFixed(4)}°
                         </div>
                       )}
                       {selectedRideReceipt.endTime && (
-                        <div className="text-[10px] text-neutral-500 font-medium mt-0.5">
+                        <div className="text-[10px] text-[#664D58] dark:text-neutral-400 font-medium mt-0.5">
                           Arrived: {formatDateTime(selectedRideReceipt.endTime)}
                         </div>
                       )}
@@ -2365,9 +2316,8 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
 
                 </div>
 
-                
                 {selectedRideReceipt.dropLat && selectedRideReceipt.dropLng && (
-                  <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-neutral-200 dark:border-neutral-700 h-36 bg-neutral-100 dark:bg-neutral-800 shadow-inner print:h-24 print:rounded-xl">
+                  <div className="receipt-map-preview relative rounded-2xl overflow-hidden border border-[#F3D1DC] dark:border-neutral-700 h-36 bg-[#FFF0F4] dark:bg-neutral-800 shadow-inner print:h-24 print:rounded-xl">
                     <iframe
                       title="Trip Route Map"
                       width="100%"
@@ -2377,7 +2327,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${Math.min(selectedRideReceipt.pickupLng || selectedRideReceipt.dropLng, selectedRideReceipt.dropLng) - 0.015}%2C${Math.min(selectedRideReceipt.pickupLat || selectedRideReceipt.dropLat, selectedRideReceipt.dropLat) - 0.015}%2C${Math.max(selectedRideReceipt.pickupLng || selectedRideReceipt.dropLng, selectedRideReceipt.dropLng) + 0.015}%2C${Math.max(selectedRideReceipt.pickupLat || selectedRideReceipt.dropLat, selectedRideReceipt.dropLat) + 0.015}&layer=mapnik&marker=${selectedRideReceipt.dropLat}%2C${selectedRideReceipt.dropLng}`}
                       className="w-full h-full opacity-90"
                     />
-                    <div className="absolute top-2 left-2 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-neutral-800 dark:text-neutral-200 shadow border border-neutral-200 dark:border-neutral-700 flex items-center gap-1.5">
+                    <div className="absolute top-2 left-2 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-bold text-[#1F1218] dark:text-neutral-200 shadow border border-[#F3D1DC] dark:border-neutral-700 flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Recorded Journey Map
                     </div>
@@ -2385,75 +2335,72 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                 )}
               </div>
 
-              
-              <div className="receipt-avoid-break p-4 rounded-2xl bg-[#f8f9fa] dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 space-y-2.5 print:p-3 print:bg-[#f8f9fa] print:space-y-1.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 pb-1 border-b border-neutral-200 dark:border-neutral-700">
+              <div className="receipt-avoid-break p-4 rounded-2xl bg-[#FFF0F4]/60 dark:bg-neutral-800 border border-[#F3D1DC] dark:border-neutral-700 space-y-2.5 print:p-3 print:bg-[#f8f9fa] print:space-y-1.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#664D58] dark:text-neutral-400 pb-1 border-b border-[#F3D1DC] dark:border-neutral-700">
                   Itemized Fare Receipt
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                <div className="flex justify-between text-xs text-[#664D58] dark:text-neutral-300">
                   <span>Driver Partner</span>
-                  <span className="font-semibold text-black dark:text-white">{selectedRideReceipt?.driverName || getDriverDetails(selectedRideReceipt).name}</span>
+                  <span className="font-semibold text-[#1F1218] dark:text-white">{selectedRideReceipt?.driverName || getDriverDetails(selectedRideReceipt).name}</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                <div className="flex justify-between text-xs text-[#664D58] dark:text-neutral-300">
                   <span>Vehicle Registration</span>
-                  <span className="font-mono font-semibold text-black dark:text-white">{selectedRideReceipt?.plateNumber || getDriverDetails(selectedRideReceipt).plateNumber}</span>
+                  <span className="font-mono font-semibold text-[#1F1218] dark:text-white">{selectedRideReceipt?.plateNumber || getDriverDetails(selectedRideReceipt).plateNumber}</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                <div className="flex justify-between text-xs text-[#664D58] dark:text-neutral-300">
                   <span>Base Pickup Fare</span>
-                  <span className="font-mono font-semibold text-black dark:text-white">₹50.00</span>
+                  <span className="font-mono font-semibold text-[#1F1218] dark:text-white">₹50.00</span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                <div className="flex justify-between text-xs text-[#664D58] dark:text-neutral-300">
                   <span>Distance Transit Charge ({selectedRideReceipt.distanceKm ? Number(selectedRideReceipt.distanceKm).toFixed(1) : 0} km)</span>
-                  <span className="font-mono font-semibold text-black dark:text-white">
+                  <span className="font-mono font-semibold text-[#1F1218] dark:text-white">
                     ₹{Math.max(0, (selectedRideReceipt.fare || 0) - 50).toFixed(2)}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-xs text-neutral-600 dark:text-neutral-300">
+                <div className="flex justify-between text-xs text-[#664D58] dark:text-neutral-300">
                   <span>Taxes & Operational Tolls</span>
                   <span className="font-mono font-semibold text-emerald-600">₹0.00 (Included)</span>
                 </div>
 
-                <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700 flex justify-between items-center text-sm font-black text-black dark:text-white">
+                <div className="pt-2 border-t border-[#F3D1DC] dark:border-neutral-700 flex justify-between items-center text-sm font-black text-[#1F1218] dark:text-white">
                   <span>Total Amount Paid</span>
-                  <span className="text-base text-black dark:text-white">
+                  <span className="text-base text-[#1F1218] dark:text-white">
                     ₹{selectedRideReceipt.fare ? Number(selectedRideReceipt.fare).toFixed(2) : '0.00'}
                   </span>
                 </div>
 
-                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 flex items-center justify-between pt-1">
+                <div className="text-[11px] text-[#664D58] dark:text-neutral-400 flex items-center justify-between pt-1">
                   <span>Payment Method</span>
-                  <span className="font-semibold text-neutral-800 dark:text-neutral-200">💳 Cash / UPI on Arrival</span>
+                  <span className="font-semibold text-[#1F1218] dark:text-neutral-200">💳 Cash / UPI on Arrival</span>
                 </div>
               </div>
 
-              
-              <div className="receipt-avoid-break flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1 print:pt-1">
+              <div className="receipt-avoid-break flex items-center justify-between text-xs text-[#664D58] dark:text-neutral-400 px-1 print:pt-1">
                 <div>
-                  Rider: <strong className="text-neutral-800 dark:text-neutral-200">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
+                  Rider: <strong className="text-[#1F1218] dark:text-neutral-200">{selectedRideReceipt.rider?.name || `Rider #${riderId}`}</strong>
                 </div>
                 <div>
-                  Email: <span className="font-mono text-neutral-600 dark:text-neutral-400">{selectedRideReceipt.rider?.email || 'verified@safarx.in'}</span>
+                  Email: <span className="font-mono text-[#664D58] dark:text-neutral-400">{selectedRideReceipt.rider?.email || 'verified@safarx.in'}</span>
                 </div>
               </div>
 
             </div>
 
-            
-            <div className="print:hidden p-4 bg-neutral-50 dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-end gap-3">
+            <div className="print:hidden p-4 bg-[#FFF0F4]/60 dark:bg-neutral-800 border-t border-[#F3D1DC] dark:border-neutral-800 flex items-center justify-end gap-3">
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-white dark:bg-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-600 border border-neutral-300 dark:border-neutral-600 text-neutral-800 dark:text-neutral-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-white dark:bg-neutral-700 hover:bg-[#FFF0F4] dark:hover:bg-neutral-600 border border-[#F3D1DC] dark:border-neutral-600 text-[#1F1218] dark:text-neutral-200 font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
               >
                 🖨️ Print Receipt
               </button>
               <button
                 onClick={() => setSelectedRideReceipt(null)}
-                className="px-6 py-2 bg-black hover:bg-neutral-800 dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black font-bold rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer"
+                className="px-6 py-2 bg-[#E11D48] hover:bg-[#BE123C] dark:bg-amber-400 dark:hover:bg-amber-500 text-white dark:text-black font-bold rounded-xl text-xs transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 Close
               </button>

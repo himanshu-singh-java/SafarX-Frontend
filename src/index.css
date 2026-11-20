@@ -5,6 +5,11 @@
   color-scheme: light;
 }
 
+body {
+  background-color: #FFF5F7;
+  color: #1F1218;
+}
+
 html.dark {
   color-scheme: dark;
 }

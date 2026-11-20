@@ -304,9 +304,9 @@ function App() {
       <Route
         path="*"
         element={
-          <div className={`min-h-screen flex flex-col justify-between transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-100' : 'bg-[#faf8f5] dark:bg-[#0b0f19] text-neutral-900 dark:text-neutral-100'}`}>
+          <div className={`min-h-screen flex flex-col justify-between transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-100' : 'bg-[#FFF5F7] dark:bg-[#0b0f19] text-[#1F1218] dark:text-neutral-100'}`}>
       
-      <header className="sticky top-0 z-40 bg-black text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-neutral-900 shadow-sm print:hidden">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-black text-[#1F1218] dark:text-white px-4 sm:px-8 py-3 flex items-center justify-between border-b border-[#F3D1DC] dark:border-neutral-900 shadow-sm backdrop-blur-md print:hidden">
         
         
         <div className="flex items-center gap-6 md:gap-8">
@@ -315,8 +315,8 @@ function App() {
             className="flex items-center gap-1 cursor-pointer select-none group"
             title="Return to SafarX Homepage"
           >
-            <span className="text-2xl font-black tracking-tight text-white group-hover:text-neutral-200 transition-colors">Safar</span>
-            <span className="text-2xl font-black tracking-tight text-[#d4af37] group-hover:brightness-125 transition-all">X</span>
+            <span className="text-2xl font-black tracking-tight text-[#1F1218] dark:text-white group-hover:text-[#E11D48] dark:group-hover:text-neutral-200 transition-colors">Safar</span>
+            <span className="text-2xl font-black tracking-tight text-[#E11D48] dark:text-[#d4af37] group-hover:brightness-125 transition-all">X</span>
           </div>
 
           
@@ -355,7 +355,7 @@ function App() {
           {token && viewMode === 'rider' && (
             <button
               onClick={() => setOpenHistoryTrigger((prev) => prev + 1)}
-              className="text-neutral-300 hover:text-white hover:bg-neutral-900 px-3 py-1.5 rounded-full transition-colors font-medium"
+              className="text-[#664D58] hover:text-[#1F1218] hover:bg-[#FCE7EE] dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-900 px-3 py-1.5 rounded-full transition-colors font-semibold"
             >
               My Trips
             </button>
@@ -369,17 +369,17 @@ function App() {
               <button
                 type="button"
                 onClick={() => setIsDriverOnboardingOpen(true)}
-                className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 hover:border-[#d4af37]/80 font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap cursor-pointer group"
+                className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-[#9F1239] dark:text-white bg-[#FCE7EE] hover:bg-[#FAD4E1] dark:bg-neutral-900 dark:hover:bg-neutral-800 border border-[#F4B8CA] dark:border-neutral-700/80 hover:border-[#E11D48] dark:hover:border-[#d4af37]/80 font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap cursor-pointer group"
                 title="Register your vehicle and drive with SafarX"
               >
-                <div className="w-5 h-4 rounded-md overflow-hidden bg-white/10 flex items-center justify-center shrink-0 border border-neutral-700/60 group-hover:border-[#d4af37]/80 transition-colors">
+                <div className="w-5 h-4 rounded-md overflow-hidden bg-white/40 dark:bg-white/10 flex items-center justify-center shrink-0 border border-[#F4B8CA] dark:border-neutral-700/60 group-hover:border-[#E11D48] dark:group-hover:border-[#d4af37]/80 transition-colors">
                   <img
                     src="/vehicle_car.jpg"
                     alt="SafarX 3D Car"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="text-xs font-bold text-neutral-200 group-hover:text-white transition-colors">
+                <span className="text-xs font-bold text-[#9F1239] dark:text-neutral-200 group-hover:text-[#E11D48] dark:group-hover:text-white transition-colors">
                   Drive with SafarX
                 </span>
               </button>
@@ -388,7 +388,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => openAuth('login')}
-                className="text-white hover:text-neutral-300 font-bold px-2 sm:px-3 py-1.5 transition-colors cursor-pointer"
+                className="text-[#1F1218] hover:text-[#E11D48] dark:text-white dark:hover:text-neutral-300 font-bold px-2 sm:px-3 py-1.5 transition-colors cursor-pointer"
               >
                 Log in
               </button>
@@ -397,7 +397,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => openAuth('register')}
-                className="bg-white hover:bg-neutral-200 text-black font-extrabold px-3.5 sm:px-4 py-2 rounded-full transition-all shadow active:scale-95 whitespace-nowrap cursor-pointer"
+                className="bg-[#E11D48] hover:bg-[#BE123C] text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black font-extrabold px-3.5 sm:px-4 py-2 rounded-full transition-all shadow-sm hover:shadow active:scale-95 whitespace-nowrap cursor-pointer"
               >
                 Sign up
               </button>
@@ -458,7 +458,7 @@ function App() {
         )}
       </main>
 
-      <footer className={`w-full py-4 text-center text-xs border-t font-medium print:hidden transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-500 border-neutral-900' : 'bg-white dark:bg-[#0b0f19] text-neutral-500 dark:text-neutral-400 border-neutral-100 dark:border-neutral-800'}`}>
+      <footer className={`w-full py-4 text-center text-xs border-t font-medium print:hidden transition-colors duration-200 ${viewMode === 'admin' ? 'bg-[#0a0706] text-neutral-500 border-neutral-900' : 'bg-[#FFF9FA] dark:bg-[#0b0f19] text-[#664D58] dark:text-neutral-400 border-[#F3D1DC] dark:border-neutral-800'}`}>
         © 2026 SafarX | By Himanshu Kumar
       </footer>
 
