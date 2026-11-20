@@ -877,7 +877,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
         setIsPayingRazorpay(false);
         setRazorpaySuccessData(result);
         setStatusMessage({
-          text: `🎉 Payment of ₹${result.amount} verified successfully via Razorpay (Payment ID: ${result.paymentId})!`,
+          text: `🎉 Payment of ₹${result.amount || (Number(activeRide?.fare) || 0).toFixed(2)} verified successfully via Razorpay (Payment ID: ${result.paymentId})!`,
           isError: false,
         });
         fetchHistory(true);
@@ -1875,7 +1875,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-neutral-500 dark:text-neutral-400">Amount Paid:</span>
-                                <span className="font-bold text-emerald-700 dark:text-emerald-400">₹{razorpaySuccessData.amount}</span>
+                                <span className="font-bold text-emerald-700 dark:text-emerald-400">₹{razorpaySuccessData.amount || (Number(activeRide?.fare) || 0).toFixed(2)}</span>
                               </div>
                             </div>
 
@@ -1922,7 +1922,7 @@ export default function RiderDashboard({ token, userEmail, userName: propUserNam
                               ) : (
                                 <>
                                   <span>💳</span>
-                                  <span>Pay ₹{activeRide.fare ? activeRide.fare.toFixed(2) : '0.00'} Online (UPI / Card)</span>
+                                  <span>Pay ₹{(Number(activeRide?.fare) || 0).toFixed(2)} Online (UPI / Card)</span>
                                 </>
                               )}
                             </button>

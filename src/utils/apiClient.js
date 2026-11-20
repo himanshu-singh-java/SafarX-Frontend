@@ -36,12 +36,20 @@ apiClient.interceptors.response.use(
         ? errorData.toLowerCase()
         : (errorData?.message || '').toLowerCase();
 
+    const reqUrl = (error.config?.url || '').toLowerCase();
+    const isAuthEndpoint =
+      reqUrl.includes('/api/auth/login') ||
+      reqUrl.includes('/api/auth/register') ||
+      reqUrl.includes('/api/auth/send-otp') ||
+      reqUrl.includes('/api/driver/onboard');
+
     const isSessionExpired =
-      status === 401 ||
-      (status !== 403 &&
-        (errText.includes('jwt expired') ||
-          errText.includes('invalid jwt') ||
-          errText.includes('token expired')));
+      !isAuthEndpoint &&
+      (status === 401 ||
+        (status !== 403 &&
+          (errText.includes('jwt expired') ||
+            errText.includes('invalid jwt') ||
+            errText.includes('token expired'))));
 
     if (error.config?.silentAuth) {
       return Promise.reject(error);

@@ -763,7 +763,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
         fare: activeTrip.fare || 0,
       });
       setStatusMessage({
-        text: `Trip #${activeTrip.rideId} completed! Please collect ₹${activeTrip.fare ? activeTrip.fare.toFixed(2) : '0.00'} from passenger.`,
+        text: `Trip #${activeTrip.rideId} completed! Please collect ₹${(Number(activeTrip?.fare) || 0).toFixed(2)} from passenger.`,
         isError: false,
       });
       setActiveTrip(null);
@@ -955,7 +955,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
             <div className="bg-white dark:bg-neutral-800 p-6 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-5">
               <div>
                 <span className="text-xs text-neutral-400 uppercase font-extrabold tracking-wider block">Collect from Passenger</span>
-                <span className="text-4xl font-black text-neutral-950 dark:text-white tracking-tight">₹{completedTripReceipt.fare.toFixed(2)}</span>
+                <span className="text-4xl font-black text-neutral-950 dark:text-white tracking-tight">₹{(Number(completedTripReceipt?.fare) || 0).toFixed(2)}</span>
                 <div className="text-xs text-[#b8860b] dark:text-amber-400 font-bold mt-1">💳 Cash / UPI on Arrival</div>
               </div>
               <button
@@ -982,7 +982,7 @@ export default function DriverDashboard({ token, userEmail: rawUserEmail }) {
                 <div className="flex items-center gap-2.5">
                   <h2 className="text-xl font-black text-neutral-950 dark:text-white tracking-tight">{driverProfile.name}</h2>
                   <span className="bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700 text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-sm">
-                    ⭐ {driverProfile.rating.toFixed(1)} Driver
+                    ⭐ {(Number(driverProfile?.rating) || 5.0).toFixed(1)} Driver
                   </span>
                 </div>
                 <div className="text-xs text-neutral-500 dark:text-neutral-400 flex flex-wrap items-center gap-3 font-medium">

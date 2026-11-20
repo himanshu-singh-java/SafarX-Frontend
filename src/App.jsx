@@ -10,6 +10,7 @@ import UserProfileMenu from './components/UserProfileMenu';
 import DriverOnboardingModal from './components/DriverOnboardingModal';
 import ThemeToggle from './components/ThemeToggle';
 import apiClient from './utils/apiClient';
+import wsService from './utils/websocket';
 import { getAuthToken, setAuthToken, clearAuthToken, parseJwt, getUserRole, getStorageItem, setStorageItem, resolveUserName, AUTH_UNAUTHORIZED_EVENT } from './utils/auth';
 
 function App() {
@@ -265,6 +266,9 @@ function App() {
   };
 
   const handleLogout = () => {
+    try {
+      wsService.disconnect();
+    } catch (e) {}
     clearAuthToken();
     setToken(null);
     setUserEmail('');

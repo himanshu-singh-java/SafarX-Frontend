@@ -121,6 +121,7 @@ export async function initiateRazorpayPayment({
         if (onSuccess) {
           onSuccess({
             ...result,
+            amount: orderData?.amount != null ? (Number(orderData.amount) / 100).toFixed(2) : undefined,
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
           });
