@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import apiClient from '../utils/apiClient';
 import { resolveUserName, getStorageItem, setStorageItem } from '../utils/auth';
 
@@ -228,9 +229,9 @@ export default function UserProfileMenu({
       </div>
 
       
-      {isAccountModalOpen && (
+      {isAccountModalOpen && createPortal(
         <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#FFF9FA] dark:bg-neutral-900 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-neutral-100 relative animate-in zoom-in-95 duration-200">
+          <div className="bg-[#FFF9FA] dark:bg-neutral-900 rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-[#F3D1DC] dark:border-neutral-800 text-[#1F1218] dark:text-neutral-100 relative animate-in zoom-in-95 duration-200">
             
             <button
               type="button"
@@ -357,7 +358,8 @@ export default function UserProfileMenu({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
